@@ -1,0 +1,401 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --white-color: #fff;
+    --black-color: #000;
+    --gray-color: #888;
+    --dark-gray-color: #333;
+    --primary-color: #3D8D7A;
+    --secondary-color: #B3D8A8;
+    --tertiary-color: #FBFFE4;
+    --fourth-color: #A3D1C6;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.poppins-regular {
+    font-family: "Poppins", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.poppins-medium {
+    font-family: "Poppins", serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.poppins-semibold {
+    font-family: "Poppins", serif;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.poppins-bold {
+    font-family: "Poppins", serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.poppins-extrabold {
+    font-family: "Poppins", serif;
+    font-weight: 800;
+    font-style: normal;
+}
+
+.poppins-black {
+    font-family: "Poppins", serif;
+    font-weight: 900;
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
+
+li {
+    list-style: none;
+}
+
+img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+#peta-pesanggrahan {
+    width: 300px;
+}
+
+/* Reset Bootstrap styling */
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    box-shadow: none;
+    border-color: #ccc;
+    /* Opsional: atur ulang warna border */
+}
+
+table.dataTable {
+    border: 1px solid #ccc;
+    /* Border luar tabel */
+    border-collapse: collapse;
+    /* Menghilangkan celah antar sel */
+}
+
+table.dataTable th,
+table.dataTable td {
+    border: 1px solid #ccc;
+    /* Border di setiap sel */
+    padding: 5px 10px;
+    /* Spasi dalam sel */
+    text-align: left;
+}
+
+.card-header {
+    background-color: var(--white-color);
+    border-bottom: none;
+    padding: 20px 30px 0;
+}
+
+/* End reset */
+
+
+.main-wrapper {
+    display: flex;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    transition: all .25s ease-in-out;
+    background-color: var(--white-color);
+    margin-left: 70px; /* Tambahkan margin untuk menghindari tertutup sidebar */
+}
+
+#dashboard-sidebar {
+    width: 70px;
+    min-width: 70px;
+    transition: all .25s ease-in-out;
+    background-color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh; /* Sidebar full tinggi */
+    z-index: 1000;
+}
+
+#dashboard-sidebar.active {
+    width: 300px;
+    max-width: 300px;
+}
+
+#dashboard-sidebar:not(.active) .sidebar-logo,
+#dashboard-sidebar:not(.active) .caret-nav,
+#dashboard-sidebar:not(.active) .sidebar-footer,
+#dashboard-sidebar:not(.active) a.sidebar-link span {
+    display: none;
+}
+
+.toggle-btn {
+    width: 30px;
+    height: 30px;
+    color: #fff;
+    border-radius: .425rem;
+    font-size: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+}
+
+.toggle-btn i {
+    color: #fff;
+}
+
+#dashboard-sidebar.active .sidebar-logo,
+#dashboard-sidebar.active a.sidebar-link span {
+    animation: fadeIn .25s ease;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.sidebar-logo a {
+    color: var(--white-color);
+    font-size: 1.15rem;
+}
+
+.sidebar-nav {
+    padding: .7rem 0;
+    flex: 1 1 auto;
+    z-index: 10;
+}
+
+a.sidebar-link {
+    padding: 10px 20px;
+    color: var(--white-color);
+    display: block;
+    white-space: nowrap;
+    font-weight: 400;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link i,
+.dropdown-item i {
+    font-size: 1.3rem;
+    margin-right: .75rem;
+}
+
+.sidebar-link span {
+    font-size: .9rem;
+}
+
+a.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, .075);
+    border-left: 3px solid var(--secondary-color);
+}
+
+.sidebar-item {
+    position: relative;
+}
+
+#dashboard-sidebar:not(.active) .sidebar-item .sidebar-dropdown {
+    position: absolute;
+    top: 0;
+    left: 70px;
+    background-color: var(--primary-color);
+    padding: 0;
+    min-width: 14rem;
+    max-height: 300px;
+    /* Batas tinggi agar scroll muncul */
+    overflow-y: auto;
+    /* Scroll vertikal */
+    display: none;
+    font-size: .9rem;
+}
+
+
+#dashboard-sidebar:not(.active) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
+    display: block;
+    max-height: 15em;
+    width: 100%;
+    opacity: 1;
+}
+
+#dashboard-sidebar:not(.active) .sidebar-item .sidebar-dropdown .sidebar-dropdown {
+    left: 100px;
+}
+
+.rotate {
+    transition: 0.3s ease;
+}
+
+.sidebar-link[aria-expanded="true"] .rotate {
+    transform: rotate(180deg);
+}
+
+.sidebar-dropdown .sidebar-link {
+    position: relative;
+    padding-left: 2rem;
+    transition: all .5s ease-in-out;
+    font-size: .9rem;
+}
+
+.dashboard-navbar {
+    background-color: var(--fourth-color);
+    box-shadow: 0 0 2rem 0 rgba(33, 37, 41, .1);
+    position: fixed;
+    top: 0;
+    left: 70px; /* Sesuaikan dengan lebar sidebar */
+    width: calc(100% - 70px);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    transition: all 0.25s ease-in-out;
+}
+
+#dashboard-sidebar.active + .main .navbar {
+    left: 300px;
+    width: calc(100% - 300px);
+}
+
+.navbar-expand .navbar-collapse {
+    min-width: 200px;
+}
+
+.avatar {
+    height: 46px;
+    width: 46px;
+    border-radius: 50%;
+}
+
+.avatar-profile {
+    height: 150px;
+    width: 150px;
+    border-radius: 50%;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.user-title {
+    font-size: 12px;
+    color: gray;
+}
+
+.content {
+    flex: 1 1 auto;
+     overflow: auto; /* Biar hanya bagian ini yang bisa di-scroll */
+    margin-top: 60px; /* Sesuaikan agar tidak tertutup navbar */
+    padding: 20px;
+    height: calc(100vh - 60px);
+}
+
+.box-area {
+    width: 930px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table .th-number {
+    width: 10px;
+}
+
+table .th-aksi {
+    width: 100px;
+    /* Atur lebar minimum untuk kolom aksi */
+}
+
+.table-informasi td:first-child {
+    max-width: 200px;
+    /* Set a maximum width */
+    width: 200px;
+    /* Optional: Ensure a consistent width */
+    white-space: nowrap;
+    /* Prevent text wrapping */
+}
+
+
+@media (max-width: 768px) {
+    .main-wrapper {
+        display: flex;
+        position: relative;
+    }
+
+    .main {
+        flex-grow: 1;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        transition: all 0.25s ease-in-out;
+        background-color: var(--white-color);
+        position: relative;
+        z-index: 1;
+        margin-left: 0; /* Reset margin karena sidebar hidden */
+    }
+
+    #dashboard-sidebar {
+        width: 0;
+        min-width: 0;
+        transition: all 0.25s ease-in-out;
+        background-color: var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 10;
+    }
+
+    .dashboard-navbar {
+        left: 0;
+        width: 100%;
+    }
+
+    #dashboard-sidebar:not(.active) .sidebar-logo,
+    #dashboard-sidebar:not(.active) .sidebar-item,
+    #dashboard-sidebar:not(.active) a.sidebar-link span {
+        display: none;
+    }
+}
