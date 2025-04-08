@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GrafikController;
 use App\Models\Kota;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -51,3 +52,8 @@ Route::post('/dashboard/mahasiswa/import', [MahasiswaController::class, 'import'
 Route::get('/dashboard/mahasiswa/show/{mahasiswa_id}', [MahasiswaController::class, 'show'])->name('mahasiswa.show');
 Route::put('/dashboard/mahasiswa/update/{mahasiswa_id}', [MahasiswaController::class, 'update'])->name('mahasiswa.update');
 Route::delete('/dashboard/mahasiswa/destroy/{mahasiswa_id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
+Route::delete('/dashboard/mahasiswa/destroys', [MahasiswaController::class, 'destroyAll'])->name('mahasiswa.destroyAll');
+
+Route::get('/dashboard/grafik/peta', [GrafikController::class, 'mapIndex'])->name('grafik.peta');
+Route::get('/dashboard/grafik/peta/filter', [GrafikController::class, 'mapFilter'])->name('grafik.peta.filter');
+Route::post('/dashboard/grafik/peta/filter/show', [GrafikController::class, 'mapFilterShow'])->name('grafik.peta.filter.show');

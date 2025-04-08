@@ -75,7 +75,7 @@ class MahasiswaController extends Controller
                 [
                     'nama_mahasiswa'   => 'required|string|max:255',
                     'nim'              => 'required|string|max:100|unique:mahasiswa,nim',
-                    'tahun_masuk'      => 'required|string|max:4',
+                    'tahun_masuk'      => 'required|number|max:4',
                     'jurusan'          => 'required|string|max:255',
                     'sekolah_asal'     => 'required|string|max:255',
                     'daerah_asal'      => 'required|string|max:255',
@@ -282,6 +282,27 @@ class MahasiswaController extends Controller
                     "icon" => "success"
                 ]);
             }
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
+    }
+
+    public function destroyAll()
+    {
+        try {
+            DB::table('mahasiswa')->truncate();
+
+            return response()->json([
+                "status" => 200,
+                "title" => "Success",
+                "message" => "Semua data mahasiswa berhasil dihapus.",
+                "icon" => "success"
+            ]);
         } catch (Exception $e) {
             return response()->json([
                 "status" => 500,

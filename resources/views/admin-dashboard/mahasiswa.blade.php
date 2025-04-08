@@ -419,5 +419,50 @@
                 }
             });
         }
+
+        function mahasiswaDeleteAll() {
+            Swal.fire({
+                title: "Apakah anda yakin?",
+                text: "Menghapus semua data secara permanen",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, Hapus!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('mahasiswa.destroyAll') }}",
+                        type: "DELETE",
+                        data: {
+                            _token: "{{ csrf_token() }}", // Kirim token dalam body
+                        },
+                        success: function(response) {
+                            if (response.status == 200) {
+                                $('#mahasiswaTable').DataTable().ajax.reload();
+                                Swal.fire({
+                                    icon: response.icon,
+                                    title: response.title,
+                                    text: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
+                            Swal.fire({
+                                icon: errorResponse.icon || "error",
+                                title: errorResponse.title || "Error",
+                                text: errorResponse.message ||
+                                    "Terjadi kesalahan yang tidak diketahui.",
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection

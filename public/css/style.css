@@ -315,7 +315,7 @@ a.sidebar-link:hover {
 
 .content {
     flex: 1 1 auto;
-     overflow: auto; /* Biar hanya bagian ini yang bisa di-scroll */
+    overflow: auto; /* Biar hanya bagian ini yang bisa di-scroll */
     margin-top: 60px; /* Sesuaikan agar tidak tertutup navbar */
     padding: 20px;
     height: calc(100vh - 60px);

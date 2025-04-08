@@ -60,28 +60,41 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="" class="sidebar-link">
-                        <i class='bx bxs-user-detail'></i>
-                        <span>Wali Kelas</span>
+                    <a href=""
+                    class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
+                    data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+                    aria-controls="collapseTwo">
+                        <div>
+                            <i class='bx bx-grid-horizontal'></i>
+                            <span>Klasterisasi</span>
+                        </div>
+                        <i class="caret-nav bx bx-caret-down rotate"></i>
                     </a>
+                    <ul id="collapseTwo" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="" class="sidebar-link"> Dataset </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="" class="sidebar-link">
-                        <i class='bx bx-book'></i> 
-                        <span>Guru Mapel</span>
+                    <a href=""
+                    class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
+                    data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
+                    aria-controls="collapseThree">
+                        <div>
+                            <i class='bx bx-bar-chart-alt-2'></i>
+                            <span>Grafik</span>
+                        </div>
+                        <i class="caret-nav bx bx-caret-down rotate"></i>
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="" class="sidebar-link">
-                        <i class='bx bxs-calendar-check'></i>
-                        <span>Jadwal Pelajaran</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="" class="sidebar-link">
-                        <i class='bx bx-list-check'></i> 
-                        <span>Absensi Siswa</span>
-                    </a>
+                    <ul id="collapseThree" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="{{ route('grafik.peta') }}" class="sidebar-link"> Peta Sebaran </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="" class="sidebar-link"> Bar Chart </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </aside>
@@ -145,7 +158,6 @@
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
-    <script src="{{ asset('js/Batas_Wilayah_KelurahanDesa_10K_AR_1.js') }}"></script>
     <script src="{{ asset('js/script.js') }}"></script>
 
     <script>
