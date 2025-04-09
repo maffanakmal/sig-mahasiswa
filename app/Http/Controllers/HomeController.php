@@ -11,27 +11,8 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $kotas = Kota::select(
-            'kota_uuid',
-            'nama_kota',
-            'warna_kota',
-            'geojson_kota' // Return full GeoJSON object
-        )
-        ->orderBy('kota_uuid', 'DESC')
-        ->get();
-
-        foreach ($kotas as $kota) {
-            if ($kota->geojson_kota) {
-                // Buat URL lengkap dari file di storage
-                $kota->geojson_url = asset('storage/' . $kota->geojson_kota);
-            } else {
-                $kota->geojson_url = null;
-            }
-        }
-
         return view('admin-dashboard.home', [
             'title' => 'Home Page',
-            'kotas' => $kotas,
         ]);
     }
 

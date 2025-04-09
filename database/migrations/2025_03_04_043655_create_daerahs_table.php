@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kota', function (Blueprint $table) {
-            $table->bigIncrements('kota_id');
-            $table->uuid('kota_uuid')->unique();
-            $table->string('nama_kota')->unique();
-            $table->string('warna_kota');
-            $table->string('geojson_kota')->nullable();
+        Schema::create('daerah', function (Blueprint $table) {
+            $table->id('daerah_id');
+            $table->uuid('daerah_uuid')->unique();
+            $table->string('nama_geojson_daerah')->unique();
+            $table->string('file_geojson_daerah')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kota');
+        Schema::dropIfExists('daerah');
     }
 };

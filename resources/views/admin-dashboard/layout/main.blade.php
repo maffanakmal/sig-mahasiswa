@@ -55,7 +55,7 @@
                             <a href="{{ route('kelurahan.index') }}" class="sidebar-link"> Kelurahan </a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="{{ route('kota.index') }}" class="sidebar-link"> Kota </a>
+                            <a href="{{ route('daerah.index') }}" class="sidebar-link"> Daerah </a>
                         </li>
                     </ul>
                 </li>

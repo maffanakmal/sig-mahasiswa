@@ -75,7 +75,7 @@ class MahasiswaController extends Controller
                 [
                     'nama_mahasiswa'   => 'required|string|max:255',
                     'nim'              => 'required|string|max:100|unique:mahasiswa,nim',
-                    'tahun_masuk'      => 'required|number|max:4',
+                    'tahun_masuk'      => 'required|string|max:4',
                     'jurusan'          => 'required|string|max:255',
                     'sekolah_asal'     => 'required|string|max:255',
                     'daerah_asal'      => 'required|string|max:255',

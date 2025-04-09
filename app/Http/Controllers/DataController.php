@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Daerah;
 use Exception;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class GrafikController extends Controller
+class DataController extends Controller
 {
     public function mapIndex()
     {
@@ -16,7 +17,11 @@ class GrafikController extends Controller
             'mahasiswas' => Mahasiswa::select(
                 'mahasiswa_uuid',
                 'daerah_asal',
-            )->get()
+            )->get(),
+            'geojson_daerah' => Daerah::select(
+                'daerah_uuid',
+                'file_geojson_daerah',
+            )->get(),
         ];
 
         return view('admin-dashboard.peta', $data);
