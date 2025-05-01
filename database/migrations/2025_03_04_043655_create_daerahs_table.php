@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('daerah', function (Blueprint $table) {
             $table->id('daerah_id');
             $table->uuid('daerah_uuid')->unique();
-            $table->string('nama_geojson_daerah')->unique();
-            $table->string('file_geojson_daerah')->nullable();
+            $table->string('kode_daerah')->unique();
+            $table->string('nama_daerah');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamps();
         });
     }

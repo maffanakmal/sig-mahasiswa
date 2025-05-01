@@ -19,7 +19,9 @@ class Daerah extends Model
 
     protected $fillable = [
         'daerah_uuid',
-        'nama_geojson_daerah',
-        'file_geojson_daerah',
+        'kode_daerah',
+        'nama_daerah',
+        'latitude',
+        'longitude',
     ];
 }

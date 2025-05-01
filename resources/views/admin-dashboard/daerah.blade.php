@@ -1,11 +1,29 @@
 @extends('admin-dashboard.layout.main')
 
 @section('child-content')
-    <div class="mb-0 d-flex justify-content-between align-items-center">
-        <h3 class="fw-bold fs-4 mb-3">GeoJSON Daerah</h3>
+    <div class="mb-0">
+        <h3 class="fw-bold fs-4 mb-3">Daftar Daerah</h3>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <strong>Info!</strong> Untuk mengimpor data daerah, silakan unduh template <a
+                href="{{ asset('template/daerah_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
+            untuk mengisi data sesuai dengan format yang telah ditentukan.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <p class="mb-2">Import Excel Daerah</p>
+        <form action="#" id="importDaerahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
+            @csrf
+            <div class="input-group w-50">
+                <input type="file" class="form-control" name="import_daerah" id="import_daerah"
+                    aria-describedby="btnImport" aria-label="Upload">
+                <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
+                    Import</button>
+                <div class="invalid-feedback" id="error-import_daerah"></div>
+            </div>
+        </form>
     </div>
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-end align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <button class="btn btn-sm btn-danger" onclick="daerahDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
             <button class="btn btn-sm btn-primary" onclick="daerahModal()"><i class='bx bx-plus'></i> Tambah</button>
         </div>
         <div class="card-body">
@@ -14,8 +32,10 @@
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>Nama GeoJSON Daerah</th>
-                            <th>File GeoJSON Daerah</th>
+                            <th>Kode Daerah</th>
+                            <th>Nama Daerah</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -39,19 +59,28 @@
                         @csrf
                         <input type="hidden" name="daerah_id" id="daerah_id">
                         <div class="form-group mb-3">
-                            <label for="nama_geojson_daerah" class="form-label">Nama GeoJSON Daerah</label>
-                            <input type="text" class="form-control" id="nama_geojson_daerah"
-                                placeholder="Masukkan Nama Daerah" name="nama_geojson_daerah"
-                                value="{{ old('nama_geojson_daerah') }}" autofocus required>
-                            <div class="invalid-feedback" id="error-nama_geojson_daerah"></div>
+                            <label for="kode_daerah" class="form-label">Kode Daerah</label>
+                            <input type="text" class="form-control" id="kode_daerah" placeholder="Masukkan Kode Daerah"
+                                name="kode_daerah" value="{{ old('kode_daerah') }}" autofocus required>
+                            <div class="invalid-feedback" id="error-kode_daerah"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="file_geojson_daerah" class="form-label">File GeoJSON Daerah</label>
-                            <input type="file" class="form-control" id="file_geojson_daerah"
-                                placeholder="Masukkan GeoJSON Daerah" name="file_geojson_daerah"
-                                value="{{ old('file_geojson_daerah') }}" required>
-                            <div class="mt-2" id="nama_file_geojson"></div>
-                            <div class="invalid-feedback" id="error-file_geojson_daerah"></div>
+                            <label for="nama_daerah" class="form-label">Nama Daerah</label>
+                            <input type="text" class="form-control" id="nama_daerah" placeholder="Masukkan Nama Daerah"
+                                name="nama_daerah" value="{{ old('nama_daerah') }}"required>
+                            <div class="invalid-feedback" id="error-nama_daerah"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="latitude" class="form-label">Latitude</label>
+                            <input type="text" class="form-control" id="latitude" placeholder="Masukkan Latitude"
+                                name="latitude" value="{{ old('latitude') }}" required>
+                            <div class="invalid-feedback" id="error-latitude"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="longitude" class="form-label">Longitude</label>
+                            <input type="text" class="form-control" id="longitude" placeholder="Masukkan Longitude"
+                                name="longitude" value="{{ old('longitude') }}" required>
+                            <div class="invalid-feedback" id="error-longitude"></div>
                         </div>
                 </div>
                 <div class="modal-footer">
@@ -84,12 +113,20 @@
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'nama_geojson_daerah',
-                        name: 'nama_geojson_daerah',
+                        data: 'kode_daerah',
+                        name: 'kode_daerah',
                     },
                     {
-                        data: 'file_geojson_daerah',
-                        name: 'file_geojson_daerah',
+                        data: 'nama_daerah',
+                        name: 'nama_daerah',
+                    },
+                    {
+                        data: 'latitude',
+                        name: 'latitude',
+                    },
+                    {
+                        data: 'longitude',
+                        name: 'longitude',
                     },
                     {
                         data: 'action',
@@ -187,6 +224,66 @@
             });
         });
 
+        $('#importDaerahForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            let url = '{{ route('daerah.import') }}';
+            let httpMethod = 'POST'; // Default method for create
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: url,
+                type: httpMethod,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.status == 200) {
+                        $('#importDaerahForm')[0].reset();
+                        $('#daerahTable').DataTable().ajax.reload();
+
+                        Swal.fire({
+                            icon: response.icon,
+                            title: response.title,
+                            text: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) { // 422 = Validation Error
+                        let errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            let inputField = $('[name="' + key + '"]');
+                            let errorField = $('#error-' + key);
+                            inputField.addClass('is-invalid');
+                            if (errorField.length) {
+                                errorField.text(value[0]);
+                            }
+                        });
+
+                        $('.form-control').on('input', function() {
+                            $(this).removeClass('is-invalid');
+                            $('#error-' + $(this).attr('name')).text('');
+                        });
+
+                    } else {
+                        let errorResponse = xhr.responseJSON; // Get JSON error data
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.title || "Error",
+                            text: errorResponse.message || "An unknown error occurred.",
+                        });
+                    }
+                }
+            });
+        });
+
         function editDaerah(e) {
             daerah_id = e.getAttribute('data-id');
             method = 'update';
@@ -199,10 +296,10 @@
                 type: "GET",
                 success: function(response) {
                     $('#daerah_id').val(response.daerah.daerah_uuid);
-                    $('#nama_geojson_daerah').val(response.daerah.nama_geojson_daerah);
-
-                    // ini hanya menampilkan nama file, bukan mengisi input file
-                    $('#nama_file_geojson').text("File saat ini: " + response.daerah.file_geojson_daerah.split('/').pop());
+                    $('#kode_daerah').val(response.daerah.kode_daerah);
+                    $('#nama_daerah').val(response.daerah.nama_daerah);
+                    $('#latitude').val(response.daerah.latitude);
+                    $('#longitude').val(response.daerah.longitude);
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
@@ -276,12 +373,59 @@
                             Swal.fire({
                                 icon: errorResponse.icon || "error",
                                 title: errorResponse.title || "Error",
-                                text: errorResponse.message || "Terjadi kesalahan yang tidak diketahui.",
+                                text: errorResponse.message ||
+                                    "Terjadi kesalahan yang tidak diketahui.",
                             });
                         }
                     });
                 }
             });
+
+            function daerahDeleteAll() {
+                Swal.fire({
+                    title: "Apakah anda yakin?",
+                    text: "Menghapus semua data secara permanen",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Hapus!",
+                    cancelButtonText: "Batal",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('daerah.destroyAll') }}",
+                            type: "DELETE",
+                            data: {
+                                _token: "{{ csrf_token() }}", // Kirim token dalam body
+                            },
+                            success: function(response) {
+                                if (response.status == 200) {
+                                    $('#daerahTable').DataTable().ajax.reload();
+                                    Swal.fire({
+                                        icon: response.icon,
+                                        title: response.title,
+                                        text: response.message,
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
+                                Swal.fire({
+                                    icon: errorResponse.icon || "error",
+                                    title: errorResponse.title || "Error",
+                                    text: errorResponse.message ||
+                                        "Terjadi kesalahan yang tidak diketahui.",
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
         }
     </script>
 @endsection

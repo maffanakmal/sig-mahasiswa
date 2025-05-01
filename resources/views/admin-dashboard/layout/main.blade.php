@@ -20,7 +20,7 @@
         <aside id="dashboard-sidebar">
             <div class="d-flex justify-content-between p-3">
                 <div class="sidebar-logo poppins-bold">
-                    <a href="#">APX</a>
+                    <a href="#">GISAPP</a>
                 </div>
                 <button class="toggle-btn border-0" type="button">
                     <i class="bx bx-menu"></i>
@@ -34,30 +34,16 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('daerah.index') }}" class="sidebar-link">
+                        <i class='bx bx-map'></i>
+                        <span>Daerah</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
                         <i class='bx bxs-graduation'></i>
                         <span>Mahasiswa</span>
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href=""
-                    class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
-                    data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
-                    aria-controls="collapseOne">
-                        <div>
-                            <i class='bx bx-map-alt'></i>
-                            <span>Peta</span>
-                        </div>
-                        <i class="caret-nav bx bx-caret-down rotate"></i>
-                    </a>
-                    <ul id="collapseOne" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="{{ route('kelurahan.index') }}" class="sidebar-link"> Kelurahan </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="{{ route('daerah.index') }}" class="sidebar-link"> Daerah </a>
-                        </li>
-                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a href=""
