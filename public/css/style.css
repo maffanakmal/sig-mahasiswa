@@ -11,8 +11,8 @@
     --black-color: #000;
     --gray-color: #888;
     --dark-gray-color: #333;
-    --primary-color: #3D8D7A;
-    --secondary-color: #B3D8A8;
+    --primary-color: #183B4E;
+    --secondary-color: #27548A;
     --tertiary-color: #FBFFE4;
     --fourth-color: #A3D1C6;
 }
@@ -71,8 +71,16 @@ img {
     object-fit: cover;
 }
 
-#peta-pesanggrahan {
-    width: 300px;
+.icon-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-card-wrapper img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
 }
 
 /* Reset Bootstrap styling */
@@ -264,7 +272,7 @@ a.sidebar-link:hover {
 }
 
 .dashboard-navbar {
-    background-color: var(--fourth-color);
+    background-color: var(--secondary-color);
     box-shadow: 0 0 2rem 0 rgba(33, 37, 41, .1);
     position: fixed;
     top: 0;

@@ -11,7 +11,7 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-
+                                <img src="{{ asset('img/graduating-student.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
@@ -28,12 +28,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-
+                                <img src="{{ asset('img/education.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
                             <h6 class="card-title">Jurusan</h6>
-                            <p class="card-text" id="mahasiswaCount"></p>
+                            <p class="card-text" id="jurusanCount"></p>
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-
+                                <img src="{{ asset('img/school.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
                             <h6 class="card-title">Sekolah Asal</h6>
-                            <p class="card-text" id="mahasiswaCount"></p>
+                            <p class="card-text" id="sekolahAsalCount"></p>
                         </div>
                     </div>
                 </div>
@@ -62,12 +62,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-
+                                <img src="{{ asset('img/map.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
                             <h6 class="card-title">Daerah</h6>
-                            <p class="card-text" id="mahasiswaCount"></p>
+                            <p class="card-text" id="daerahCount"></p>
                         </div>
                     </div>
                 </div>
@@ -90,12 +90,22 @@
                 dataType: "json", // Ensure the response is parsed as JSON
                 success: function(response) {
                     if (response.status === 200) {
-                        // ✅ Update count display
-                        $('#mahasiswaCount').text(response.mahasiswaCount);
+
+                        $('#mahasiswaCount').text(response.mahasiswa);
+                        $('#jurusanCount').text(response.jurusan);
+                        $('#sekolahAsalCount').text(response.asal_sekolah);
+                        $('#daerahCount').text(response.daerah);
                     }
                 },
                 error: function(xhr) {
-                    console.error("Failed to fetch mahasiswa data:", xhr);
+                    let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
+                    Swal.fire({
+                        icon: errorResponse.icon || "error",
+                        title: errorResponse.title || "Error",
+                        text: errorResponse.message ||
+                            "Terjadi kesalahan yang tidak diketahui.",
+                    });
                 }
             });
         }

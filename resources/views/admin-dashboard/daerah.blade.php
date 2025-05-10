@@ -9,6 +9,12 @@
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        <div class="notFound">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Tambahkan data!</strong> Silakan tambahkan daerah baru dengan kode 404.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
         <p class="mb-2">Import Excel Daerah</p>
         <form action="#" id="importDaerahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
             @csrf
@@ -48,46 +54,60 @@
     </div>
 
     <div class="modal fade" id="daerahModal" tabindex="-1" aria-labelledby="daerahModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="daerahModalLabel">Tambah data</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="daerahForm" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="daerah_id" id="daerah_id">
-                        <div class="form-group mb-3">
-                            <label for="kode_daerah" class="form-label">Kode Daerah</label>
-                            <input type="text" class="form-control" id="kode_daerah" placeholder="Masukkan Kode Daerah"
-                                name="kode_daerah" value="{{ old('kode_daerah') }}" autofocus required>
-                            <div class="invalid-feedback" id="error-kode_daerah"></div>
+                    <div class="row">
+                        <!-- Kolom Peta -->
+                        <div class="col-md-8 mb-3">
+                            <div id="mapInput" style="height: 400px; width: 100%; border-radius: 8px;"></div>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="nama_daerah" class="form-label">Nama Daerah</label>
-                            <input type="text" class="form-control" id="nama_daerah" placeholder="Masukkan Nama Daerah"
-                                name="nama_daerah" value="{{ old('nama_daerah') }}"required>
-                            <div class="invalid-feedback" id="error-nama_daerah"></div>
+                        <!-- Kolom Form -->
+                        <div class="col-md-4">
+                            <form action="#" id="daerahForm" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="kode_daerah_edit" id="kode_daerah_edit">
+                                <div class="form-group mb-3">
+                                    <label for="kode_daerah" class="form-label">Kode Daerah</label>
+                                    <input type="text" class="form-control" id="kode_daerah"
+                                        placeholder="Masukkan Kode Daerah" name="kode_daerah"
+                                        value="{{ old('kode_daerah') }}" autofocus required>
+                                    <div class="invalid-feedback" id="error-kode_daerah"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="nama_daerah" class="form-label">Nama Daerah</label>
+                                    <input type="text" class="form-control" id="nama_daerah"
+                                        placeholder="Masukkan Nama Daerah" name="nama_daerah"
+                                        value="{{ old('nama_daerah') }}" required>
+                                    <div class="invalid-feedback" id="error-nama_daerah"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="latitude" class="form-label">Latitude</label>
+                                    <input type="text" class="form-control" id="latitude"
+                                        placeholder="Masukkan Latitude" name="latitude" value="{{ old('latitude') }}"
+                                        required>
+                                    <div class="invalid-feedback" id="error-latitude"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="longitude" class="form-label">Longitude</label>
+                                    <input type="text" class="form-control" id="longitude"
+                                        placeholder="Masukkan Longitude" name="longitude" value="{{ old('longitude') }}"
+                                        required>
+                                    <div class="invalid-feedback" id="error-longitude"></div>
+                                </div>
+                                <div class="modal-footer px-0">
+                                    <button type="button" class="btn btn-secondary btn-sm"
+                                        data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="latitude" class="form-label">Latitude</label>
-                            <input type="text" class="form-control" id="latitude" placeholder="Masukkan Latitude"
-                                name="latitude" value="{{ old('latitude') }}" required>
-                            <div class="invalid-feedback" id="error-latitude"></div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="longitude" class="form-label">Longitude</label>
-                            <input type="text" class="form-control" id="longitude" placeholder="Masukkan Longitude"
-                                name="longitude" value="{{ old('longitude') }}" required>
-                            <div class="invalid-feedback" id="error-longitude"></div>
-                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
-                </div>
-                </form>
             </div>
         </div>
     </div>
@@ -95,12 +115,69 @@
 
 @section('script')
     <script>
-        let method;
-        let daerah_id = null;
-
         $(document).ready(function() {
+            var defaultCenter = [-2.5, 118]; // Koordinat tengah Indonesia
+            var defaultZoom = 5;
+            var map;
+            var marker;
+
+            var daerahModal = document.getElementById('daerahModal');
+            daerahModal.addEventListener('shown.bs.modal', function() {
+                if (!map) {
+                    map = L.map('mapInput').setView(defaultCenter, defaultZoom);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(map);
+
+                    // Tambah marker draggable
+                    marker = L.marker(defaultCenter, {
+                        draggable: true
+                    }).addTo(map);
+
+                    // Update input ketika marker digeser
+                    marker.on('dragend', function(e) {
+                        var latlng = marker.getLatLng();
+                        document.getElementById('latitude').value = latlng.lat;
+                        document.getElementById('longitude').value = latlng.lng;
+                    });
+
+                    // Set nilai awal input
+                    document.getElementById('latitude').value = defaultCenter[0];
+                    document.getElementById('longitude').value = defaultCenter[1];
+
+                    // Kontrol tombol reset
+                    var resetControl = L.control({
+                        position: 'topleft'
+                    });
+                    resetControl.onAdd = function(map) {
+                        var div = L.DomUtil.create('div',
+                            'leaflet-bar leaflet-control leaflet-control-custom');
+                        div.innerHTML =
+                            '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
+                        div.onclick = function() {
+                            map.setView(defaultCenter, defaultZoom);
+                            marker.setLatLng(defaultCenter);
+
+                            // Update input juga
+                            document.getElementById('latitude').value = defaultCenter[0];
+                            document.getElementById('longitude').value = defaultCenter[1];
+                        };
+                        return div;
+                    };
+                    resetControl.addTo(map);
+
+                } else {
+                    map.invalidateSize();
+                }
+            });
+
             daerahTable();
+            checkNotFound();
         });
+
+        let method;
+        let kode_daerah = null;
 
         function daerahTable() {
             var table = $('#daerahTable').DataTable({
@@ -136,10 +213,33 @@
             });
         }
 
+        function checkNotFound() {
+            $.ajax({
+                url: "{{ route('daerah.check') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.status === 404) {
+                        $('.notFound').show();
+                    } else {
+                        $('.notFound').hide();
+                    }
+                },
+                error: function(xhr) {
+                    let errorResponse = xhr.responseJSON;
+
+                    Swal.fire({
+                        icon: errorResponse?.icon || "error",
+                        title: errorResponse?.title || "Error",
+                        text: errorResponse?.message || "Terjadi kesalahan yang tidak diketahui.",
+                    });
+                }
+            });
+        }
+
         function daerahModal() {
             $('#daerahForm')[0].reset();
             method = 'create';
-            daerah_id;
+            kode_daerah;
 
             $('#daerahModal').modal('show');
             $('#daerahModalLabel').text('Tambah Data Daerah');
@@ -154,7 +254,7 @@
             let httpMethod = 'POST'; // Default method for create
 
             if (method === 'update') {
-                if (!daerah_id) {
+                if (!kode_daerah) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
@@ -163,7 +263,7 @@
                     return;
                 }
 
-                url = '{{ route('daerah.update', '') }}/' + daerah_id;
+                url = '{{ route('daerah.update', '') }}/' + kode_daerah;
                 formData.append('_method', 'PUT'); // Laravel expects PUT for updates
                 httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
             }
@@ -191,6 +291,8 @@
                             showConfirmButton: false,
                             timer: 1500
                         });
+
+                        checkNotFound();
                     }
                 },
                 error: function(xhr) {
@@ -241,34 +343,45 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
                     if (response.status == 200) {
+
                         $('#importDaerahForm')[0].reset();
                         $('#daerahTable').DataTable().ajax.reload();
 
-                        Swal.fire({
-                            icon: response.icon,
-                            title: response.title,
-                            text: response.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
+                        // Setelah sedikit delay agar spinner sempat terlihat
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        }, 1000); // delay 0.8 detik sebelum tampil hasil
+
+                        checkNotFound();
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Validation Error
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            let inputField = $('[name="' + key + '"]');
-                            let errorField = $('#error-' + key);
-                            inputField.addClass('is-invalid');
-                            if (errorField.length) {
-                                errorField.text(value[0]);
-                            }
-                        });
+                        let errorResponse = xhr.responseJSON;
 
-                        $('.form-control').on('input', function() {
-                            $(this).removeClass('is-invalid');
-                            $('#error-' + $(this).attr('name')).text('');
+                        let allErrors = Object.values(errorResponse.errors).flat().join('\n');
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.message || "Validasi Gagal",
+                            text: allErrors,
+                            showConfirmButton: true
                         });
 
                     } else {
@@ -285,21 +398,32 @@
         });
 
         function editDaerah(e) {
-            daerah_id = e.getAttribute('data-id');
+            kode_daerah = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('daerah.show', '') }}/" + daerah_id,
+                url: "{{ route('daerah.show', '') }}/" + kode_daerah,
                 type: "GET",
                 success: function(response) {
-                    $('#daerah_id').val(response.daerah.daerah_uuid);
+                    $('#kode_daerah_edit').val(response.daerah.daerah_uuid);
                     $('#kode_daerah').val(response.daerah.kode_daerah);
                     $('#nama_daerah').val(response.daerah.nama_daerah);
                     $('#latitude').val(response.daerah.latitude);
                     $('#longitude').val(response.daerah.longitude);
+
+                    let lat = response.daerah.latitude;
+                    let lng = response.daerah.longitude;
+
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    }
+
+                    if (map) {
+                        map.setView([lat, lng], 12); // bisa sesuaikan zoom level
+                    }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
@@ -336,7 +460,7 @@
         }
 
         function deleteDaerah(e) {
-            let daerah_id = e.getAttribute('data-id');
+            let kode_daerah = e.getAttribute('data-id');
 
             Swal.fire({
                 title: "Apakah anda yakin?",
@@ -350,7 +474,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('daerah.destroy', '') }}/" + daerah_id,
+                        url: "{{ route('daerah.destroy', '') }}/" + kode_daerah,
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
@@ -381,51 +505,51 @@
                 }
             });
 
-            function daerahDeleteAll() {
-                Swal.fire({
-                    title: "Apakah anda yakin?",
-                    text: "Menghapus semua data secara permanen",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Ya, Hapus!",
-                    cancelButtonText: "Batal",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "{{ route('daerah.destroyAll') }}",
-                            type: "DELETE",
-                            data: {
-                                _token: "{{ csrf_token() }}", // Kirim token dalam body
-                            },
-                            success: function(response) {
-                                if (response.status == 200) {
-                                    $('#daerahTable').DataTable().ajax.reload();
-                                    Swal.fire({
-                                        icon: response.icon,
-                                        title: response.title,
-                                        text: response.message,
-                                        showConfirmButton: false,
-                                        timer: 1500
-                                    });
-                                }
-                            },
-                            error: function(xhr) {
-                                let errorResponse = xhr.responseJSON; // Ambil data JSON error
+        }
 
+        function daerahDeleteAll() {
+            Swal.fire({
+                title: "Apakah anda yakin?",
+                text: "Menghapus semua data secara permanen",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, Hapus!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('daerah.destroyAll') }}",
+                        type: "DELETE",
+                        data: {
+                            _token: "{{ csrf_token() }}", // Kirim token dalam body
+                        },
+                        success: function(response) {
+                            if (response.status == 200) {
+                                $('#daerahTable').DataTable().ajax.reload();
                                 Swal.fire({
-                                    icon: errorResponse.icon || "error",
-                                    title: errorResponse.title || "Error",
-                                    text: errorResponse.message ||
-                                        "Terjadi kesalahan yang tidak diketahui.",
+                                    icon: response.icon,
+                                    title: response.title,
+                                    text: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
                                 });
                             }
-                        });
-                    }
-                });
-            }
+                        },
+                        error: function(xhr) {
+                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
 
+                            Swal.fire({
+                                icon: errorResponse.icon || "error",
+                                title: errorResponse.title || "Error",
+                                text: errorResponse.message ||
+                                    "Terjadi kesalahan yang tidak diketahui.",
+                            });
+                        }
+                    });
+                }
+            });
         }
     </script>
 @endsection

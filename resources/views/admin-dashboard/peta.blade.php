@@ -2,7 +2,7 @@
 
 @section('child-content')
     <div class="mb-0 d-flex justify-content-between align-items-center">
-        <h3 class="fw-bold fs-4 mb-3">Peta Sebaran Mahasiswa USNI</h3>
+        <h3 class="fw-bold fs-4 mb-3">Peta Sebaran Mahasiswa</h3>
     </div>
     <div class="card shadow-sm">
         <div class="card-header mb-2">
@@ -26,12 +26,6 @@
 
                     </select>
                 </div>
-                <div class="form-group">
-                    <select class="form-select" id="status_mahasiswa" name="status_mahasiswa">
-                        <option value="" selected disabled>Status Mahasiswa</option>
-
-                    </select>
-                </div>
                 <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
                 <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
             </form>
@@ -47,22 +41,73 @@
 
 @section('script')
     <script>
-        var standard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        // Buat koordinat awal dan zoom default
+        var defaultCenter = [-2.5, 118]; // contoh koordinat
+        var defaultZoom = 5;
+
+        // Inisialisasi peta
+        var map = L.map('map').setView(defaultCenter, defaultZoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Tambahkan kontrol reset
+        var resetControl = L.control({
+            position: 'topleft'
         });
 
-        var map = L.map('map', {
-            center: [-2.5, 118],
-            zoom: 5,
-            layers: [standard]
-        });
+        resetControl.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            div.innerHTML =
+                '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
 
-        var baseMaps = {
-            "OpenStreetMap - Standard": standard,
+            div.onclick = function() {
+                map.setView(defaultCenter, defaultZoom);
+            };
+
+            return div;
         };
 
-        var layerControl = L.control.layers(baseMaps).addTo(map);
+        resetControl.addTo(map);
+
+        // Hapus legenda lama jika ada
+        if (window.legendControl) {
+            map.removeControl(window.legendControl);
+        }
+
+        // Buat legenda baru
+        const legend = L.control({
+            position: 'bottomright'
+        });
+
+        legend.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const grades = [0, 5, 10, 15, 20];
+            const colors = [
+                "#FF9F00",
+                "#522546",
+                "#004225",
+                "#003366",
+                "#800026"
+            ];
+
+            div.innerHTML += "<h4>Jumlah Mahasiswa</h4>";
+            for (let i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    `<i style="background:${colors[i]}; width:18px; height:18px; display:inline-block; margin-right:6px;"></i> ` +
+                    `${grades[i]}${(grades[i + 1]) ? '&ndash;' + grades[i + 1] + '<br>' : '+'}`;
+            }
+
+            return div;
+        };
+
+        // Tambahkan ke peta
+        legend.addTo(map);
+
+        // Simpan referensi agar bisa dihapus nanti
+        window.legendControl = legend;
+
 
         $(document).ready(function() {
             showAllMahasiswa();
@@ -70,85 +115,90 @@
         });
 
         function showAllMahasiswa() {
-            var mahasiswa = @json($mahasiswas); // Assuming response contains mahasiswa
-            var groupedData = {};
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{ route('grafik.peta.show') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.status == 200) {
+                        const mahasiswa = response.mahasiswa;
 
-            // Group data by city
-            mahasiswa.forEach((data) => {
-                var city = data.daerah_asal;
+                        // Hapus marker lama
+                        map.eachLayer(function(layer) {
+                            if (layer instanceof L.CircleMarker) {
+                                map.removeLayer(layer);
+                            }
+                        });
 
-                if (!groupedData[city]) {
-                    groupedData[city] = {
-                        count: 0,
-                        city: city
-                    };
-                }
-                groupedData[city].count++;
-            });
+                        const groupedData = {};
 
-            var geojson_daerah = @json($geojson_daerah);
-
-            geojson_daerah.forEach(daerah => {
-                fetch('/storage/' + daerah.file_geojson_daerah)
-                    .then(response => response.json())
-                    .then(geojsonData => {
-                        var validCities = geojsonData.features.map(feature => feature.properties.name);
-                        var validGroupedData = {};
-
-                        const invalidCities = [];
+                        mahasiswa.forEach(data => {
+                            if (!data.daerah) return;
+                            const city = data.daerah.nama_daerah;
+                            const lat = data.daerah.latitude;
+                            const lng = data.daerah.longitude;
+                            if (!groupedData[city]) {
+                                groupedData[city] = {
+                                    count: 0,
+                                    jurusan: {},
+                                    latitude: lat,
+                                    longitude: lng
+                                };
+                            }
+                            groupedData[city].count++;
+                            // Mengakses nama jurusan dengan benar
+                            const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
+                                'Tidak diketahui';
+                            if (!groupedData[city].jurusan[jurusanName]) {
+                                groupedData[city].jurusan[jurusanName] = 0;
+                            }
+                            groupedData[city].jurusan[jurusanName]++;
+                        });
 
                         Object.keys(groupedData).forEach(city => {
-                            if (validCities.includes(city)) {
-                                validGroupedData[city] = groupedData[city];
-                            } else {
-                                invalidCities.push(city);
-                            }
+                            const data = groupedData[city];
+                            const count = data.count;
+                            const latlng = L.latLng(data.latitude, data.longitude);
+
+                            // Perbaikan di sini: langsung mengakses data.jurusan
+                            const jurusanList = Object.entries(data.jurusan)
+                                .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
+                                .join('');
+
+                            L.circleMarker(latlng, {
+                                    radius: 8,
+                                    fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" :
+                                        count > 10 ? "#004225" : count > 5 ? "#522546" : "#FF9F00",
+                                    color: "white",
+                                    weight: 1,
+                                    opacity: 1,
+                                    fillOpacity: 0.7
+                                })
+                                .bindPopup(`
+                    <strong>${city}</strong><br>
+                    Jumlah Mahasiswa: ${count}<br>
+                    Jurusan:<br>
+                    <ul style="margin: 0; padding-left: 18px;">
+                        ${jurusanList}
+                    </ul>
+                `)
+                                .on('mouseover', function() {
+                                    this.openPopup();
+                                })
+                                .on('mouseout', function() {
+                                    this.closePopup();
+                                })
+                                .addTo(map);
                         });
-
-                        // Display invalid cities in <span id="cityValidate">
-                        if (invalidCities.length > 0) {
-                            document.getElementById("cityValidate").textContent = invalidCities.join(", ");
-                            // Show alert if not already visible
-                            document.querySelector(".alert").style.display = "block";
-                        }
-
-                        // Loop through the GeoJSON features and add markers to the map
-                        geojsonData.features.forEach(feature => {
-                            var cityName = feature.properties.name;
-                            if (validGroupedData[cityName]) {
-                                var count = validGroupedData[cityName].count;
-                                var coordinates = feature.geometry.coordinates;
-                                var latlng = L.latLng(coordinates[1], coordinates[0]); // [lat, lng]
-
-                                // Add circle marker
-                                L.circleMarker(latlng, {
-                                        radius: 8,
-                                        fillColor: count > 20 ? "#800026" : count > 15 ? "#BD0026" :
-                                            count > 10 ? "#E31A1C" : count > 5 ? "#FC4E2A" :
-                                            "#FD8D3C",
-                                        color: "white",
-                                        weight: 1,
-                                        opacity: 1,
-                                        fillOpacity: 0.7
-                                    })
-                                    .bindPopup("<strong>" + cityName +
-                                        "</strong><br>Jumlah Mahasiswa: " + count)
-                                    .on('mouseover', function(e) {
-                                        this.openPopup();
-                                    })
-                                    .on('mouseout', function(e) {
-                                        this.closePopup();
-                                    })
-                                    .addTo(map); // ✅ Now it's correct
-
-                            }
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading GeoJSON:', error);
-                    });
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Gagal memuat data:", xhr);
+                }
             });
-        };
+        }
 
 
         function mapFilter() {
@@ -163,7 +213,6 @@
                         // Clear existing options (except placeholder)
                         $('#tahun_masuk').find('option:gt(0)').remove();
                         $('#jurusan').find('option:gt(0)').remove();
-                        $('#status_mahasiswa').find('option:gt(0)').remove();
 
                         // Populate Tahun Masuk
                         response.tahun_masuk.forEach(function(item) {
@@ -173,12 +222,6 @@
                         // Populate Jurusan
                         response.jurusan.forEach(function(item) {
                             $('#jurusan').append(`<option value="${item}">${item}</option>`);
-                        });
-
-                        // Populate Status Mahasiswa
-                        response.status_mahasiswa.forEach(function(item) {
-                            $('#status_mahasiswa').append(
-                                `<option value="${item}">${item}</option>`);
                         });
                     }
                 },
@@ -201,111 +244,75 @@
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('grafik.peta.filter.show') }}';
-            let httpMethod = 'POST';
+            const url = '{{ route('grafik.peta.filter.show') }}';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 url: url,
-                type: httpMethod,
+                type: 'POST',
                 data: formData,
                 contentType: false,
                 processData: false,
                 success: function(response) {
                     if (response.status == 200) {
-                        var groupedData = {};
+                        const mahasiswa = response.mahasiswa;
 
-                        //use response data
-                        response.mahasiswa.forEach((data) => {
-                            var city = data.daerah_asal;
+                        const groupedData = {};
+
+                        mahasiswa.forEach(data => {
+                            const daerah = data.daerah;
+                            if (!daerah) return; // skip jika tidak ada relasi
+
+                            const city = daerah.nama_daerah;
 
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
-                                    city: city
+                                    latitude: daerah.latitude,
+                                    longitude: daerah.longitude
                                 };
                             }
-                            groupedData[city].count += data.total ||
-                                1; // use data.total if available, fallback to 1
+
+                            // Jika ada data.total (hasil query agregat), pakai itu, jika tidak tambah 1
+                            groupedData[city].count += data.total || 1;
                         });
 
-                        var geojson_daerah = @json($geojson_daerah);
+                        // Hapus marker lama
+                        map.eachLayer(function(layer) {
+                            if (layer instanceof L.CircleMarker) {
+                                map.removeLayer(layer);
+                            }
+                        });
 
-                        geojson_daerah.forEach(daerah => {
+                        // Tambahkan marker baru
+                        Object.keys(groupedData).forEach(city => {
+                            const data = groupedData[city];
+                            const latlng = L.latLng(data.latitude, data.longitude);
+                            const count = data.count;
 
-                            fetch('/storage/' + daerah.file_geojson_daerah)
-                                .then(response => response.json())
-                                .then(geojsonData => {
-                                    var validCities = geojsonData.features.map(feature =>
-                                        feature
-                                        .properties.name);
-
-                                    var validGroupedData = {};
-                                    Object.keys(groupedData).forEach(city => {
-                                        if (validCities.includes(city)) {
-                                            validGroupedData[city] = groupedData[
-                                                city];
-                                        } else {
-                                            console.log(
-                                                "Kota tidak ditemukan di GeoJSON:",
-                                                city);
-                                        }
-                                    });
-
-                                    // Clear existing markers
-                                    map.eachLayer(function(layer) {
-                                        if (layer instanceof L.CircleMarker) {
-                                            map.removeLayer(layer);
-                                        }
-                                    });
-
-                                    // Loop through the GeoJSON features and add markers to the map
-                                    geojsonData.features.forEach(feature => {
-                                        var cityName = feature.properties.name;
-                                        if (validGroupedData[cityName]) {
-                                            var count = validGroupedData[cityName]
-                                                .count;
-
-                                            // Ambil koordinat tengah kota
-                                            var coordinates = feature.geometry
-                                                .coordinates;
-                                            var latlng = L.latLng(coordinates[1],
-                                                coordinates[
-                                                    0]);
-
-                                            // Tambahkan marker lingkaran
-                                            L.circleMarker(latlng, {
-                                                    radius: 8,
-                                                    fillColor: count > 20 ?
-                                                        "#800026" : count > 15 ?
-                                                        "#BD0026" : count > 10 ?
-                                                        "#E31A1C" : count > 5 ?
-                                                        "#FC4E2A" : "#FD8D3C",
-                                                    color: "white",
-                                                    weight: 1,
-                                                    opacity: 1,
-                                                    fillOpacity: 0.7
-                                                })
-                                                .bindPopup("<strong>" + cityName +
-                                                    "</strong><br>Jumlah Mahasiswa: " +
-                                                    count)
-                                                .on('mouseover', function(e) {
-                                                    this.openPopup();
-                                                })
-                                                .on('mouseout', function(e) {
-                                                    this.closePopup();
-                                                })
-                                                .addTo(map); // ✅ Now it's correct
-
-                                        }
-                                    });
+                            L.circleMarker(latlng, {
+                                    radius: 8,
+                                    fillColor: count > 20 ? "#800026" : count > 15 ?
+                                        "#BD0026" : count > 10 ? "#E31A1C" : count > 5 ?
+                                        "#FC4E2A" : "#FD8D3C",
+                                    color: "white",
+                                    weight: 1,
+                                    opacity: 1,
+                                    fillOpacity: 0.7
                                 })
-                                .catch(error => {
-                                    console.error('Error loading GeoJSON:', error);
-                                });
-                        })
+                                .bindPopup(
+                                    `<strong>${city}</strong><br>Jumlah Mahasiswa: ${count}`
+                                )
+                                .on('mouseover', function() {
+                                    this.openPopup();
+                                })
+                                .on('mouseout', function() {
+                                    this.closePopup();
+                                })
+                                .addTo(map);
+                        });
                     }
                 },
                 error: function(xhr) {
@@ -313,6 +320,8 @@
                 }
             });
         });
+
+
 
         $('#resetFilterBtn').on('click', function() {
             $('#mapFilterForm')[0].reset();

@@ -49,6 +49,16 @@
             <div class="card-body">
                 <div class="container-fluid">
                     <div id="map" class="mb-3"></div>
+
+                    <p class="mahasiswa-alert text-danger mb-0" style="display: none;">
+                        Data mahasiswa belum dimasukkan.
+                    </p>
+
+                    <p class="daerah-alert text-danger mb-0" style="display: none;">
+                        Data daerah belum dimasukkan.
+                    </p>
+                    <small>Data daerah berasal dari Badan Pusat Statistik <a
+                            href="https://sig.bps.go.id/">www.sig.bps.go.id</a></small>
                 </div>
             </div>
         </div>
@@ -67,97 +77,162 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
     <script>
-        var standard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        // Buat koordinat awal dan zoom default
+        var defaultCenter = [-2.5, 118]; // contoh koordinat
+        var defaultZoom = 5;
+
+        // Inisialisasi peta
+        var map = L.map('map').setView(defaultCenter, defaultZoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Tambahkan kontrol reset
+        var resetControl = L.control({
+            position: 'topleft'
         });
 
-        var map = L.map('map', {
-            center: [-2.5, 118],
-            zoom: 5,
-            layers: [standard]
+        resetControl.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            div.innerHTML =
+                '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
+
+            div.onclick = function() {
+                map.setView(defaultCenter, defaultZoom);
+            };
+
+            return div;
+        };
+
+        resetControl.addTo(map);
+
+        // Hapus legenda lama jika ada
+        if (window.legendControl) {
+            map.removeControl(window.legendControl);
+        }
+
+        // Buat legenda baru
+        const legend = L.control({
+            position: 'bottomright'
         });
+
+        legend.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const grades = [0, 5, 10, 15, 20];
+            const colors = [
+                "#FF9F00",
+                "#522546",
+                "#004225",
+                "#003366",
+                "#800026"
+            ];
+
+            div.innerHTML += "<h4>Jumlah Mahasiswa</h4>";
+            for (let i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    `<i style="background:${colors[i]}; width:18px; height:18px; display:inline-block; margin-right:6px;"></i> ` +
+                    `${grades[i]}${(grades[i + 1]) ? '&ndash;' + grades[i + 1] + '<br>' : '+'}`;
+            }
+
+            return div;
+        };
+
+        // Tambahkan ke peta
+        legend.addTo(map);
+
+        // Simpan referensi agar bisa dihapus nanti
+        window.legendControl = legend;
 
         $(document).ready(function() {
             showAllMahasiswa();
         });
 
         function showAllMahasiswa() {
-            var mahasiswa = @json($mahasiswa);
-            var groupedData = {};
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{ route('grafik.peta.show') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.status == 200) {
+                        const mahasiswa = response.mahasiswa;
 
-            // Kelompokkan berdasarkan asal daerah
-            mahasiswa.forEach((data) => {
-                var city = data.daerah_asal;
-                if (!groupedData[city]) {
-                    groupedData[city] = {
-                        count: 0,
-                        city: city,
-                        jurusan: []
-                    };
+                        // Hapus marker lama
+                        map.eachLayer(function(layer) {
+                            if (layer instanceof L.CircleMarker) {
+                                map.removeLayer(layer);
+                            }
+                        });
+
+                        const groupedData = {};
+
+                        mahasiswa.forEach(data => {
+                            if (!data.daerah) return;
+                            const city = data.daerah.nama_daerah;
+                            const lat = data.daerah.latitude;
+                            const lng = data.daerah.longitude;
+                            if (!groupedData[city]) {
+                                groupedData[city] = {
+                                    count: 0,
+                                    jurusan: {},
+                                    latitude: lat,
+                                    longitude: lng
+                                };
+                            }
+                            groupedData[city].count++;
+                            // Mengakses nama jurusan dengan benar
+                            const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
+                                'Tidak diketahui';
+                            if (!groupedData[city].jurusan[jurusanName]) {
+                                groupedData[city].jurusan[jurusanName] = 0;
+                            }
+                            groupedData[city].jurusan[jurusanName]++;
+                        });
+
+                        Object.keys(groupedData).forEach(city => {
+                            const data = groupedData[city];
+                            const count = data.count;
+                            const latlng = L.latLng(data.latitude, data.longitude);
+
+                            // Perbaikan di sini: langsung mengakses data.jurusan
+                            const jurusanList = Object.entries(data.jurusan)
+                                .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
+                                .join('');
+
+                            L.circleMarker(latlng, {
+                                    radius: 8,
+                                    fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" :
+                                        count > 10 ? "#004225" : count > 5 ? "#522546" : "#FF9F00",
+                                    color: "white",
+                                    weight: 1,
+                                    opacity: 1,
+                                    fillOpacity: 0.7
+                                })
+                                .bindPopup(`
+                    <strong>${city}</strong><br>
+                    Jumlah Mahasiswa: ${count}<br>
+                    Jurusan:<br>
+                    <ul style="margin: 0; padding-left: 18px;">
+                        ${jurusanList}
+                    </ul>
+                `)
+                                .on('mouseover', function() {
+                                    this.openPopup();
+                                })
+                                .on('mouseout', function() {
+                                    this.closePopup();
+                                })
+                                .addTo(map);
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Gagal memuat data:", xhr);
                 }
-                groupedData[city].count++;
-                if (data.jurusan) {
-                    groupedData[city].jurusan.push(data.jurusan);
-                }
-            });
-
-            var daerah = @json($daerah);
-
-            const invalidCities = [];
-            const validGroupedData = {};
-
-            daerah.forEach(d => {
-                const city = d.nama_daerah;
-
-                if (groupedData[city]) {
-                    validGroupedData[city] = groupedData[city];
-                    validGroupedData[city].latitude = d.latitude;
-                    validGroupedData[city].longitude = d.longitude;
-                }
-            });
-
-            Object.keys(groupedData).forEach(city => {
-                if (!validGroupedData[city]) {
-                    invalidCities.push(city);
-                }
-            });
-
-            Object.keys(validGroupedData).forEach(city => {
-                const data = validGroupedData[city];
-                const count = data.count;
-                const latlng = L.latLng(data.latitude, data.longitude);
-
-                // Ambil jurusan unik
-                const uniqueJurusan = [...new Set(data.jurusan)];
-
-                L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: count > 20 ? "#800026" : count > 15 ? "#BD0026" : count > 10 ? "#E31A1C" :
-                            count > 5 ? "#FC4E2A" : "#FD8D3C",
-                        color: "white",
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    })
-                    .bindPopup(
-                        `<strong>${city}</strong><br>
-                Jumlah Mahasiswa: ${count}<br>
-                Jurusan:<br>
-                <ul style="margin: 0; padding-left: 18px;">
-                    ${uniqueJurusan.map(j => `<li>${j}</li>`).join('')}
-                </ul>`
-                    )
-                    .on('mouseover', function(e) {
-                        this.openPopup();
-                    })
-                    .on('mouseout', function(e) {
-                        this.closePopup();
-                    })
-                    .addTo(map);
             });
         }
-
 
         document.getElementById("year").textContent = new Date().getFullYear();
     </script>

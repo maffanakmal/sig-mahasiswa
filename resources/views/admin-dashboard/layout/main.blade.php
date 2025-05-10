@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}" />
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
     <script src="{{ asset('js/leaflet.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
@@ -40,12 +42,30 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('sekolah.index') }}" class="sidebar-link">
+                        <i class='bx bxs-school'></i>
+                        <span>Sekolah</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('jurusan.index') }}" class="sidebar-link">
+                        <i class='bx bx-book'></i>
+                        <span>Jurusan</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
                         <i class='bx bxs-graduation'></i>
                         <span>Mahasiswa</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('grafik.peta') }}" class="sidebar-link">
+                        <i class='bx bx-map-alt'></i>
+                        <span>Peta</span>
+                    </a>
+                </li>
+                {{-- <li class="sidebar-item">
                     <a href=""
                     class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
                     data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
@@ -81,7 +101,7 @@
                             <a href="" class="sidebar-link"> Bar Chart </a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
             </ul>
         </aside>
         <div class="main">
@@ -98,15 +118,15 @@
                                 </span>
                             </div>
                             <a href="#" data-bs-toggle="dropdown" type="button" aria-expanded="false" class="nav-icon pe-md-0">
-                                {{-- <img src="storage/img/{{ session('loggedInUser')['foto_user'] }}" 
+                                <img src="#" 
                                      alt="Profile" 
                                      class="avatar img-fluid rounded-circle dropdown-toggle" 
                                      width="40" 
-                                     id="navbar-avatar" /> --}}
+                                     id="navbar-avatar" />
                             </a>                            
-                            <div class="caret-icon mx-1">
+                            {{-- <div class="caret-icon mx-1">
                                 <i class="bx bx-caret-down"></i>
-                            </div>
+                            </div> --}}
                             <div class="dropdown-menu dropdown-menu-end rounded-1 border-0 shadow mt-3">
                                 <a href="" class="dropdown-item">
                                     <i class="bx bx-bell"></i>
@@ -117,7 +137,7 @@
                                     <span>Settings</span>
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form action="#" method="POST" id="logout-form">
+                                <form action="{{ route('landing.index') }}" method="POST" id="logout-form">
                                     @csrf
                                     <a href="javascript:void(0)" class="dropdown-item" id="btn-logout">
                                         <i class="bx bx-log-out"></i>
@@ -144,6 +164,7 @@
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('js/script.js') }}"></script>
 
     <script>

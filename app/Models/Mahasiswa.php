@@ -11,20 +11,33 @@ class Mahasiswa extends Model
 
     protected $table = 'mahasiswa';
 
-    protected $primaryKey = 'mahasiswa_id';
+    protected $primaryKey = 'nim';
 
-    public $incrementing = true;
+    public $incrementing = false;
 
-    protected $keyType = 'int';
+    protected $keyType = 'integer';
 
     protected $fillable = [
         'mahasiswa_uuid',
-        'mahasiswa_nama',
         'nim',
         'tahun_masuk',
         'jurusan',
         'sekolah_asal',
         'daerah_asal',
-        'status_mahasiswa',
     ];
+
+    public function daerah()
+    {
+        return $this->belongsTo(Daerah::class, 'daerah_asal', 'kode_daerah');
+    }
+
+    public function jurusan()
+    {
+        return $this->belongsTo(Jurusan::class, 'jurusan', 'kode_jurusan');
+    }
+
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class, 'sekolah_asal', 'sekolah_id');
+    }
 }

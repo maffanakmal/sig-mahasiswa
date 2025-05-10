@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\SekolahImport;
 use Exception;
 use App\Models\Daerah;
+use App\Models\Sekolah;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Imports\DaerahImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class DaerahController extends Controller
+class SekolahController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,34 +21,29 @@ class DaerahController extends Controller
     public function index(Request $request)
     {
         $data = [
-            'title' => 'Daerah Page',
-            'daerah' => Daerah::where('daerah_uuid', $request->kode_daerah)->first([
-                'daerah_uuid',
-                'kode_daerah',
-                'nama_daerah',
-                'latitude',
-                'longitude',
-            ]),
+            'title' => 'Sekolah Page',
+            'sekolah' => Sekolah::where('sekolah_uuid', $request->sekolah_id)->first(['sekolah_id', 'nama_sekolah', 'daerah_sekolah', 'latitude', 'longitude'])
         ];
 
         if ($request->ajax()) {
-            $daerahs = Daerah::select(
-                'daerah_uuid',
-                'kode_daerah',
-                'nama_daerah',
-                'latitude',
-                'longitude',
-            )
-                ->orderBy('daerah_uuid', 'DESC')
+            $sekolahs = Sekolah::join('daerah', 'sekolah.daerah_sekolah', '=', 'daerah.kode_daerah')
+                ->select(
+                    'sekolah.sekolah_uuid',
+                    'sekolah.nama_sekolah',
+                    'daerah.nama_daerah as daerah_sekolah',
+                    'sekolah.latitude',
+                    'sekolah.longitude',
+                )
+                ->orderBy('sekolah.sekolah_uuid', 'DESC')
                 ->get();
 
-            return DataTables::of($daerahs)
+            return DataTables::of($sekolahs)
                 ->addIndexColumn()
-                ->addColumn('action', function ($daerah) {
-                    return '<button data-id="' . $daerah->daerah_uuid . '" class="btn btn-warning btn-sm" onclick="editDaerah(this)">
+                ->addColumn('action', function ($sekolah) {
+                    return '<button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-warning btn-sm" onclick="editSekolah(this)">
                                 <i class="bx bx-pencil"></i>
                             </button>
-                            <button data-id="' . $daerah->daerah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteDaerah(this)">
+                            <button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteSekolah(this)">
                                 <i class="bx bx-trash"></i>
                             </button>';
                 })
@@ -57,8 +51,7 @@ class DaerahController extends Controller
                 ->make(true);
         }
 
-
-        return view('admin-dashboard.daerah', $data);
+        return view('admin-dashboard.sekolah', $data);
     }
 
     /**
@@ -66,7 +59,21 @@ class DaerahController extends Controller
      */
     public function create()
     {
-        //
+        try {
+            $daerah = Daerah::select(['kode_daerah', 'nama_daerah'])->get();
+
+            return response()->json([
+                'status' => 200,
+                'daerah' => $daerah,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
     }
 
     /**
@@ -77,15 +84,14 @@ class DaerahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_daerah' => 'required|regex:/^\d{1,4}$/|unique:daerah,kode_daerah',
-                    'nama_daerah' => 'required|string|max:255',
+                    'nama_sekolah' => 'required|string|max:255|unique:sekolah,nama_sekolah',
+                    'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
                     'latitude' => 'required|numeric|between:-90,90',
                     'longitude' => 'required|numeric|between:-180,180',
                 ],
                 [
-                    'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah tidak boleh lebih dari 4 karakter.',
-                    'nama_daerah.required' => 'Nama daerah harus diisi.',
+                    'nama_sekolah.unique' => 'Nama sekolah sudah terdaftar.',
+                    'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
                     'latitude.required' => 'Latitude harus diisi.',
                     'latitude.numeric' => 'Latitude harus berupa angka.',
                     'latitude.between' => 'Latitude harus antara -90 dan 90.',
@@ -95,22 +101,22 @@ class DaerahController extends Controller
                 ]
             );
 
-            $daerah_uuid = Str::uuid();
+            $sekolah_uuid = Str::uuid();
 
             DB::insert("
-            INSERT INTO daerah (
-                daerah_uuid, 
-                kode_daerah,
-                nama_daerah,
+            INSERT INTO sekolah (
+                sekolah_uuid, 
+                nama_sekolah,
+                daerah_sekolah,
                 latitude,
                 longitude, 
                 created_at, 
                 updated_at
             ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
         ", [
-                $daerah_uuid,
-                $validatedData['kode_daerah'],
-                $validatedData['nama_daerah'],
+                $sekolah_uuid,
+                $validatedData['nama_sekolah'],
+                $validatedData['daerah_sekolah'],
                 $validatedData['latitude'],
                 $validatedData['longitude'],
             ]);
@@ -118,7 +124,7 @@ class DaerahController extends Controller
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data daerah berhasil ditambahkan.",
+                "message" => "Data sekolah berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
         } catch (ValidationException $e) {
@@ -140,19 +146,20 @@ class DaerahController extends Controller
     {
         try {
             $request->validate([
-                'import_daerah' => 'required|file|mimes:xlsx,xls',
+                'import_sekolah' => 'required|file|mimes:xlsx,xls',
             ],
             [
-                'import_daerah.mimes' => 'File harus berupa file Excel (xlsx, xls).',
+                'import_sekolah.required' => 'File Excel tidak boleh kosong.',
+                'import_sekolah.mimes' => 'File harus berupa file Excel (xlsx, xls).',
             ]);
 
             // Import the Excel file
-            Excel::import(new DaerahImport, $request->file('import_daerah'));
+            Excel::import(new SekolahImport, $request->file('import_sekolah'));
 
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data daerah berhasil diimpor.",
+                "message" => "Data sekolah berhasil diimpor.",
                 "icon" => "success"
             ]);
         } catch (ValidationException $e) {
@@ -174,54 +181,20 @@ class DaerahController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($kode_daerah)
+    public function show($sekolah_id)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->select(
-                'daerah_uuid',
-                'kode_daerah',
-                'nama_daerah',
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->select(
+                'sekolah_uuid',
+                'nama_sekolah',
+                'daerah_sekolah',
                 'latitude',
                 'longitude',
             )->firstOrFail();
 
             return response()->json([
                 "status" => 200,
-                'daerah' => $daerah,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    public function check()
-    {
-        try {
-            $daerah = Daerah::where('kode_daerah', '404')->select(
-                'daerah_uuid',
-                'kode_daerah',
-                'nama_daerah',
-                'latitude',
-                'longitude',
-            )->first();
-
-            if (!$daerah) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Tidak Ditemukan",
-                    "message" => "Tidak ada daerah dengan kode 404",
-                    "icon" => "warning"
-                ], 404);
-            }
-
-            return response()->json([
-                "status" => 200,
-                'daerah' => $daerah,
+                'sekolah' => $sekolah,
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -236,7 +209,7 @@ class DaerahController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Daerah $Daerah)
+    public function edit(Sekolah $sekolah)
     {
         //
     }
@@ -244,22 +217,21 @@ class DaerahController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $kode_daerah)
+    public function update(Request $request, $sekolah_id)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->firstOrFail(); // Cari user berdasarkan UUID
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate(
                 [
-                    'kode_daerah'      => 'required|regex:/^\d{1,4}$/|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
-                    'nama_daerah'      => 'required|string|max:255',
+                    'nama_sekolah'      => 'required|unique:sekolah,nama_sekolah,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
                     'latitude' => 'required|numeric|between:-90,90',
                     'longitude' => 'required|numeric|between:-180,180',
                 ],
                 [
-                    'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah tidak boleh lebih dari 4 karakter.',
-                    'nama_daerah.required' => 'Nama daerah harus diisi.',
+                    'nama_sekolah.unique' => 'Nama sekolah sudah terdaftar.',
+                    'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
                     'latitude.required' => 'Latitude harus diisi.',
                     'latitude.numeric' => 'Latitude harus berupa angka.',
                     'latitude.between' => 'Latitude harus antara -90 dan 90.',
@@ -270,25 +242,25 @@ class DaerahController extends Controller
             );
 
             DB::update("
-            UPDATE daerah SET 
-                kode_daerah = ?, 
-                nama_daerah = ?,
+            UPDATE sekolah SET 
+                nama_sekolah = ?, 
+                daerah_sekolah = ?,
                 latitude = ?,
                 longitude = ?,
                 updated_at = NOW()
-            WHERE daerah_uuid = ?
+            WHERE sekolah_uuid = ?
         ", [
-                $validatedData['kode_daerah'],
-                $validatedData['nama_daerah'],
+                $validatedData['nama_sekolah'],
+                $validatedData['daerah_sekolah'],
                 $validatedData['latitude'],
                 $validatedData['longitude'],
-                $kode_daerah
+                $sekolah_id
             ]);
 
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data daerah berhasil diperbarui.",
+                "message" => "Data sekolah berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
         } catch (ValidationException $e) {
@@ -309,18 +281,18 @@ class DaerahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($kode_daerah)
+    public function destroy($sekolah_id)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->firstOrFail();
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->firstOrFail();
 
-            if ($daerah) {
-                $daerah->delete();
+            if ($sekolah) {
+                $sekolah->delete();
 
                 return response()->json([
                     "status" => 200,
                     "title" => "Success",
-                    "message" => "Data daerah berhasil dihapus.",
+                    "message" => "Data sekolah berhasil dihapus.",
                     "icon" => "success"
                 ]);
             }
@@ -337,12 +309,12 @@ class DaerahController extends Controller
     public function destroyAll()
     {
         try {
-            DB::table('daerah')->delete();
+            DB::table('sekolah')->delete();
 
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Semua data daerah berhasil dihapus.",
+                "message" => "Semua data sekolah berhasil dihapus.",
                 "icon" => "success"
             ]);
         } catch (Exception $e) {

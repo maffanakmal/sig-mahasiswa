@@ -4,33 +4,27 @@
     z-index: 1;
 }
 
-.layer-control {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
+.leaflet-control-custom {
+    margin-top: 58px; /* geser ke bawah agar di bawah tombol + - */
+    text-align: center;
+    line-height: 26px;
+    cursor: pointer;
+}
+
+.info.legend {
     background: white;
     padding: 10px;
+    font: 14px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    line-height: 18px;
+    color: #333;
 }
-.layer-control h4 {
-    margin: 0;
-    cursor: pointer;
+
+.info.legend h4 {
+    margin: 0 0 5px;
+    color: #000;
+    font-size: 17px;
 }
-.layer-control .dropdown-content {
-    display: none;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-.layer-control .dropdown-content li {
-    cursor: pointer;
-    padding: 5px;
-}
-.layer-control .dropdown-content li:hover {
-    background-color: #f0f0f0;
-}
-.layer-control .dropdown-content.show {
-    display: block;
-}
+
+

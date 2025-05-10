@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Daerah;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
@@ -10,14 +11,28 @@ class LandingController extends Controller
 {
     public function index()
     {
-        // Fetching data from the database
-        $mahasiswa = Mahasiswa::select(['jurusan', 'daerah_asal'])->get();
-        $daerah = Daerah::select(['nama_daerah', 'latitude', 'longitude'])->get();
-
         return view('landing-page.layout.main', [
-            'mahasiswa' => $mahasiswa,
-            'daerah' => $daerah,
-            'title' => 'Welcome to My Website',
+            'title' => 'gisapp',
         ]);
     }
+
+    public function show()
+    {
+        try {
+            $mahasiswa = Mahasiswa::with('daerah')->get();
+
+            return response()->json([
+                'status' => 200,
+                'mahasiswa' => $mahasiswa,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
+    }
+
 }

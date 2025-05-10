@@ -2,16 +2,16 @@
 
 namespace App\Imports;
 
-use App\Models\Daerah;
 use App\Models\Jurusan;
-use App\Models\Mahasiswa;
-use App\Models\Sekolah;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class MahasiswaImport implements ToCollection
+class JurusanImport implements ToCollection
 {
+    /**
+     * @param Collection $collection
+     */
     public function collection(Collection $collection)
     {
         $data = [];
@@ -19,27 +19,19 @@ class MahasiswaImport implements ToCollection
 
         foreach ($collection as $row) {
             if ($index > 1) {
-                if (Mahasiswa::where('nim', $row[0])->exists()) {
-                    continue;
-                }
-
                 $data[] = [
-                    'mahasiswa_uuid' => Str::uuid(),
-                    'nim' => strval($row[0] ?? ''),
-                    'tahun_masuk' => '',
-                    'jurusan' => '',
-                    'sekolah_asal' => '',
-                    'daerah_asal' => '',
+                    'jurusan_uuid' => Str::uuid(),
+                    'kode_jurusan' => $row[0] ?? '',
+                    'nama_jurusan' => $row[1] ?? '',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
-
             $index++;
         }
 
         if (!empty($data)) {
-            Mahasiswa::insert($data);
+            Jurusan::insert($data);
         }
     }
 }

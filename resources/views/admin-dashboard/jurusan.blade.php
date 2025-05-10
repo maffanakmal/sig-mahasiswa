@@ -2,42 +2,39 @@
 
 @section('child-content')
     <div class="mb-0">
-        <h3 class="fw-bold fs-4 mb-3">Daftar Mahasiswa</h3>
+        <h3 class="fw-bold fs-4 mb-3">Daftar Program Studi</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <strong>Info!</strong> Untuk mengimpor data mahasiswa, silakan unduh template <a
-                href="{{ asset('template/mahasiswa_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
+            <strong>Info!</strong> Untuk mengimpor data program studi, silakan unduh template <a
+                href="{{ asset('template/jurusan_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <p class="mb-2">Import Excel Mahasiswa</p>
-        <form action="#" id="importMahasiswaForm" enctype="multipart/form-data"
+        <p class="mb-2">Import Excel Program Studi</p>
+        <form action="#" id="importJurusanForm" enctype="multipart/form-data"
             class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
-                <input type="file" class="form-control" name="import_mahasiswa" id="import_mahasiswa"
+                <input type="file" class="form-control" name="import_jurusan" id="import_jurusan"
                     aria-describedby="btnImport" aria-label="Upload">
                 <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
                     Import</button>
-                <div class="invalid-feedback" id="error-import_mahasiswa"></div>
+                <div class="invalid-feedback" id="error-import_jurusan"></div>
             </div>
         </form>
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="mahasiswaDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="mahasiswaModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="jurusanDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="jurusanModal()"><i class='bx bx-plus'></i> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="mahasiswaTable" class="table table-striped" style="width:100%">
+                <table id="jurusanTable" class="table table-striped" style="width:100%">
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>NIM</th>
-                            <th>Tahun Masuk</th>
-                            <th>Jurusan</th>
-                            <th>Sekolah Asal</th>
-                            <th>Daerah Asal</th>
+                            <th>Kode Program Studi</th>
+                            <th>Nama Program Studi</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -49,43 +46,28 @@
         </div>
     </div>
 
-    <div class="modal fade" id="mahasiswaModal" tabindex="-1" aria-labelledby="mahasiswaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="jurusanModal" tabindex="-1" aria-labelledby="jurusanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mahasiswaModalLabel">Tambah data</h1>
+                    <h1 class="modal-title fs-5" id="jurusanModalLabel">Tambah data</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="mahasiswaForm" enctype="multipart/form-data">
+                    <form action="#" id="jurusanForm" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="nim_edit" id="nim_edit">
+                        <input type="hidden" name="jurusan_edit" id="jurusan_edit">
                         <div class="form-group mb-3">
-                            <label for="nim" class="form-label">NIM</label>
-                            <input type="text" class="form-control" id="nim" placeholder="Masukkan NIM"
-                                name="nim" value="{{ old('nim') }}" required>
-                            <div class="invalid-feedback" id="error-nim"></div>
+                            <label for="kode_jurusan" class="form-label">Kode Program Studi</label>
+                            <input type="text" class="form-control" id="kode_jurusan" placeholder="Masukkan Kode Program Studi"
+                                name="kode_jurusan" value="{{ old('kode_jurusan') }}" required>
+                            <div class="invalid-feedback" id="error-kode_jurusan"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
-                            <input type="text" class="form-control" id="tahun_masuk" placeholder="Masukkan Tahun Masuk"
-                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" required>
-                            <div class="invalid-feedback" id="error-tahun_masuk"></div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <select id="jurusan" name="jurusan" class="form-control select-jurusan">
-                                <option value="" selected disabled>Program Studi</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <select id="sekolah_asal" name="sekolah_asal" class="form-control select-sekolah">
-                                <option value="" selected disabled>Sekolah Asal</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <select id="daerah_asal" name="daerah_asal" class="form-control select-daerah">
-                                <option value="" selected disabled>Daerah Asal</option>
-                            </select>
+                            <label for="nama_jurusan" class="form-label">Nama Program Studi</label>
+                            <input type="text" class="form-control" id="nama_jurusan" placeholder="Masukkan Nama Program Studi"
+                                name="nama_jurusan" value="{{ old('nama_jurusan') }}" required>
+                            <div class="invalid-feedback" id="error-nama_jurusan"></div>
                         </div>
                 </div>
                 <div class="modal-footer">
@@ -101,45 +83,31 @@
 @section('script')
     <script>
         let method;
-        let nim = null;
+        let kode_jurusan = null;
 
         $(document).ready(function() {
-            mahasiswaTable();
+            jurusanTable();
             showSelect();
-            selectDaerahAsal();
-            selectSekolahAsal();
-            selectJurusan();
+            selectDaerahJurusan();
         });
 
-        function mahasiswaTable() {
-            var table = $('#mahasiswaTable').DataTable({
+        function jurusanTable() {
+            var table = $('#jurusanTable').DataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: '{{ route('mahasiswa.index') }}',
+                ajax: '{{ route('jurusan.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'nim',
-                        name: 'nim',
+                        data: 'kode_jurusan',
+                        name: 'kode_jurusan'
                     },
                     {
-                        data: 'tahun_masuk',
-                        name: 'tahun_masuk',
-                    },
-                    {
-                        data: 'jurusan',
-                        name: 'jurusan',
-                    },
-                    {
-                        data: 'sekolah_asal',
-                        name: 'sekolah_asal',
-                    },
-                    {
-                        data: 'daerah_asal',
-                        name: 'daerah_asal',
+                        data: 'nama_jurusan',
+                        name: 'nama_jurusan',
                     },
                     {
                         data: 'action',
@@ -149,130 +117,34 @@
             });
         }
 
-        function mahasiswaModal() {
-            $('#mahasiswaForm')[0].reset();
+        function jurusanModal() {
+            $('#jurusanForm')[0].reset();
             method = 'create';
-            nim;
+            kode_jurusan;
 
-            $('#mahasiswaModal').modal('show');
-            $('#mahasiswaModalLabel').text('Tambah Data Mahasiswa');
+            $('#jurusanModal').modal('show');
+            $('#jurusanModalLabel').text('Tambah Data Jurusan');
             $('#saveBtn').text('Simpan');
         }
 
-        function selectDaerahAsal() {
-            $('#daerah_asal').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#daerah_asal').parent(), // Ensures proper z-index handling
-                language: {
-                    noResults: function() {
-                        return "Tidak ada hasil yang ditemukan";
-                    },
-                    searching: function() {
-                        return "Mencari...";
-                    }
-                }
-            })
-        }
-
-        function selectSekolahAsal() {
-            $('#sekolah_asal').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#sekolah_asal').parent(), // Ensures proper z-index handling
-                language: {
-                    noResults: function() {
-                        return "Tidak ada hasil yang ditemukan";
-                    },
-                    searching: function() {
-                        return "Mencari...";
-                    }
-                }
-            })
-        }
-
-        function selectJurusan() {
-            $('#jurusan').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#jurusan').parent(), // Ensures proper z-index handling
-                language: {
-                    noResults: function() {
-                        return "Tidak ada hasil yang ditemukan";
-                    },
-                    searching: function() {
-                        return "Mencari...";
-                    }
-                }
-            })
-        }
-
-        function showSelect() {
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: '{{ route('mahasiswa.create') }}',
-                type: 'GET',
-                success: function(response) {
-                    if (response.status == 200) {
-
-                        response.daerah.forEach(function(item) {
-                            $('#daerah_asal').append(
-                                `<option value="${item.kode_daerah}">${item.nama_daerah}</option>`);
-                        });
-
-                        response.sekolah.forEach(function(item) {
-                            $('#sekolah_asal').append(
-                                `<option value="${item.sekolah_id}">${item.nama_sekolah}</option>`);
-                        });
-
-                        response.jurusan.forEach(function(item) {
-                            $('#jurusan').append(
-                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
-                        });
-
-                        selectDaerahAsal(); // Initialize select2 after appending options
-                        selectSekolahAsal(); // Initialize select2 after appending options
-                        selectJurusan(); // Initialize select2 after appending options
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 500) {
-                        let errorResponse = xhr.responseJSON; // Ambil data JSON error
-
-                        Swal.fire({
-                            icon: errorResponse.icon || "error",
-                            title: errorResponse.title || "Error",
-                            text: errorResponse.message ||
-                                "Terjadi kesalahan yang tidak diketahui.",
-                        });
-                    }
-                }
-            });
-        }
-
-        $('#mahasiswaForm').on('submit', function(e) {
+        $('#jurusanForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('mahasiswa.store') }}';
+            let url = '{{ route('jurusan.store') }}';
             let httpMethod = 'POST'; // Default method for create
 
             if (method === 'update') {
-                if (!nim) {
+                if (!kode_jurusan) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
-                        text: 'Mahasiswa ID tidak ditemukan.',
+                        text: 'Jurusan ID tidak ditemukan.',
                     });
                     return;
                 }
 
-                url = '{{ route('mahasiswa.update', '') }}/' + nim;
+                url = '{{ route('jurusan.update', '') }}/' + kode_jurusan;
                 formData.append('_method', 'PUT'); // Laravel expects PUT for updates
                 httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
             }
@@ -288,10 +160,10 @@
                 processData: false,
                 success: function(response) {
                     if (response.status == 200) {
-                        $('#mahasiswaModal').modal('hide');
-                        $('#mahasiswaForm').trigger('reset');
+                        $('#jurusanModal').modal('hide');
+                        $('#jurusanForm').trigger('reset');
 
-                        $('#mahasiswaTable').DataTable().ajax.reload();
+                        $('#jurusanTable').DataTable().ajax.reload();
 
                         Swal.fire({
                             icon: response.icon,
@@ -303,7 +175,7 @@
                     }
                 },
                 error: function(xhr) {
-                    if (xhr.status === 422) { // 422 = Error Validasi Laravel
+                    if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
                             let inputField = $('[name="' + key + '"]');
@@ -333,11 +205,11 @@
             });
         });
 
-        $('#importMahasiswaForm').on('submit', function(e) {
+        $('#importJurusanForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('mahasiswa.import') }}';
+            let url = '{{ route('jurusan.import') }}';
             let httpMethod = 'POST'; // Default method for create
 
             $.ajax({
@@ -360,8 +232,8 @@
                             }
                         });
 
-                        $('#importMahasiswaForm')[0].reset();
-                        $('#mahasiswaTable').DataTable().ajax.reload();
+                        $('#importJurusanForm')[0].reset();
+                        $('#jurusanTable').DataTable().ajax.reload();
 
                         // Setelah sedikit delay agar spinner sempat terlihat
                         setTimeout(() => {
@@ -405,24 +277,20 @@
             });
         });
 
-        function editMahasiswa(e) {
-            nim = e.getAttribute('data-id');
+        function editJurusan(e) {
+            kode_jurusan = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('mahasiswa.show', '') }}/" + nim,
+                url: "{{ route('jurusan.show', '') }}/" + kode_jurusan,
                 type: "GET",
                 success: function(response) {
-                    $('#nim').val(response.mahasiswa.mahasiswa_uuid);
-                    $('#nim').val(response.mahasiswa.nim);
-                    $('#tahun_masuk').val(response.mahasiswa.tahun_masuk);
-                    $('#jurusan').val(response.mahasiswa.jurusan);
-                    $('#sekolah_asal').val(response.mahasiswa.sekolah_asal);
-                    $('#daerah_asal').val(response.mahasiswa.daerah_asal);
-                    $('#status_mahasiswa').val(response.mahasiswa.status_mahasiswa);
+                    $('#jurusan_edit').val(response.jurusan.jurusan_uuid);
+                    $('#kode_jurusan').val(response.jurusan.kode_jurusan);
+                    $('#nama_jurusan').val(response.jurusan.nama_jurusan);
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
@@ -453,13 +321,13 @@
                 }
             });
 
-            $('#mahasiswaModal').modal('show');
-            $('#mahasiswaModalLabel').text('Edit Data Mahasiswa');
+            $('#jurusanModal').modal('show');
+            $('#jurusanModalLabel').text('Edit Data Jurusan');
             $('#saveBtn').text('Ubah');
         }
 
-        function deleteMahasiswa(e) {
-            let nim = e.getAttribute('data-id');
+        function deleteJurusan(e) {
+            let kode_jurusan = e.getAttribute('data-id');
 
             Swal.fire({
                 title: "Apakah anda yakin?",
@@ -473,14 +341,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('mahasiswa.destroy', '') }}/" + nim,
+                        url: "{{ route('jurusan.destroy', '') }}/" + kode_jurusan,
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
                             if (response.status == 200) {
-                                $('#mahasiswaTable').DataTable().ajax.reload();
+                                $('#jurusanTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,
@@ -505,7 +373,7 @@
             });
         }
 
-        function mahasiswaDeleteAll() {
+        function jurusanDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
                 text: "Menghapus semua data secara permanen",
@@ -518,14 +386,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('mahasiswa.destroyAll') }}",
+                        url: "{{ route('jurusan.destroyAll') }}",
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
                             if (response.status == 200) {
-                                $('#mahasiswaTable').DataTable().ajax.reload();
+                                $('#jurusanTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,

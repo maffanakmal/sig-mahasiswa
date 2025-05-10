@@ -11,11 +11,11 @@ class Daerah extends Model
 
     protected $table = 'daerah';
 
-    protected $primaryKey = 'daerah_id';
+    protected $primaryKey = 'kode_daerah';
 
-    public $incrementing = true;
+    public $incrementing = false;
 
-    protected $keyType = 'int';
+    protected $keyType = 'integer';
 
     protected $fillable = [
         'daerah_uuid',
@@ -24,4 +24,17 @@ class Daerah extends Model
         'latitude',
         'longitude',
     ];
+
+    public function mahasiswa()
+    {
+        return $this->hasMany(Mahasiswa::class, 'daerah_asal', 'kode_daerah');
+    }
+
+    public function sekolah()
+    {
+        return $this->hasMany(Sekolah::class, 'daerah_sekolah', 'kode_daerah');
+    }
+
+    
 }
+

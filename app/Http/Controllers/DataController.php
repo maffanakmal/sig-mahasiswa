@@ -12,19 +12,28 @@ class DataController extends Controller
 {
     public function mapIndex()
     {
-        $data = [
-            'title' => 'Peta Page',
-            'mahasiswas' => Mahasiswa::select(
-                'mahasiswa_uuid',
-                'daerah_asal',
-            )->get(),
-            'geojson_daerah' => Daerah::select(
-                'daerah_uuid',
-                'file_geojson_daerah',
-            )->get(),
-        ];
+        return view('admin-dashboard.peta', [
+            'title' => 'Peta Mahasiswa',
+        ]);
+    }
 
-        return view('admin-dashboard.peta', $data);
+    public function mapShow()
+    {
+        try {
+            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan'])->get();
+
+            return response()->json([
+                'status' => 200,
+                'mahasiswa' => $mahasiswa,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
     }
 
     public function mapFilter()
@@ -32,13 +41,11 @@ class DataController extends Controller
         try {
             $tahunMasuk = Mahasiswa::distinct()->orderBy('tahun_masuk')->pluck('tahun_masuk');
             $jurusan = Mahasiswa::distinct()->orderBy('jurusan')->pluck('jurusan');
-            $status = Mahasiswa::distinct()->orderBy('status_mahasiswa')->pluck('status_mahasiswa');
 
             return response()->json([
                 'status' => 200,
                 'tahun_masuk' => $tahunMasuk,
                 'jurusan' => $jurusan,
-                'status_mahasiswa' => $status,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -56,32 +63,31 @@ class DataController extends Controller
             $request->validate([
                 'tahun_masuk' => 'nullable|integer',
                 'jurusan' => 'nullable|string|max:255',
-                'status_mahasiswa' => 'nullable|string|max:255',
             ]);
 
-            $query = Mahasiswa::query();
+            $query = DB::table('mahasiswa')
+                ->join('daerah', 'mahasiswa.daerah_asal', '=', 'daerah.nama_daerah')
+                ->select(
+                    'daerah.nama_daerah',
+                    'daerah.latitude',
+                    'daerah.longitude',
+                    DB::raw('count(*) as total')
+                )
+                ->groupBy('daerah.nama_daerah', 'daerah.latitude', 'daerah.longitude', 'mahasiswa.jurusan');
 
             if ($request->tahun_masuk) {
-                $query->where('tahun_masuk', $request->tahun_masuk);
+                $query->where('mahasiswa.tahun_masuk', $request->tahun_masuk);
             }
 
             if ($request->jurusan) {
-                $query->where('jurusan', $request->jurusan);
+                $query->where('mahasiswa.jurusan', $request->jurusan);
             }
 
-            if ($request->status_mahasiswa) {
-                $query->where('status_mahasiswa', $request->status_mahasiswa);
-            }
-
-            // Group by daerah_asal and count how many students per region
-            $mahasiswa = $query->select(
-                'daerah_asal',
-                DB::raw('count(*) as total')
-            )->groupBy('daerah_asal')->get();
+            $mahasiswa = $query->get();
 
             return response()->json([
                 'status' => 200,
-                'mahasiswa' => $mahasiswa,
+                'mahasiswa' => $mahasiswa
             ]);
         } catch (Exception $e) {
             return response()->json([

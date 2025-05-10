@@ -2,42 +2,41 @@
 
 @section('child-content')
     <div class="mb-0">
-        <h3 class="fw-bold fs-4 mb-3">Daftar Mahasiswa</h3>
+        <h3 class="fw-bold fs-4 mb-3">Daftar Sekolah</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <strong>Info!</strong> Untuk mengimpor data mahasiswa, silakan unduh template <a
-                href="{{ asset('template/mahasiswa_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
+            <strong>Info!</strong> Untuk mengimpor data sekolah, silakan unduh template <a
+                href="{{ asset('template/sekolah_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <p class="mb-2">Import Excel Mahasiswa</p>
-        <form action="#" id="importMahasiswaForm" enctype="multipart/form-data"
+        <p class="mb-2">Import Excel Sekolah</p>
+        <form action="#" id="importSekolahForm" enctype="multipart/form-data"
             class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
-                <input type="file" class="form-control" name="import_mahasiswa" id="import_mahasiswa"
+                <input type="file" class="form-control" name="import_sekolah" id="import_sekolah"
                     aria-describedby="btnImport" aria-label="Upload">
                 <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
                     Import</button>
-                <div class="invalid-feedback" id="error-import_mahasiswa"></div>
+                <div class="invalid-feedback" id="error-import_sekolah"></div>
             </div>
         </form>
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="mahasiswaDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="mahasiswaModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="sekolahDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="sekolahModal()"><i class='bx bx-plus'></i> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="mahasiswaTable" class="table table-striped" style="width:100%">
+                <table id="sekolahTable" class="table table-striped" style="width:100%">
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>NIM</th>
-                            <th>Tahun Masuk</th>
-                            <th>Jurusan</th>
-                            <th>Sekolah Asal</th>
-                            <th>Daerah Asal</th>
+                            <th>Nama Sekolah</th>
+                            <th>Daerah Sekolah</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -49,50 +48,53 @@
         </div>
     </div>
 
-    <div class="modal fade" id="mahasiswaModal" tabindex="-1" aria-labelledby="mahasiswaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="sekolahModal" tabindex="-1" aria-labelledby="sekolahModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mahasiswaModalLabel">Tambah data</h1>
+                    <h1 class="modal-title fs-5" id="sekolahModalLabel">Tambah data</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="mahasiswaForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="mapInput" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <form action="#" id="sekolahForm" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="nim_edit" id="nim_edit">
+                        <input type="hidden" name="sekolah_id" id="sekolah_id">
                         <div class="form-group mb-3">
-                            <label for="nim" class="form-label">NIM</label>
-                            <input type="text" class="form-control" id="nim" placeholder="Masukkan NIM"
-                                name="nim" value="{{ old('nim') }}" required>
-                            <div class="invalid-feedback" id="error-nim"></div>
+                            <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
+                            <input type="text" class="form-control" id="nama_sekolah" placeholder="Masukkan Nama Sekolah"
+                                name="nama_sekolah" value="{{ old('nama_sekolah') }}" required>
+                            <div class="invalid-feedback" id="error-nama_sekolah"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
-                            <input type="text" class="form-control" id="tahun_masuk" placeholder="Masukkan Tahun Masuk"
-                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" required>
-                            <div class="invalid-feedback" id="error-tahun_masuk"></div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <select id="jurusan" name="jurusan" class="form-control select-jurusan">
-                                <option value="" selected disabled>Program Studi</option>
+                            <select id="daerah_sekolah" name="daerah_sekolah" class="form-control select-daerah">
+                                <option value="" selected disabled>Daerah Sekolah</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="sekolah_asal" name="sekolah_asal" class="form-control select-sekolah">
-                                <option value="" selected disabled>Sekolah Asal</option>
-                            </select>
+                            <label for="latitude" class="form-label">Latitude</label>
+                            <input type="text" class="form-control" id="latitude" placeholder="Masukkan Latitude"
+                                name="latitude" value="{{ old('latitude') }}" required>
+                            <div class="invalid-feedback" id="error-latitude"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="daerah_asal" name="daerah_asal" class="form-control select-daerah">
-                                <option value="" selected disabled>Daerah Asal</option>
-                            </select>
+                            <label for="longitude" class="form-label">Longitude</label>
+                            <input type="text" class="form-control" id="longitude" placeholder="Masukkan Longitude"
+                                name="longitude" value="{{ old('longitude') }}" required>
+                            <div class="invalid-feedback" id="error-longitude"></div>
                         </div>
+                        <div class="modal-footer px-0">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
+                        </div>
+                    </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
-                </div>
-                </form>
             </div>
         </div>
     </div>
@@ -100,46 +102,97 @@
 
 @section('script')
     <script>
-        let method;
-        let nim = null;
-
+        
         $(document).ready(function() {
-            mahasiswaTable();
-            showSelect();
-            selectDaerahAsal();
-            selectSekolahAsal();
-            selectJurusan();
-        });
+            var defaultCenter = [-2.5, 118]; // Koordinat tengah Indonesia
+            var defaultZoom = 5;
+            var map;
+            var marker;
 
-        function mahasiswaTable() {
-            var table = $('#mahasiswaTable').DataTable({
+            var sekolahModal = document.getElementById('sekolahModal');
+            sekolahModal.addEventListener('shown.bs.modal', function() {
+                if (!map) {
+                    map = L.map('mapInput').setView(defaultCenter, defaultZoom);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(map);
+
+                    // Tambah marker draggable
+                    marker = L.marker(defaultCenter, {
+                        draggable: true
+                    }).addTo(map);
+
+                    // Update input ketika marker digeser
+                    marker.on('dragend', function(e) {
+                        var latlng = marker.getLatLng();
+                        document.getElementById('latitude').value = latlng.lat;
+                        document.getElementById('longitude').value = latlng.lng;
+                    });
+
+                    // Set nilai awal input
+                    document.getElementById('latitude').value = defaultCenter[0];
+                    document.getElementById('longitude').value = defaultCenter[1];
+
+                    // Kontrol tombol reset
+                    var resetControl = L.control({
+                        position: 'topleft'
+                    });
+                    resetControl.onAdd = function(map) {
+                        var div = L.DomUtil.create('div',
+                            'leaflet-bar leaflet-control leaflet-control-custom');
+                        div.innerHTML =
+                            '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
+                        div.onclick = function() {
+                            map.setView(defaultCenter, defaultZoom);
+                            marker.setLatLng(defaultCenter);
+
+                            // Update input juga
+                            document.getElementById('latitude').value = defaultCenter[0];
+                            document.getElementById('longitude').value = defaultCenter[1];
+                        };
+                        return div;
+                    };
+                    resetControl.addTo(map);
+
+                } else {
+                    map.invalidateSize();
+                }
+            });
+            
+            sekolahTable();
+            showSelect();
+            selectDaerahSekolah();
+        });
+        
+        let method;
+        let sekolah_id = null;
+
+        function sekolahTable() {
+            var table = $('#sekolahTable').DataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: '{{ route('mahasiswa.index') }}',
+                ajax: '{{ route('sekolah.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'nim',
-                        name: 'nim',
+                        data: 'nama_sekolah',
+                        name: 'nama_sekolah'
                     },
                     {
-                        data: 'tahun_masuk',
-                        name: 'tahun_masuk',
+                        data: 'daerah_sekolah',
+                        name: 'daerah_sekolah',
                     },
                     {
-                        data: 'jurusan',
-                        name: 'jurusan',
+                        data: 'latitude',
+                        name: 'latitude',
                     },
                     {
-                        data: 'sekolah_asal',
-                        name: 'sekolah_asal',
-                    },
-                    {
-                        data: 'daerah_asal',
-                        name: 'daerah_asal',
+                        data: 'longitude',
+                        name: 'longitude',
                     },
                     {
                         data: 'action',
@@ -149,22 +202,22 @@
             });
         }
 
-        function mahasiswaModal() {
-            $('#mahasiswaForm')[0].reset();
+        function sekolahModal() {
+            $('#sekolahForm')[0].reset();
             method = 'create';
-            nim;
+            sekolah_id;
 
-            $('#mahasiswaModal').modal('show');
-            $('#mahasiswaModalLabel').text('Tambah Data Mahasiswa');
+            $('#sekolahModal').modal('show');
+            $('#sekolahModalLabel').text('Tambah Data Sekolah');
             $('#saveBtn').text('Simpan');
         }
 
-        function selectDaerahAsal() {
-            $('#daerah_asal').select2({
+        function selectDaerahSekolah() {
+            $('#daerah_sekolah').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#daerah_asal').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#daerah_sekolah').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -173,41 +226,12 @@
                         return "Mencari...";
                     }
                 }
-            })
-        }
-
-        function selectSekolahAsal() {
-            $('#sekolah_asal').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#sekolah_asal').parent(), // Ensures proper z-index handling
-                language: {
-                    noResults: function() {
-                        return "Tidak ada hasil yang ditemukan";
-                    },
-                    searching: function() {
-                        return "Mencari...";
-                    }
-                }
-            })
-        }
-
-        function selectJurusan() {
-            $('#jurusan').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#jurusan').parent(), // Ensures proper z-index handling
-                language: {
-                    noResults: function() {
-                        return "Tidak ada hasil yang ditemukan";
-                    },
-                    searching: function() {
-                        return "Mencari...";
-                    }
-                }
-            })
+            }).on('select2:open', function() {
+                // Focus the search field when opened
+                setTimeout(function() {
+                    $('.select2-search__field').focus();
+                }, 0);
+            });
         }
 
         function showSelect() {
@@ -215,29 +239,17 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: '{{ route('mahasiswa.create') }}',
+                url: '{{ route('sekolah.create') }}',
                 type: 'GET',
                 success: function(response) {
                     if (response.status == 200) {
 
                         response.daerah.forEach(function(item) {
-                            $('#daerah_asal').append(
+                            $('#daerah_sekolah').append(
                                 `<option value="${item.kode_daerah}">${item.nama_daerah}</option>`);
                         });
 
-                        response.sekolah.forEach(function(item) {
-                            $('#sekolah_asal').append(
-                                `<option value="${item.sekolah_id}">${item.nama_sekolah}</option>`);
-                        });
-
-                        response.jurusan.forEach(function(item) {
-                            $('#jurusan').append(
-                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
-                        });
-
-                        selectDaerahAsal(); // Initialize select2 after appending options
-                        selectSekolahAsal(); // Initialize select2 after appending options
-                        selectJurusan(); // Initialize select2 after appending options
+                        selectDaerahSekolah();
                     }
                 },
                 error: function(xhr) {
@@ -255,24 +267,24 @@
             });
         }
 
-        $('#mahasiswaForm').on('submit', function(e) {
+        $('#sekolahForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('mahasiswa.store') }}';
+            let url = '{{ route('sekolah.store') }}';
             let httpMethod = 'POST'; // Default method for create
 
             if (method === 'update') {
-                if (!nim) {
+                if (!sekolah_id) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
-                        text: 'Mahasiswa ID tidak ditemukan.',
+                        text: 'Sekolah ID tidak ditemukan.',
                     });
                     return;
                 }
 
-                url = '{{ route('mahasiswa.update', '') }}/' + nim;
+                url = '{{ route('sekolah.update', '') }}/' + sekolah_id;
                 formData.append('_method', 'PUT'); // Laravel expects PUT for updates
                 httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
             }
@@ -288,10 +300,10 @@
                 processData: false,
                 success: function(response) {
                     if (response.status == 200) {
-                        $('#mahasiswaModal').modal('hide');
-                        $('#mahasiswaForm').trigger('reset');
+                        $('#sekolahModal').modal('hide');
+                        $('#sekolahForm').trigger('reset');
 
-                        $('#mahasiswaTable').DataTable().ajax.reload();
+                        $('#sekolahTable').DataTable().ajax.reload();
 
                         Swal.fire({
                             icon: response.icon,
@@ -333,11 +345,11 @@
             });
         });
 
-        $('#importMahasiswaForm').on('submit', function(e) {
+        $('#importSekolahForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('mahasiswa.import') }}';
+            let url = '{{ route('sekolah.import') }}';
             let httpMethod = 'POST'; // Default method for create
 
             $.ajax({
@@ -360,8 +372,8 @@
                             }
                         });
 
-                        $('#importMahasiswaForm')[0].reset();
-                        $('#mahasiswaTable').DataTable().ajax.reload();
+                        $('#importSekolahForm')[0].reset();
+                        $('#sekolahTable').DataTable().ajax.reload();
 
                         // Setelah sedikit delay agar spinner sempat terlihat
                         setTimeout(() => {
@@ -405,24 +417,33 @@
             });
         });
 
-        function editMahasiswa(e) {
-            nim = e.getAttribute('data-id');
+        function editSekolah(e) {
+            sekolah_id = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('mahasiswa.show', '') }}/" + nim,
+                url: "{{ route('sekolah.show', '') }}/" + sekolah_id,
                 type: "GET",
                 success: function(response) {
-                    $('#nim').val(response.mahasiswa.mahasiswa_uuid);
-                    $('#nim').val(response.mahasiswa.nim);
-                    $('#tahun_masuk').val(response.mahasiswa.tahun_masuk);
-                    $('#jurusan').val(response.mahasiswa.jurusan);
-                    $('#sekolah_asal').val(response.mahasiswa.sekolah_asal);
-                    $('#daerah_asal').val(response.mahasiswa.daerah_asal);
-                    $('#status_mahasiswa').val(response.mahasiswa.status_mahasiswa);
+                    $('#sekolah_id').val(response.sekolah.sekolah_uuid);
+                    $('#nama_sekolah').val(response.sekolah.nama_sekolah);
+                    $('#daerah_sekolah').val(response.sekolah.daerah_sekolah);
+                    $('#latitude').val(response.sekolah.latitude);
+                    $('#longitude').val(response.sekolah.longitude);
+
+                    let lat = response.sekolah.latitude;
+                    let lng = response.sekolah.longitude;
+
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    }
+
+                    if (map) {
+                        map.setView([lat, lng], 12); // bisa sesuaikan zoom level
+                    }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
@@ -453,12 +474,12 @@
                 }
             });
 
-            $('#mahasiswaModal').modal('show');
-            $('#mahasiswaModalLabel').text('Edit Data Mahasiswa');
+            $('#sekolahModal').modal('show');
+            $('#sekolahModalLabel').text('Edit Data Sekolah');
             $('#saveBtn').text('Ubah');
         }
 
-        function deleteMahasiswa(e) {
+        function deleteSekolah(e) {
             let nim = e.getAttribute('data-id');
 
             Swal.fire({
@@ -473,14 +494,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('mahasiswa.destroy', '') }}/" + nim,
+                        url: "{{ route('sekolah.destroy', '') }}/" + nim,
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
                             if (response.status == 200) {
-                                $('#mahasiswaTable').DataTable().ajax.reload();
+                                $('#sekolahTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,
@@ -505,7 +526,7 @@
             });
         }
 
-        function mahasiswaDeleteAll() {
+        function sekolahDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
                 text: "Menghapus semua data secara permanen",
@@ -518,14 +539,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('mahasiswa.destroyAll') }}",
+                        url: "{{ route('sekolah.destroyAll') }}",
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
                             if (response.status == 200) {
-                                $('#mahasiswaTable').DataTable().ajax.reload();
+                                $('#sekolahTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,
