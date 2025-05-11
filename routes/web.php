@@ -41,7 +41,6 @@ Route::get('/dashboard/daerah/show/{kode_daerah}', [DaerahController::class, 'sh
 Route::put('/dashboard/daerah/update/{kode_daerah}', [DaerahController::class, 'update'])->name('daerah.update');
 Route::delete('/dashboard/daerah/destroy/{kode_daerah}', [DaerahController::class, 'destroy'])->name('daerah.destroy');
 Route::delete('/dashboard/daerah/destroys', [DaerahController::class, 'destroyAll'])->name('daerah.destroyAll');
-Route::get('/dashboard/daerah/check', [DaerahController::class, 'check'])->name('daerah.check');
 
 Route::get('/dashboard/sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
 Route::get('/dashboard/sekolah/create', [SekolahController::class, 'create'])->name('sekolah.create');
@@ -69,7 +68,7 @@ Route::put('/dashboard/mahasiswa/update/{nim}', [MahasiswaController::class, 'up
 Route::delete('/dashboard/mahasiswa/destroy/{nim}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
 Route::delete('/dashboard/mahasiswa/destroys', [MahasiswaController::class, 'destroyAll'])->name('mahasiswa.destroyAll');
 
-Route::get('/dashboard/grafik/peta', [DataController::class, 'mapIndex'])->name('grafik.peta');
-Route::get('/dashboard/grafik/peta/show', [DataController::class, 'mapShow'])->name('grafik.peta.show');
-Route::get('/dashboard/grafik/peta/filter', [DataController::class, 'mapFilter'])->name('grafik.peta.filter');
-Route::post('/dashboard/grafik/peta/filter/show', [DataController::class, 'mapFilterShow'])->name('grafik.peta.filter.show');
+Route::get('/dashboard/peta/daerah', [DataController::class, 'mapIndex'])->name('dashboard.petaDaerah');
+Route::get('/dashboard/peta/daerah/show', [DataController::class, 'mapShow'])->name('dashboard.petaDaerah.show');
+Route::get('/dashboard/peta/daerah/filter', [DataController::class, 'mapFilter'])->name('dashboard.petaDaerah.filter');
+Route::post('/dashboard/peta/daerah/filter/show', [DataController::class, 'mapFilterShow'])->name('dashboard.petaDaerah.filter.show');

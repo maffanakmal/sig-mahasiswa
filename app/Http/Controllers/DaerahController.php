@@ -199,40 +199,6 @@ class DaerahController extends Controller
         }
     }
 
-    public function check()
-    {
-        try {
-            $daerah = Daerah::where('kode_daerah', '404')->select(
-                'daerah_uuid',
-                'kode_daerah',
-                'nama_daerah',
-                'latitude',
-                'longitude',
-            )->first();
-
-            if (!$daerah) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Tidak Ditemukan",
-                    "message" => "Tidak ada daerah dengan kode 404",
-                    "icon" => "warning"
-                ], 404);
-            }
-
-            return response()->json([
-                "status" => 200,
-                'daerah' => $daerah,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
     /**
      * Show the form for editing the specified resource.
      */

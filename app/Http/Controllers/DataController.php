@@ -20,7 +20,7 @@ class DataController extends Controller
     public function mapShow()
     {
         try {
-            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan'])->get();
+            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah'])->get();
 
             return response()->json([
                 'status' => 200,
@@ -41,6 +41,8 @@ class DataController extends Controller
         try {
             $tahunMasuk = Mahasiswa::distinct()->orderBy('tahun_masuk')->pluck('tahun_masuk');
             $jurusan = Mahasiswa::distinct()->orderBy('jurusan')->pluck('jurusan');
+            $daerah = Mahasiswa::distinct()->orderBy('daerah_asal')->pluck('daerah_asal');
+            $sekolah = Mahasiswa::distinct()->orderBy('sekolah_asal')->pluck('sekolah_asal');
 
             return response()->json([
                 'status' => 200,

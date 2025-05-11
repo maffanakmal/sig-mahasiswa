@@ -16,10 +16,10 @@ class LandingController extends Controller
         ]);
     }
 
-    public function show()
+public function show()
     {
         try {
-            $mahasiswa = Mahasiswa::with('daerah')->get();
+            $mahasiswa = Mahasiswa::with(['daerah', 'sekolah'])->get();
 
             return response()->json([
                 'status' => 200,

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('sekolah_id');
             $table->uuid('sekolah_uuid')->unique();
             $table->string('nama_sekolah');
-            $table->bigInteger('daerah_sekolah')->unsigned();
+            $table->bigInteger('daerah_sekolah')->unsigned()->nullable();
             $table->string('latitude');
             $table->string('longitude');
             $table->timestamps();

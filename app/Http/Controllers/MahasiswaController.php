@@ -29,9 +29,9 @@ class MahasiswaController extends Controller
         ];
 
         if ($request->ajax()) {
-            $mahasiswas = Mahasiswa::join('daerah', 'mahasiswa.daerah_asal', '=', 'daerah.kode_daerah')
-                ->join('sekolah', 'mahasiswa.sekolah_asal', '=', 'sekolah.sekolah_id')
-                ->join('jurusan', 'mahasiswa.jurusan', '=', 'jurusan.kode_jurusan')
+            $mahasiswas = Mahasiswa::leftJoin('daerah', 'mahasiswa.daerah_asal', '=', 'daerah.kode_daerah')
+                ->leftJoin('sekolah', 'mahasiswa.sekolah_asal', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jurusan', 'mahasiswa.jurusan', '=', 'jurusan.kode_jurusan')
                 ->select(
                     'mahasiswa.mahasiswa_uuid',
                     'mahasiswa.nim',

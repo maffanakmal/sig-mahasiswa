@@ -9,12 +9,6 @@
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="notFound">
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Tambahkan data!</strong> Silakan tambahkan daerah baru dengan kode 404.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
         <p class="mb-2">Import Excel Daerah</p>
         <form action="#" id="importDaerahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
             @csrf
@@ -173,7 +167,6 @@
             });
 
             daerahTable();
-            checkNotFound();
         });
 
         let method;
@@ -210,29 +203,6 @@
                         name: 'action'
                     }
                 ]
-            });
-        }
-
-        function checkNotFound() {
-            $.ajax({
-                url: "{{ route('daerah.check') }}",
-                type: "GET",
-                success: function(response) {
-                    if (response.status === 404) {
-                        $('.notFound').show();
-                    } else {
-                        $('.notFound').hide();
-                    }
-                },
-                error: function(xhr) {
-                    let errorResponse = xhr.responseJSON;
-
-                    Swal.fire({
-                        icon: errorResponse?.icon || "error",
-                        title: errorResponse?.title || "Error",
-                        text: errorResponse?.message || "Terjadi kesalahan yang tidak diketahui.",
-                    });
-                }
             });
         }
 
@@ -291,8 +261,6 @@
                             showConfirmButton: false,
                             timer: 1500
                         });
-
-                        checkNotFound();
                     }
                 },
                 error: function(xhr) {
@@ -367,8 +335,6 @@
                                 timer: 1500
                             });
                         }, 1000); // delay 0.8 detik sebelum tampil hasil
-
-                        checkNotFound();
                     }
                 },
                 error: function(xhr) {

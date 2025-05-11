@@ -16,18 +16,15 @@ class SekolahImport implements ToCollection
      */
     public function collection(Collection $collection)
     {
+        $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')->toArray();
+
         $data = [];
         $index = 1;
 
         foreach ($collection as $row) {
             if ($index > 1) {
                 $namaDaerah = $row[1] ?? '';
-                $kodeDaerah = Daerah::where('nama_daerah', $namaDaerah)->value('kode_daerah');
-
-                // Jika tidak ditemukan, beri kode default 404
-                if (!$kodeDaerah) {
-                    $kodeDaerah = '404';
-                }
+                $kodeDaerah = $daerahList[$namaDaerah] ?? null;
 
                 $data[] = [
                     'sekolah_uuid' => Str::uuid(),

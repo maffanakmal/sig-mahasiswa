@@ -12,27 +12,46 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <p class="mb-2">Filter Data</p>
-            <form action="#" id="mapFilterForm" class="d-flex gap-2">
+            <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
                 @csrf
-                <div class="form-group">
-                    <select class="form-select" id="tahun_masuk" name="tahun_masuk">
+
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="tahun_masuk" name="tahun_masuk" class="form-control">
                         <option value="" selected disabled>Tahun Masuk</option>
-
                     </select>
                 </div>
-                <div class="form-group">
-                    <select class="form-select" id="jurusan" name="jurusan">
+
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="jurusan" name="jurusan" class="form-control">
                         <option value="" selected disabled>Jurusan</option>
-
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
-                <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="daerah_asal" name="daerah_asal" class="form-control">
+                        <option value="" selected disabled>Daerah Asal</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="sekolah_asal" name="sekolah_asal" class="form-control">
+                        <option value="" selected disabled>Sekolah Asal</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
+                </div>
+
+                <div>
+                    <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+                </div>
             </form>
         </div>
         <div class="card-body">
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
+                <p>Jumlah mahasiswa yang tampil: <span>0</span></p>
             </div>
         </div>
     </div>
@@ -42,7 +61,7 @@
 @section('script')
     <script>
         // Buat koordinat awal dan zoom default
-        var defaultCenter = [-2.5, 118]; // contoh koordinat
+        var defaultCenter = [-2.3, 121]; // contoh koordinat
         var defaultZoom = 5;
 
         // Inisialisasi peta
@@ -119,7 +138,7 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('grafik.peta.show') }}",
+                url: "{{ route('dashboard.petaDaerah.show') }}",
                 type: "GET",
                 success: function(response) {
                     if (response.status == 200) {
@@ -162,7 +181,7 @@
                             const count = data.count;
                             const latlng = L.latLng(data.latitude, data.longitude);
 
-                            // Perbaikan di sini: langsung mengakses data.jurusan
+                            // langsung mengakses data.jurusan
                             const jurusanList = Object.entries(data.jurusan)
                                 .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
                                 .join('');
@@ -206,7 +225,7 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: '{{ route('grafik.peta.filter') }}',
+                url: '{{ route('dashboard.petaDaerah.filter') }}',
                 type: 'GET',
                 success: function(response) {
                     if (response.status == 200) {
@@ -244,7 +263,7 @@
             e.preventDefault();
 
             const formData = new FormData(this);
-            const url = '{{ route('grafik.peta.filter.show') }}';
+            const url = '{{ route('dashboard.petaDaerah.filter.show') }}';
 
             $.ajax({
                 headers: {

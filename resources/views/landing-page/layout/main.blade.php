@@ -18,7 +18,7 @@
     <nav class="navbar navbar-expand-md bg-white sticky-top shadow-sm p-2" data-bs-theme="dark">
         <div class="container">
             <a class="navbar-brand text-dark fw-bold" href="/">
-                Gisapp
+                USNIGIS
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,16 +36,24 @@
 
     <div class="container min-vh-100 d-flex align-items-center justify-content-center">
         <div class="jumbotron text-center mb-4">
-            <h1 class="display-6 fw-bold">Selamat datang di Gisapp</h1>
+            <h1 class="display-6 fw-bold">Selamat datang di USNIGIS</h1>
             <p class="lead">Sistem Informasi Geografis Mahasiswa Universitas Satya Negara Indonesia</p>
         </div>
     </div>
 
     <div class="container min-vh-100">
         <div class="card shadow-sm">
-            <div class="card-header mb-2 d-flex justify-content-center align-items-center">
-                <h5>Dari mana aja sih mahasiswa USNI berasal?</h5>
+            <div class="card-header mb-2 d-flex justify-content-between align-items-center flex-wrap">
+                <h5 class="mb-0 text-center flex-grow-1">Dari mana aja sih mahasiswa USNI berasal?</h5>
+
+                <form action="#" class="ms-auto">
+                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
+                        onclick="showDaerah()">Daerah</button>
+                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
+                        onclick="showSekolah()">Sekolah</button>
+                </form>
             </div>
+
             <div class="card-body">
                 <div class="container-fluid">
                     <div id="map" class="mb-3"></div>
@@ -78,7 +86,7 @@
     <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
     <script>
         // Buat koordinat awal dan zoom default
-        var defaultCenter = [-2.5, 118]; // contoh koordinat
+        var defaultCenter = [-2.3, 120]; // contoh koordinat
         var defaultZoom = 5;
 
         // Inisialisasi peta
@@ -144,27 +152,93 @@
         // Simpan referensi agar bisa dihapus nanti
         window.legendControl = legend;
 
-        $(document).ready(function() {
-            showAllMahasiswa();
+        // Koordinat Kampus USNI
+        const usniALatLng = L.latLng(-6.241583056276483, 106.78289180186107);
+
+        // Custom icon (gunakan jika ada ikon khusus)
+        const usniIcon = L.icon({
+            iconUrl: '{{ asset('img/logo-usni.png') }}', // Ganti path ke ikonmu
+            iconSize: [60, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -35]
         });
 
-        function showAllMahasiswa() {
+        // Tambahkan marker dengan ikon (atau hapus opsi icon jika tidak pakai)
+        const usniAMarker = L.marker(usniALatLng, {
+                icon: usniIcon // jika tidak pakai custom icon, hapus baris ini
+            })
+            .bindPopup('<strong>Kampus USNI</strong><br>Jl. Rawamangun Muka, Jakarta')
+            .addTo(map);
+
+        // Tampilkan popup saat hover
+        usniMarker.on('mouseover', function() {
+            this.openPopup();
+        });
+
+        // Tutup popup saat mouse keluar
+        usniMarker.on('mouseout', function() {
+            this.closePopup();
+        });
+
+
+        function clearCircleMarkers() {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.CircleMarker) {
+                    map.removeLayer(layer);
+                }
+            });
+        }
+
+        function renderMarkers(groupedData) {
+            Object.keys(groupedData).forEach(label => {
+                const data = groupedData[label];
+                const count = data.count;
+                const latlng = L.latLng(data.latitude, data.longitude);
+
+                const jurusanList = Object.entries(data.jurusan)
+                    .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
+                    .join('');
+
+                L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" : count > 10 ? "#004225" :
+                            count > 5 ? "#522546" : "#FF9F00",
+                        color: "white",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    })
+                    .bindPopup(`
+                <strong>${label}</strong><br>
+                Jumlah Mahasiswa: ${count}<br>
+                Jurusan:<br>
+                <ul style="margin: 0; padding-left: 18px;">
+                    ${jurusanList}
+                </ul>
+            `)
+                    .on('mouseover', function() {
+                        this.openPopup();
+                    })
+                    .on('mouseout', function() {
+                        this.closePopup();
+                    })
+                    .addTo(map);
+            });
+        }
+
+        function showDaerah() {
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('grafik.peta.show') }}",
+                url: "{{ route('dashboard.petaDaerah.show') }}",
                 type: "GET",
                 success: function(response) {
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
                         // Hapus marker lama
-                        map.eachLayer(function(layer) {
-                            if (layer instanceof L.CircleMarker) {
-                                map.removeLayer(layer);
-                            }
-                        });
+                        clearCircleMarkers();
 
                         const groupedData = {};
 
@@ -173,6 +247,7 @@
                             const city = data.daerah.nama_daerah;
                             const lat = data.daerah.latitude;
                             const lng = data.daerah.longitude;
+
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
@@ -182,7 +257,7 @@
                                 };
                             }
                             groupedData[city].count++;
-                            // Mengakses nama jurusan dengan benar
+
                             const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
                                 'Tidak diketahui';
                             if (!groupedData[city].jurusan[jurusanName]) {
@@ -191,45 +266,60 @@
                             groupedData[city].jurusan[jurusanName]++;
                         });
 
-                        Object.keys(groupedData).forEach(city => {
-                            const data = groupedData[city];
-                            const count = data.count;
-                            const latlng = L.latLng(data.latitude, data.longitude);
-
-                            // Perbaikan di sini: langsung mengakses data.jurusan
-                            const jurusanList = Object.entries(data.jurusan)
-                                .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
-                                .join('');
-
-                            L.circleMarker(latlng, {
-                                    radius: 8,
-                                    fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" :
-                                        count > 10 ? "#004225" : count > 5 ? "#522546" : "#FF9F00",
-                                    color: "white",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 0.7
-                                })
-                                .bindPopup(`
-                    <strong>${city}</strong><br>
-                    Jumlah Mahasiswa: ${count}<br>
-                    Jurusan:<br>
-                    <ul style="margin: 0; padding-left: 18px;">
-                        ${jurusanList}
-                    </ul>
-                `)
-                                .on('mouseover', function() {
-                                    this.openPopup();
-                                })
-                                .on('mouseout', function() {
-                                    this.closePopup();
-                                })
-                                .addTo(map);
-                        });
+                        renderMarkers(groupedData);
                     }
                 },
                 error: function(xhr) {
-                    console.error("Gagal memuat data:", xhr);
+                    console.error("Gagal memuat data daerah:", xhr);
+                }
+            });
+        }
+
+        function showSekolah() {
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{ route('dashboard.petaDaerah.show') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.status == 200) {
+                        const mahasiswa = response.mahasiswa;
+
+                        // Hapus marker lama
+                        clearCircleMarkers();
+
+                        const groupedData = {};
+
+                        mahasiswa.forEach(data => {
+                            if (!data.sekolah) return;
+                            const sekolah = data.sekolah.nama_sekolah;
+                            const lat = data.sekolah.latitude;
+                            const lng = data.sekolah.longitude;
+
+                            if (!groupedData[sekolah]) {
+                                groupedData[sekolah] = {
+                                    count: 0,
+                                    jurusan: {},
+                                    latitude: lat,
+                                    longitude: lng
+                                };
+                            }
+                            groupedData[sekolah].count++;
+
+                            const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
+                                'Tidak diketahui';
+                            if (!groupedData[sekolah].jurusan[jurusanName]) {
+                                groupedData[sekolah].jurusan[jurusanName] = 0;
+                            }
+                            groupedData[sekolah].jurusan[jurusanName]++;
+                        });
+
+                        renderMarkers(groupedData);
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Gagal memuat data sekolah:", xhr);
                 }
             });
         }

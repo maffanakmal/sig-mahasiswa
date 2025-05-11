@@ -26,7 +26,7 @@ class SekolahController extends Controller
         ];
 
         if ($request->ajax()) {
-            $sekolahs = Sekolah::join('daerah', 'sekolah.daerah_sekolah', '=', 'daerah.kode_daerah')
+            $sekolahs = Sekolah::leftjoin('daerah', 'sekolah.daerah_sekolah', '=', 'daerah.kode_daerah')
                 ->select(
                     'sekolah.sekolah_uuid',
                     'sekolah.nama_sekolah',

@@ -22,7 +22,7 @@
         <aside id="dashboard-sidebar">
             <div class="d-flex justify-content-between p-3">
                 <div class="sidebar-logo poppins-bold">
-                    <a href="#">GISAPP</a>
+                    <a href="#">USNIGIS</a>
                 </div>
                 <button class="toggle-btn border-0" type="button">
                     <i class="bx bx-menu"></i>
@@ -60,7 +60,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="{{ route('grafik.peta') }}" class="sidebar-link">
+                    <a href="{{ route('dashboard.petaDaerah') }}" class="sidebar-link">
                         <i class='bx bx-map-alt'></i>
                         <span>Peta</span>
                     </a>
@@ -117,24 +117,20 @@
                                     {{-- {{ session('loggedInUser')['nip'] ?? 'User' }} --}}
                                 </span>
                             </div>
-                            <a href="#" data-bs-toggle="dropdown" type="button" aria-expanded="false" class="nav-icon pe-md-0">
-                                <img src="#" 
+                            <a href="#" class="nav-icon pe-md-0">
+                                <img src="{{ asset('img/admin.png') }}" 
                                      alt="Profile" 
-                                     class="avatar img-fluid rounded-circle dropdown-toggle" 
+                                     class="avatar img-fluid rounded-circle" 
                                      width="40" 
                                      id="navbar-avatar" />
                             </a>                            
-                            {{-- <div class="caret-icon mx-1">
+                            <div class="caret-icon mx-1" data-bs-toggle="dropdown" type="button" aria-expanded="false">
                                 <i class="bx bx-caret-down"></i>
-                            </div> --}}
+                            </div>
                             <div class="dropdown-menu dropdown-menu-end rounded-1 border-0 shadow mt-3">
                                 <a href="" class="dropdown-item">
-                                    <i class="bx bx-bell"></i>
-                                    <span>Notification</span>
-                                </a>
-                                <a href="" class="dropdown-item">
                                     <i class="bx bx-cog"></i>
-                                    <span>Settings</span>
+                                    <span>Setting</span>
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form action="{{ route('landing.index') }}" method="POST" id="logout-form">
