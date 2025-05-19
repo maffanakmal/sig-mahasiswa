@@ -22,9 +22,7 @@ class JurusanImport implements ToCollection
                 $data[] = [
                     'jurusan_uuid' => Str::uuid(),
                     'kode_jurusan' => $row[0] ?? '',
-                    'nama_jurusan' => $row[1] ?? '',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'nama_jurusan' => $row[1] ?? ''
                 ];
             }
             $index++;

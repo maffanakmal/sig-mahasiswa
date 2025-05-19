@@ -1,53 +1,38 @@
 @extends('admin-dashboard.layout.main')
 
 @section('child-content')
-    <div class="mb-0 d-flex justify-content-between align-items-center">
-        <h3 class="fw-bold fs-4 mb-3">Peta Sebaran Mahasiswa</h3>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h3 class="fw-bold fs-4">Peta Persebaran Mahasiswa Berdasarkan Daerah</h3>
     </div>
     <div class="card shadow-sm">
         <div class="card-header mb-2">
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">
-                <strong>Perhatian!</strong> Nama daerah <strong id="cityValidate"></strong> tidak ditemukan di GeoJSON
-                <a href="{{ route('mahasiswa.index') }}" class="alert-link">Klik disini</a> untuk menambah data daerah.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                @if (session('loggedInUser')['role'] === 'Warek 3')
+                <p class="mb-2">Filter Data</p>
+                <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
+                    @csrf
+
+                    <div class="form-group" style="min-width: 180px;">
+                        <select id="tahun_masuk" name="tahun_masuk" class="form-control">
+                            <option value="" selected disabled>Tahun Masuk</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="min-width: 180px;">
+                        <select id="jurusan" name="jurusan" class="form-control">
+                            <option value="" selected disabled>Jurusan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
+                    </div>
+
+                    <div>
+                        <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+                    </div>
+                </form>
+                @endif
             </div>
-            <p class="mb-2">Filter Data</p>
-            <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
-                @csrf
-
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="tahun_masuk" name="tahun_masuk" class="form-control">
-                        <option value="" selected disabled>Tahun Masuk</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="jurusan" name="jurusan" class="form-control">
-                        <option value="" selected disabled>Jurusan</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="daerah_asal" name="daerah_asal" class="form-control">
-                        <option value="" selected disabled>Daerah Asal</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="sekolah_asal" name="sekolah_asal" class="form-control">
-                        <option value="" selected disabled>Sekolah Asal</option>
-                    </select>
-                </div>
-
-                <div>
-                    <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
-                </div>
-
-                <div>
-                    <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
-                </div>
-            </form>
-        </div>
         <div class="card-body">
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
@@ -127,37 +112,118 @@
         // Simpan referensi agar bisa dihapus nanti
         window.legendControl = legend;
 
+        // Koordinat Kampus USNI
+        const usniALatLng = L.latLng(-6.241724, 106.783435);
+        const usniBLatLng = L.latLng(-6.2738302, 107.0200002);
 
-        $(document).ready(function() {
-            showAllMahasiswa();
-            mapFilter();
+        // Custom icon (pakai logo kampus)
+        const usniIcon = L.icon({
+            iconUrl: '{{ asset('img/icon-usni.png') }}',
+            iconSize: [50, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -35]
         });
 
-        function showAllMahasiswa() {
+        // Marker untuk Kampus USNI A
+        const usniAMarker = L.marker(usniALatLng, {
+                icon: usniIcon
+            })
+            .bindPopup(
+                '<strong>Kampus USNI A</strong><br>Jl Arteri Pondok Indah No.11 Kebayoran Lama, Kota Jakarta Selatan')
+            .addTo(map);
+        usniAMarker.on('mouseover', function() {
+            this.openPopup();
+        });
+        usniAMarker.on('mouseout', function() {
+            this.closePopup();
+        });
+
+        // Marker untuk Kampus USNI B
+        const usniBMarker = L.marker(usniBLatLng, {
+                icon: usniIcon
+            })
+            .bindPopup('<strong>Kampus USNI B</strong><br>Jl. H. Jampang No.91 Jatimulya, Kabupaten Bekasi')
+            .addTo(map);
+        usniBMarker.on('mouseover', function() {
+            this.openPopup();
+        });
+        usniBMarker.on('mouseout', function() {
+            this.closePopup();
+        });
+
+
+        $(document).ready(function() {
+            mapFilter();
+            showDaerah()
+        });
+
+        function clearCircleMarkers() {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.CircleMarker) {
+                    map.removeLayer(layer);
+                }
+            });
+        }
+
+        function renderMarkers(groupedData) {
+            Object.keys(groupedData).forEach(label => {
+                const data = groupedData[label];
+                const count = data.count;
+                const latlng = L.latLng(data.latitude, data.longitude);
+
+                const jurusanList = Object.entries(data.jurusan)
+                    .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
+                    .join('');
+
+                L.circleMarker(latlng, {
+                        radius: 10,
+                        fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" : count > 10 ? "#004225" :
+                            count > 5 ? "#522546" : "#FF9F00",
+                        color: "white",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    })
+                    .bindPopup(`
+                <strong>${label}</strong><br>
+                Jumlah Mahasiswa: ${count}<br>
+                Jurusan:<br>
+                <ul style="margin: 0; padding-left: 18px;">
+                    ${jurusanList}
+                </ul>
+            `)
+                    .on('mouseover', function() {
+                        this.openPopup();
+                    })
+                    .on('mouseout', function() {
+                        this.closePopup();
+                    })
+                    .addTo(map);
+            });
+        }
+
+        function showDaerah() {
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('dashboard.petaDaerah.show') }}",
+                url: "{{ route('dashboard.peta.show') }}",
                 type: "GET",
                 success: function(response) {
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
                         // Hapus marker lama
-                        map.eachLayer(function(layer) {
-                            if (layer instanceof L.CircleMarker) {
-                                map.removeLayer(layer);
-                            }
-                        });
+                        clearCircleMarkers();
 
                         const groupedData = {};
 
                         mahasiswa.forEach(data => {
                             if (!data.daerah) return;
                             const city = data.daerah.nama_daerah;
-                            const lat = data.daerah.latitude;
-                            const lng = data.daerah.longitude;
+                            const lat = data.daerah.latitude_daerah;
+                            const lng = data.daerah.longitude_daerah;
+
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
@@ -167,7 +233,7 @@
                                 };
                             }
                             groupedData[city].count++;
-                            // Mengakses nama jurusan dengan benar
+
                             const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
                                 'Tidak diketahui';
                             if (!groupedData[city].jurusan[jurusanName]) {
@@ -176,56 +242,21 @@
                             groupedData[city].jurusan[jurusanName]++;
                         });
 
-                        Object.keys(groupedData).forEach(city => {
-                            const data = groupedData[city];
-                            const count = data.count;
-                            const latlng = L.latLng(data.latitude, data.longitude);
-
-                            // langsung mengakses data.jurusan
-                            const jurusanList = Object.entries(data.jurusan)
-                                .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
-                                .join('');
-
-                            L.circleMarker(latlng, {
-                                    radius: 8,
-                                    fillColor: count > 20 ? "#800026" : count > 15 ? "#003366" :
-                                        count > 10 ? "#004225" : count > 5 ? "#522546" : "#FF9F00",
-                                    color: "white",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 0.7
-                                })
-                                .bindPopup(`
-                    <strong>${city}</strong><br>
-                    Jumlah Mahasiswa: ${count}<br>
-                    Jurusan:<br>
-                    <ul style="margin: 0; padding-left: 18px;">
-                        ${jurusanList}
-                    </ul>
-                `)
-                                .on('mouseover', function() {
-                                    this.openPopup();
-                                })
-                                .on('mouseout', function() {
-                                    this.closePopup();
-                                })
-                                .addTo(map);
-                        });
+                        renderMarkers(groupedData);
                     }
                 },
                 error: function(xhr) {
-                    console.error("Gagal memuat data:", xhr);
+                    console.error("Gagal memuat data daerah:", xhr);
                 }
             });
         }
-
 
         function mapFilter() {
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: '{{ route('dashboard.petaDaerah.filter') }}',
+                url: '{{ route('dashboard.peta.filter') }}',
                 type: 'GET',
                 success: function(response) {
                     if (response.status == 200) {
@@ -240,8 +271,11 @@
 
                         // Populate Jurusan
                         response.jurusan.forEach(function(item) {
-                            $('#jurusan').append(`<option value="${item}">${item}</option>`);
+                            $('#jurusan').append(
+                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`
+                            );
                         });
+
                     }
                 },
                 error: function(xhr) {
@@ -263,7 +297,7 @@
             e.preventDefault();
 
             const formData = new FormData(this);
-            const url = '{{ route('dashboard.petaDaerah.filter.show') }}';
+            const url = '{{ route('dashboard.peta.filter.show.daerah') }}';
 
             $.ajax({
                 headers: {
@@ -278,60 +312,37 @@
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
+                        // Hapus marker lama
+                        clearCircleMarkers();
+
                         const groupedData = {};
 
                         mahasiswa.forEach(data => {
-                            const daerah = data.daerah;
-                            if (!daerah) return; // skip jika tidak ada relasi
-
-                            const city = daerah.nama_daerah;
+                            if (!data.nama_daerah) return;
+                            const city = data.nama_daerah;
+                            const lat = data.latitude;
+                            const lng = data.longitude;
 
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
-                                    latitude: daerah.latitude,
-                                    longitude: daerah.longitude
+                                    jurusan: {},
+                                    latitude: lat,
+                                    longitude: lng
                                 };
                             }
+                            groupedData[city].count += data
+                                .total; // karena sudah grouped di SQL
 
-                            // Jika ada data.total (hasil query agregat), pakai itu, jika tidak tambah 1
-                            groupedData[city].count += data.total || 1;
-                        });
-
-                        // Hapus marker lama
-                        map.eachLayer(function(layer) {
-                            if (layer instanceof L.CircleMarker) {
-                                map.removeLayer(layer);
+                            const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
+                            if (!groupedData[city].jurusan[jurusanName]) {
+                                groupedData[city].jurusan[jurusanName] = 0;
                             }
+                            groupedData[city].jurusan[jurusanName] += data.total;
                         });
 
-                        // Tambahkan marker baru
-                        Object.keys(groupedData).forEach(city => {
-                            const data = groupedData[city];
-                            const latlng = L.latLng(data.latitude, data.longitude);
-                            const count = data.count;
 
-                            L.circleMarker(latlng, {
-                                    radius: 8,
-                                    fillColor: count > 20 ? "#800026" : count > 15 ?
-                                        "#BD0026" : count > 10 ? "#E31A1C" : count > 5 ?
-                                        "#FC4E2A" : "#FD8D3C",
-                                    color: "white",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 0.7
-                                })
-                                .bindPopup(
-                                    `<strong>${city}</strong><br>Jumlah Mahasiswa: ${count}`
-                                )
-                                .on('mouseover', function() {
-                                    this.openPopup();
-                                })
-                                .on('mouseout', function() {
-                                    this.closePopup();
-                                })
-                                .addTo(map);
-                        });
+                        renderMarkers(groupedData);
                     }
                 },
                 error: function(xhr) {
@@ -340,12 +351,10 @@
             });
         });
 
-
-
         $('#resetFilterBtn').on('click', function() {
             $('#mapFilterForm')[0].reset();
 
-            showAllMahasiswa();
+            showDaerah();
         });
     </script>
 @endsection

@@ -16,7 +16,7 @@
         <div class="container d-flex justify-content-center align-items-center min-vh-100">
             <div class="row border rounded-1 p-3 m-2 bg-white shadow box-area">
                 <div class="col-md-6 rounded-1 d-flex justify-content-center align-items-center flex-column left-box p-3"
-                    style="background-image: url({{ asset('img/profile-fau.jpg') }}); 
+                    style="background-image: url({{ asset('img/logo-usni.png') }}); 
                             background-size: cover; 
                             background-position: center; 
                             background-repeat: no-repeat;">
@@ -35,25 +35,6 @@
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.querySelectorAll(".toggle-password").forEach(toggle => {
-            toggle.addEventListener("click", function() {
-                const targetId = this.getAttribute("data-target");
-                const passwordField = document.getElementById(targetId);
-                const icon = this.querySelector("i");
-
-                if (passwordField.type === "password") {
-                    passwordField.type = "text";
-                    icon.classList.remove("bx-show");
-                    icon.classList.add("bx-low-vision");
-                } else {
-                    passwordField.type = "password";
-                    icon.classList.remove("bx-low-vision");
-                    icon.classList.add("bx-show");
-                }
-            });
-        });
-    </script>
     @yield('script');
 </body>
 

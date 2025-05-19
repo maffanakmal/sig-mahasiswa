@@ -14,14 +14,12 @@ return new class extends Migration
         Schema::create('mahasiswa', function (Blueprint $table) {
             $table->bigInteger('nim')->unsigned()->primary(); // Primary Key
             $table->uuid('mahasiswa_uuid')->unique();
-            $table->string('tahun_masuk');
+            $table->smallInteger('tahun_masuk');
         
             // Foreign keys, sekarang bisa NULL
-            $table->bigInteger('jurusan')->unsigned()->nullable();
+            $table->integer('jurusan')->unsigned()->nullable();
             $table->bigInteger('sekolah_asal')->unsigned()->nullable();
             $table->bigInteger('daerah_asal')->unsigned()->nullable();
-        
-            $table->timestamps();
         
             // Foreign key constraints
             $table->foreign('jurusan')->references('kode_jurusan')->on('jurusan')->onDelete('cascade');

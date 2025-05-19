@@ -10,8 +10,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <p class="mb-2">Import Excel Sekolah</p>
-        <form action="#" id="importSekolahForm" enctype="multipart/form-data"
-            class="d-flex align-items-end gap-2 mb-3">
+        <form action="#" id="importSekolahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_sekolah" id="import_sekolah"
@@ -62,36 +61,41 @@
                         </div>
                         <div class="col-md-4">
                             <form action="#" id="sekolahForm" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="sekolah_id" id="sekolah_id">
-                        <div class="form-group mb-3">
-                            <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
-                            <input type="text" class="form-control" id="nama_sekolah" placeholder="Masukkan Nama Sekolah"
-                                name="nama_sekolah" value="{{ old('nama_sekolah') }}" required>
-                            <div class="invalid-feedback" id="error-nama_sekolah"></div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <select id="daerah_sekolah" name="daerah_sekolah" class="form-control select-daerah">
-                                <option value="" selected disabled>Daerah Sekolah</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="latitude" class="form-label">Latitude</label>
-                            <input type="text" class="form-control" id="latitude" placeholder="Masukkan Latitude"
-                                name="latitude" value="{{ old('latitude') }}" required>
-                            <div class="invalid-feedback" id="error-latitude"></div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="longitude" class="form-label">Longitude</label>
-                            <input type="text" class="form-control" id="longitude" placeholder="Masukkan Longitude"
-                                name="longitude" value="{{ old('longitude') }}" required>
-                            <div class="invalid-feedback" id="error-longitude"></div>
-                        </div>
-                        <div class="modal-footer px-0">
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
-                        </div>
-                    </form>
+                                @csrf
+                                <input type="hidden" name="sekolah_id" id="sekolah_id">
+                                <div class="form-group mb-3">
+                                    <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
+                                    <input type="text" class="form-control" id="nama_sekolah"
+                                        placeholder="Masukkan Nama Sekolah" name="nama_sekolah"
+                                        value="{{ old('nama_sekolah') }}" required>
+                                    <div class="invalid-feedback" id="error-nama_sekolah"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="daerah_sekolah" class="form-label">Daerah Sekolah</label>
+                                    <select id="daerah_sekolah" name="daerah_sekolah" class="form-control select-daerah">
+                                        <option value="" selected disabled>Pilih Daerah Sekolah</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="latitude_sekolah" class="form-label">Latitude</label>
+                                    <input type="text" class="form-control" id="latitude_sekolah"
+                                        placeholder="Masukkan Latitude" name="latitude_sekolah" value="{{ old('latitude_sekolah') }}"
+                                        required>
+                                    <div class="invalid-feedback" id="error-latitude_sekolah"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="longitude_sekolah" class="form-label">Longitude</label>
+                                    <input type="text" class="form-control" id="longitude_sekolah"
+                                        placeholder="Masukkan Longitude" name="longitude_sekolah" value="{{ old('longitude_sekolah') }}"
+                                        required>
+                                    <div class="invalid-feedback" id="error-longitude_sekolah"></div>
+                                </div>
+                                <div class="modal-footer px-0">
+                                    <button type="button" class="btn btn-secondary btn-sm"
+                                        data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -102,7 +106,6 @@
 
 @section('script')
     <script>
-        
         $(document).ready(function() {
             var defaultCenter = [-2.5, 118]; // Koordinat tengah Indonesia
             var defaultZoom = 5;
@@ -126,13 +129,13 @@
                     // Update input ketika marker digeser
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
-                        document.getElementById('latitude').value = latlng.lat;
-                        document.getElementById('longitude').value = latlng.lng;
+                        document.getElementById('latitude_sekolah').value = latlng.lat;
+                        document.getElementById('longitude_sekolah').value = latlng.lng;
                     });
 
                     // Set nilai awal input
-                    document.getElementById('latitude').value = defaultCenter[0];
-                    document.getElementById('longitude').value = defaultCenter[1];
+                    document.getElementById('latitude_sekolah').value = defaultCenter[0];
+                    document.getElementById('longitude_sekolah').value = defaultCenter[1];
 
                     // Kontrol tombol reset
                     var resetControl = L.control({
@@ -148,8 +151,8 @@
                             marker.setLatLng(defaultCenter);
 
                             // Update input juga
-                            document.getElementById('latitude').value = defaultCenter[0];
-                            document.getElementById('longitude').value = defaultCenter[1];
+                            document.getElementById('latitude_sekolah').value = defaultCenter[0];
+                            document.getElementById('longitude_sekolah').value = defaultCenter[1];
                         };
                         return div;
                     };
@@ -159,12 +162,12 @@
                     map.invalidateSize();
                 }
             });
-            
+
             sekolahTable();
             showSelect();
             selectDaerahSekolah();
         });
-        
+
         let method;
         let sekolah_id = null;
 
@@ -187,12 +190,12 @@
                         name: 'daerah_sekolah',
                     },
                     {
-                        data: 'latitude',
-                        name: 'latitude',
+                        data: 'latitude_sekolah',
+                        name: 'latitude_sekolah',
                     },
                     {
-                        data: 'longitude',
-                        name: 'longitude',
+                        data: 'longitude_sekolah',
+                        name: 'longitude_sekolah',
                     },
                     {
                         data: 'action',
@@ -431,11 +434,11 @@
                     $('#sekolah_id').val(response.sekolah.sekolah_uuid);
                     $('#nama_sekolah').val(response.sekolah.nama_sekolah);
                     $('#daerah_sekolah').val(response.sekolah.daerah_sekolah);
-                    $('#latitude').val(response.sekolah.latitude);
-                    $('#longitude').val(response.sekolah.longitude);
+                    $('#latitude_sekolah').val(response.sekolah.latitude_sekolah);
+                    $('#longitude_sekolah').val(response.sekolah.longitude_sekolah);
 
-                    let lat = response.sekolah.latitude;
-                    let lng = response.sekolah.longitude;
+                    let lat = response.sekolah.latitude_sekolah;
+                    let lng = response.sekolah.longitude_sekolah;
 
                     if (marker) {
                         marker.setLatLng([lat, lng]);
@@ -545,7 +548,7 @@
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
-                            if (response.status == 200) {
+                            if (response.status === 200) {
                                 $('#sekolahTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
@@ -554,10 +557,17 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 });
+                            } else {
+                                // Untuk response custom selain 200 (misal 404 dari backend)
+                                Swal.fire({
+                                    icon: response.icon || "info",
+                                    title: response.title || "Info",
+                                    text: response.message || "Tidak ada data untuk dihapus.",
+                                });
                             }
                         },
                         error: function(xhr) {
-                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                            let errorResponse = xhr.responseJSON || {};
 
                             Swal.fire({
                                 icon: errorResponse.icon || "error",

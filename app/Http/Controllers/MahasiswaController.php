@@ -120,10 +120,8 @@ class MahasiswaController extends Controller
                 tahun_masuk, 
                 jurusan, 
                 sekolah_asal, 
-                daerah_asal, 
-                created_at, 
-                updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                daerah_asal
+            ) VALUES (?, ?, ?, ?, ?, ?)
         ", [
                 $mahasiswa_uuid,
                 $validatedData['nim'],
@@ -240,7 +238,7 @@ class MahasiswaController extends Controller
             $validatedData = $request->validate(
                 [
                     'nim'              => 'required|string|max:100|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
-                    'tahun_masuk'      => 'required|string|max:4',
+                    'tahun_masuk'      => 'required|numeric|max:4',
                     'jurusan'          => 'required|string|exists:jurusan,kode_jurusan',
                     'sekolah_asal'     => 'required|string|exists:sekolah,sekolah_id',
                     'daerah_asal'      => 'required|string|exists:daerah,kode_daerah',
@@ -259,8 +257,7 @@ class MahasiswaController extends Controller
                 tahun_masuk = ?, 
                 jurusan = ?, 
                 sekolah_asal = ?, 
-                daerah_asal = ?, 
-                updated_at = NOW()
+                daerah_asal = ?
             WHERE mahasiswa_uuid = ?
         ", [
                 $validatedData['nim'],
@@ -323,6 +320,17 @@ class MahasiswaController extends Controller
     public function destroyAll()
     {
         try {
+            $count = DB::table('mahasiswa')->count();
+
+            if ($count === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Tidak Ada Data",
+                    "message" => "Tidak ada data mahasiswa yang dapat dihapus.",
+                    "icon" => "warning"
+                ]);
+            }
+
             DB::table('mahasiswa')->delete();
 
             return response()->json([

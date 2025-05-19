@@ -1,92 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('admin-dashboard.layout.main')
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title }}</title>
-    <meta name="csrf_token" content="{{ csrf_token() }}" />
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
-    <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
-    <script src="{{ asset('js/leaflet.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/maps.css') }}" />
-</head>
-
-<body>
-    <nav class="navbar navbar-expand-md bg-white sticky-top shadow-sm p-2" data-bs-theme="dark">
-        <div class="container">
-            <a class="navbar-brand text-dark fw-bold" href="/">
-                USNIGIS
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                    <li class="nav-item me-2 mb-2 mb-lg-0">
-                        <a class="btn btn-sm btn-warning rounded-5 px-4" href="{{ route('auth.login') }}">Masuk</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container min-vh-100 d-flex align-items-center justify-content-center">
-        <div class="jumbotron text-center mb-4">
-            <h1 class="display-6 fw-bold">Selamat datang di USNIGIS</h1>
-            <p class="lead">Sistem Informasi Geografis Mahasiswa Universitas Satya Negara Indonesia</p>
-        </div>
+@section('child-content')
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h3 class="fw-bold fs-4">Peta Persebaran Mahasiswa Berdasarkan Sekolah</h3>
     </div>
+    <div class="card shadow-sm">
+        <div class="card-header mb-2">
+            @if (session('loggedInUser')['role'] === 'Warek 3')
+            <p class="mb-2">Filter Data</p>
+            <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
+                @csrf
 
-    <div class="container min-vh-100">
-        <div class="card shadow-sm">
-            <div class="card-header mb-2 d-flex justify-content-between align-items-center flex-wrap">
-                <h5 class="mb-0 text-center flex-grow-1">Dari mana aja sih mahasiswa USNI berasal?</h5>
-
-                <form action="#" class="ms-auto">
-                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
-                        onclick="showDaerah()">Daerah</button>
-                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
-                        onclick="showSekolah()">Sekolah</button>
-                </form>
-            </div>
-
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div id="map" class="mb-3"></div>
-
-                    <p class="mahasiswa-alert text-danger mb-0" style="display: none;">
-                        Data mahasiswa belum dimasukkan.
-                    </p>
-
-                    <p class="daerah-alert text-danger mb-0" style="display: none;">
-                        Data daerah belum dimasukkan.
-                    </p>
-                    <small>Data daerah berasal dari Badan Pusat Statistik <a
-                            href="https://sig.bps.go.id/">www.sig.bps.go.id</a></small>
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="tahun_masuk" name="tahun_masuk" class="form-control">
+                        <option value="" selected disabled>Tahun Masuk</option>
+                    </select>
                 </div>
+
+                <div class="form-group" style="min-width: 180px;">
+                    <select id="jurusan" name="jurusan" class="form-control">
+                        <option value="" selected disabled>Jurusan</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
+                </div>
+
+                <div>
+                    <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+                </div>
+            </form>
+            @endif
+        </div>
+        <div class="card-body">
+            <div class="container-fluid">
+                <div id="map" class="mb-3"></div>
+                <p>Jumlah mahasiswa yang tampil: <span>0</span></p>
             </div>
         </div>
     </div>
-
-    <div class="container">
-        <footer class="d-flex justify-content-center align-items-center py-3">
-            <span class="mb-3 mb-md-0 text-dark">&copy; <span id="year"></span> akmal. </span>
-        </footer>
     </div>
+@endsection
 
-    <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+@section('script')
     <script>
         // Buat koordinat awal dan zoom default
-        var defaultCenter = [-2.3, 120]; // contoh koordinat
+        var defaultCenter = [-2.3, 121]; // contoh koordinat
         var defaultZoom = 5;
 
         // Inisialisasi peta
@@ -191,6 +151,12 @@
             this.closePopup();
         });
 
+
+        $(document).ready(function() {
+            mapFilter();
+            showSekolah();
+        });
+
         function clearCircleMarkers() {
             map.eachLayer(function(layer) {
                 if (layer instanceof L.CircleMarker) {
@@ -236,61 +202,12 @@
             });
         }
 
-        function showDaerah() {
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: "{{ route('landing.show') }}",
-                type: "GET",
-                success: function(response) {
-                    if (response.status == 200) {
-                        const mahasiswa = response.mahasiswa;
-
-                        // Hapus marker lama
-                        clearCircleMarkers();
-
-                        const groupedData = {};
-
-                        mahasiswa.forEach(data => {
-                            if (!data.daerah) return;
-                            const city = data.daerah.nama_daerah;
-                            const lat = data.daerah.latitude;
-                            const lng = data.daerah.longitude;
-
-                            if (!groupedData[city]) {
-                                groupedData[city] = {
-                                    count: 0,
-                                    jurusan: {},
-                                    latitude: lat,
-                                    longitude: lng
-                                };
-                            }
-                            groupedData[city].count++;
-
-                            const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
-                                'Tidak diketahui';
-                            if (!groupedData[city].jurusan[jurusanName]) {
-                                groupedData[city].jurusan[jurusanName] = 0;
-                            }
-                            groupedData[city].jurusan[jurusanName]++;
-                        });
-
-                        renderMarkers(groupedData);
-                    }
-                },
-                error: function(xhr) {
-                    console.error("Gagal memuat data daerah:", xhr);
-                }
-            });
-        }
-
         function showSekolah() {
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('landing.show') }}",
+                url: "{{ route('dashboard.peta.show') }}",
                 type: "GET",
                 success: function(response) {
                     if (response.status == 200) {
@@ -304,8 +221,8 @@
                         mahasiswa.forEach(data => {
                             if (!data.sekolah) return;
                             const sekolah = data.sekolah.nama_sekolah;
-                            const lat = data.sekolah.latitude;
-                            const lng = data.sekolah.longitude;
+                            const lat = data.sekolah.latitude_sekolah;
+                            const lng = data.sekolah.longitude_sekolah;
 
                             if (!groupedData[sekolah]) {
                                 groupedData[sekolah] = {
@@ -334,8 +251,108 @@
             });
         }
 
-        document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
-</body>
 
-</html>
+        function mapFilter() {
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '{{ route('dashboard.peta.filter') }}',
+                type: 'GET',
+                success: function(response) {
+                    if (response.status == 200) {
+                        // Clear existing options (except placeholder)
+                        $('#tahun_masuk').find('option:gt(0)').remove();
+                        $('#jurusan').find('option:gt(0)').remove();
+
+                        // Populate Tahun Masuk
+                        response.tahun_masuk.forEach(function(item) {
+                            $('#tahun_masuk').append(`<option value="${item}">${item}</option>`);
+                        });
+
+                        // Populate Jurusan
+                        response.jurusan.forEach(function(item) {
+                        $('#jurusan').append(`<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
+                    });
+
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 500) {
+                        let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.title || "Error",
+                            text: errorResponse.message ||
+                                "Terjadi kesalahan yang tidak diketahui.",
+                        });
+                    }
+                }
+            });
+        }
+
+        $('#mapFilterForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const url = '{{ route('dashboard.peta.filter.show.sekolah') }}';
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: url,
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.status == 200) {
+                        const mahasiswa = response.mahasiswa;
+
+                        clearCircleMarkers();
+
+                        const groupedData = {};
+
+                        mahasiswa.forEach(data => {
+                            if (!data.nama_sekolah) return;
+                            const school = data.nama_sekolah;
+                            const lat = data.latitude;
+                            const lng = data.longitude;
+
+                            if (!groupedData[school]) {
+                                groupedData[school] = {
+                                    count: 0,
+                                    jurusan: {},
+                                    latitude: lat,
+                                    longitude: lng
+                                };
+                            }
+                            groupedData[school].count += data
+                            .total; // karena sudah grouped di SQL
+
+                            const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
+                            if (!groupedData[school].jurusan[jurusanName]) {
+                                groupedData[school].jurusan[jurusanName] = 0;
+                            }
+                            groupedData[school].jurusan[jurusanName] += data.total;
+                        });
+
+                        renderMarkers(groupedData);
+
+                    }
+                },
+                error: function(xhr) {
+                    console.error("AJAX error:", xhr.responseText);
+                }
+            });
+        });
+
+        $('#resetFilterBtn').on('click', function() {
+            $('#mapFilterForm')[0].reset();
+
+            showSekolah();
+        });
+    </script>
+@endsection

@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}" />
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
     <script src="{{ asset('js/leaflet.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
@@ -35,73 +36,60 @@
                         <span>Beranda</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('daerah.index') }}" class="sidebar-link">
-                        <i class='bx bx-map'></i>
-                        <span>Daerah</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('sekolah.index') }}" class="sidebar-link">
-                        <i class='bx bxs-school'></i>
-                        <span>Sekolah</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('jurusan.index') }}" class="sidebar-link">
-                        <i class='bx bx-book'></i>
-                        <span>Jurusan</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
-                        <i class='bx bxs-graduation'></i>
-                        <span>Mahasiswa</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('dashboard.petaDaerah') }}" class="sidebar-link">
-                        <i class='bx bx-map-alt'></i>
-                        <span>Peta</span>
-                    </a>
-                </li>
-                {{-- <li class="sidebar-item">
-                    <a href=""
-                    class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
-                    data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
-                    aria-controls="collapseTwo">
-                        <div>
-                            <i class='bx bx-grid-horizontal'></i>
-                            <span>Klasterisasi</span>
-                        </div>
-                        <i class="caret-nav bx bx-caret-down rotate"></i>
-                    </a>
-                    <ul id="collapseTwo" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="" class="sidebar-link"> Dataset </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="sidebar-item">
-                    <a href=""
-                    class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
-                    data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
-                    aria-controls="collapseThree">
-                        <div>
-                            <i class='bx bx-bar-chart-alt-2'></i>
-                            <span>Grafik</span>
-                        </div>
-                        <i class="caret-nav bx bx-caret-down rotate"></i>
-                    </a>
-                    <ul id="collapseThree" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="{{ route('grafik.peta') }}" class="sidebar-link"> Peta Sebaran </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="" class="sidebar-link"> Bar Chart </a>
-                        </li>
-                    </ul>
-                </li> --}}
+                @if (session('loggedInUser')['role'] === 'BAAKPSI')
+                    <li class="sidebar-item">
+                        <a href="{{ route('pengguna.index') }}" class="sidebar-link">
+                            <i class='bx bx-user'></i>
+                            <span>Pengguna</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('daerah.index') }}" class="sidebar-link">
+                            <i class='bx bx-map'></i>
+                            <span>Daerah</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('sekolah.index') }}" class="sidebar-link">
+                            <i class='bx bxs-school'></i>
+                            <span>Sekolah</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('jurusan.index') }}" class="sidebar-link">
+                            <i class='bx bx-book'></i>
+                            <span>Jurusan</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
+                            <i class='bx bxs-graduation'></i>
+                            <span>Mahasiswa</span>
+                        </a>
+                    </li>
+                @endif
+                @if (session('loggedInUser')['role'] === 'Warek 3' || session('loggedInUser')['role'] === 'PMB')
+                    <li class="sidebar-item">
+                        <a href=""
+                            class="sidebar-link collapsed has-dropdown d-flex align-items-center justify-content-between"
+                            data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
+                            aria-controls="collapseOne">
+                            <div>
+                                <i class='bx bx-map-alt'></i>
+                                <span>Peta</span>
+                            </div>
+                            <i class="caret-nav bx bx-caret-down rotate"></i>
+                        </a>
+                        <ul id="collapseOne" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="{{ route('dashboard.peta.daerah') }}" class="sidebar-link"> Daerah </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{{ route('dashboard.peta.sekolah') }}" class="sidebar-link"> Sekolah </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
             </ul>
         </aside>
         <div class="main">
@@ -110,20 +98,13 @@
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item dropdown d-flex align-items-center">
                             <div class="user-info me-2 text-end">
-                                <span class="user-name d-block fw-bold">
-                                    {{-- {{ session('loggedInUser')['nama_lengkap'] ?? 'Guest' }} --}}
+                                <span class="user-name d-block fw-bold text-white">
+                                    {{ session('loggedInUser')['nama_user'] ?? 'Guest' }}
                                 </span>
-                                <span class="user-title text-muted">
-                                    {{-- {{ session('loggedInUser')['nip'] ?? 'User' }} --}}
+                                <span class="user-title text-white">
+                                    {{ session('loggedInUser')['role'] ?? 'User' }}
                                 </span>
                             </div>
-                            <a href="#" class="nav-icon pe-md-0">
-                                <img src="{{ asset('img/admin.png') }}" 
-                                     alt="Profile" 
-                                     class="avatar img-fluid rounded-circle" 
-                                     width="40" 
-                                     id="navbar-avatar" />
-                            </a>                            
                             <div class="caret-icon mx-1" data-bs-toggle="dropdown" type="button" aria-expanded="false">
                                 <i class="bx bx-caret-down"></i>
                             </div>
@@ -133,7 +114,7 @@
                                     <span>Setting</span>
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form action="{{ route('landing.index') }}" method="POST" id="logout-form">
+                                <form action="#" id="logout-form">
                                     @csrf
                                     <a href="javascript:void(0)" class="dropdown-item" id="btn-logout">
                                         <i class="bx bx-log-out"></i>
@@ -164,45 +145,45 @@
     <script src="{{ asset('js/script.js') }}"></script>
 
     <script>
-        // $('#btn-logout').click(function(e) {
-        //     e.preventDefault();
-        //     Swal.fire({
-        //         title: 'Apakah Anda yakin ingin logout?',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Ya, Logout',
-        //         cancelButtonText: 'Batal'
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             $.ajax({
-        //                 url: "", // Pastikan route sesuai
-        //                 method: 'POST',
-        //                 data: $('#logout-form').serialize(), // Kirim CSRF form
-        //                 dataType: 'json',
-        //                 success: function(res) {
-        //                     if (res.status === 200) {
-        //                         Swal.fire({
-        //                             icon: 'success',
-        //                             title: 'Logout Berhasil!',
-        //                             showConfirmButton: false,
-        //                             timer: 1500
-        //                         }).then(() => {
-        //                             window.location.href =
-        //                                 "";
-        //                         });
-        //                     }
-        //                 },
-        //                 error: function(xhr) {
-        //                     Swal.fire({
-        //                         icon: 'error',
-        //                         title: 'Terjadi kesalahan!',
-        //                         text: 'Gagal logout, silakan coba lagi.'
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // });
+        $('#btn-logout').click(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Apakah Anda yakin ingin logout?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('logout') }}", // Ubah sesuai route
+                        method: 'POST',
+                        data: $('#logout-form').serialize(),
+                        dataType: 'json',
+                        success: function(res) {
+                            if (res.status === 200) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Logout Berhasil!',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    window.location.href =
+                                        "/"; // Ubah ke tujuan
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi kesalahan!',
+                                text: 'Gagal logout, silakan coba lagi.'
+                            });
+                        }
+                    });
+                }
+            });
+        });
     </script>
     @yield('script');
 </body>

@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('sekolah', function (Blueprint $table) {
             $table->bigIncrements('sekolah_id');
             $table->uuid('sekolah_uuid')->unique();
-            $table->string('nama_sekolah');
+            $table->string('nama_sekolah', 100);
             $table->bigInteger('daerah_sekolah')->unsigned()->nullable();
-            $table->string('latitude');
-            $table->string('longitude');
-            $table->timestamps();
+            $table->string('latitude_sekolah', 20);
+            $table->string('longitude_sekolah', 20);
 
             $table->foreign('daerah_sekolah')->references('kode_daerah')->on('daerah')->onDelete('cascade');
         });

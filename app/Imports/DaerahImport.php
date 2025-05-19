@@ -43,10 +43,8 @@ class DaerahImport implements ToCollection
                     'daerah_uuid' => Str::uuid(),
                     'kode_daerah' => $kode,
                     'nama_daerah' => $row[1] ?? '',
-                    'latitude' => $row[2] ?? '',
-                    'longitude' => $row[3] ?? '',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'latitude_daerah' => $row[2] ?? '',
+                    'longitude_daerah' => $row[3] ?? '',
                 ];
 
                 // Tambahkan ke array kode yang sudah diproses

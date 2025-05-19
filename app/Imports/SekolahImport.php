@@ -30,10 +30,8 @@ class SekolahImport implements ToCollection
                     'sekolah_uuid' => Str::uuid(),
                     'nama_sekolah' => $row[0] ?? '',
                     'daerah_sekolah' => $kodeDaerah,
-                    'latitude' => $row[2] ?? '',
-                    'longitude' => $row[3] ?? '',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'latitude_sekolah' => $row[2] ?? '',
+                    'longitude_sekolah' => $row[3] ?? '',
                 ];
             }
 

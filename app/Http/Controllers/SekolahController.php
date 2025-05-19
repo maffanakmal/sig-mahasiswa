@@ -22,7 +22,7 @@ class SekolahController extends Controller
     {
         $data = [
             'title' => 'Sekolah Page',
-            'sekolah' => Sekolah::where('sekolah_uuid', $request->sekolah_id)->first(['sekolah_id', 'nama_sekolah', 'daerah_sekolah', 'latitude', 'longitude'])
+            'sekolah' => Sekolah::where('sekolah_uuid', $request->sekolah_id)->first(['sekolah_id', 'nama_sekolah', 'daerah_sekolah', 'latitude_sekolah', 'longitude_sekolah'])
         ];
 
         if ($request->ajax()) {
@@ -31,8 +31,8 @@ class SekolahController extends Controller
                     'sekolah.sekolah_uuid',
                     'sekolah.nama_sekolah',
                     'daerah.nama_daerah as daerah_sekolah',
-                    'sekolah.latitude',
-                    'sekolah.longitude',
+                    'sekolah.latitude_sekolah',
+                    'sekolah.longitude_sekolah',
                 )
                 ->orderBy('sekolah.sekolah_uuid', 'DESC')
                 ->get();
@@ -84,20 +84,22 @@ class SekolahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'nama_sekolah' => 'required|string|max:255|unique:sekolah,nama_sekolah',
+                    'nama_sekolah' => 'required|string|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
                     'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
-                    'latitude' => 'required|numeric|between:-90,90',
-                    'longitude' => 'required|numeric|between:-180,180',
+                    'latitude_sekolah' => 'required|numeric|between:-90,90',
+                    'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
-                    'nama_sekolah.unique' => 'Nama sekolah sudah terdaftar.',
+                    'nama_sekolah.required' => 'Nama sekolah harus diisi.',
+                    'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
+                    'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
                     'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
-                    'latitude.required' => 'Latitude harus diisi.',
-                    'latitude.numeric' => 'Latitude harus berupa angka.',
-                    'latitude.between' => 'Latitude harus antara -90 dan 90.',
-                    'longitude.required' => 'Longitude harus diisi.',
-                    'longitude.numeric' => 'Longitude harus berupa angka.',
-                    'longitude.between' => 'Longitude harus antara -180 dan 180.',
+                    'latitude_sekolah.required' => 'Latitude harus diisi.',
+                    'latitude_sekolah.numeric' => 'Latitude harus berupa angka.',
+                    'latitude_sekolah.between' => 'Latitude harus antara -90 dan 90.',
+                    'longitude_sekolah.required' => 'Longitude harus diisi.',
+                    'longitude_sekolah.numeric' => 'Longitude harus berupa angka.',
+                    'longitude_sekolah.between' => 'Longitude harus antara -180 dan 180.',
                 ]
             );
 
@@ -108,17 +110,15 @@ class SekolahController extends Controller
                 sekolah_uuid, 
                 nama_sekolah,
                 daerah_sekolah,
-                latitude,
-                longitude, 
-                created_at, 
-                updated_at
-            ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+                latitude_sekolah,
+                longitude_sekolah
+            ) VALUES (?, ?, ?, ?, ?)
         ", [
                 $sekolah_uuid,
                 $validatedData['nama_sekolah'],
                 $validatedData['daerah_sekolah'],
-                $validatedData['latitude'],
-                $validatedData['longitude'],
+                $validatedData['latitude_sekolah'],
+                $validatedData['longitude_sekolah'],
             ]);
 
             return response()->json([
@@ -145,13 +145,15 @@ class SekolahController extends Controller
     public function import(Request $request)
     {
         try {
-            $request->validate([
-                'import_sekolah' => 'required|file|mimes:xlsx,xls',
-            ],
-            [
-                'import_sekolah.required' => 'File Excel tidak boleh kosong.',
-                'import_sekolah.mimes' => 'File harus berupa file Excel (xlsx, xls).',
-            ]);
+            $request->validate(
+                [
+                    'import_sekolah' => 'required|file|mimes:xlsx,xls',
+                ],
+                [
+                    'import_sekolah.required' => 'Form input excel tidak boleh kosong.',
+                    'import_sekolah.mimes' => 'File harus berupa file Excel (xlsx, xls).',
+                ]
+            );
 
             // Import the Excel file
             Excel::import(new SekolahImport, $request->file('import_sekolah'));
@@ -188,8 +190,8 @@ class SekolahController extends Controller
                 'sekolah_uuid',
                 'nama_sekolah',
                 'daerah_sekolah',
-                'latitude',
-                'longitude',
+                'latitude_sekolah',
+                'longitude_sekolah',
             )->firstOrFail();
 
             return response()->json([
@@ -224,20 +226,22 @@ class SekolahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'nama_sekolah'      => 'required|unique:sekolah,nama_sekolah,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'nama_sekolah'      => 'required|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
                     'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
-                    'latitude' => 'required|numeric|between:-90,90',
-                    'longitude' => 'required|numeric|between:-180,180',
+                    'latitude_sekolah' => 'required|numeric|between:-90,90',
+                    'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
-                    'nama_sekolah.unique' => 'Nama sekolah sudah terdaftar.',
+                    'nama_sekolah.required' => 'Nama sekolah harus diisi.',
+                    'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
+                    'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
                     'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
-                    'latitude.required' => 'Latitude harus diisi.',
-                    'latitude.numeric' => 'Latitude harus berupa angka.',
-                    'latitude.between' => 'Latitude harus antara -90 dan 90.',
-                    'longitude.required' => 'Longitude harus diisi.',
-                    'longitude.numeric' => 'Longitude harus berupa angka.',
-                    'longitude.between' => 'Longitude harus antara -180 dan 180.',
+                    'latitude_sekolah.required' => 'Latitude harus diisi.',
+                    'latitude_sekolah.numeric' => 'Latitude harus berupa angka.',
+                    'latitude_sekolah.between' => 'Latitude harus antara -90 dan 90.',
+                    'longitude_sekolah.required' => 'Longitude harus diisi.',
+                    'longitude_sekolah.numeric' => 'Longitude harus berupa angka.',
+                    'longitude_sekolah.between' => 'Longitude harus antara -180 dan 180.',
                 ]
             );
 
@@ -245,15 +249,14 @@ class SekolahController extends Controller
             UPDATE sekolah SET 
                 nama_sekolah = ?, 
                 daerah_sekolah = ?,
-                latitude = ?,
-                longitude = ?,
-                updated_at = NOW()
+                latitude_sekolah = ?,
+                longitude_sekolah = ?
             WHERE sekolah_uuid = ?
         ", [
                 $validatedData['nama_sekolah'],
                 $validatedData['daerah_sekolah'],
-                $validatedData['latitude'],
-                $validatedData['longitude'],
+                $validatedData['latitude_sekolah'],
+                $validatedData['longitude_sekolah'],
                 $sekolah_id
             ]);
 
@@ -309,6 +312,17 @@ class SekolahController extends Controller
     public function destroyAll()
     {
         try {
+            $count = DB::table('sekolah')->count();
+
+            if ($count === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Tidak Ada Data",
+                    "message" => "Tidak ada data sekolah yang dapat dihapus.",
+                    "icon" => "warning"
+                ]);
+            }
+
             DB::table('sekolah')->delete();
 
             return response()->json([

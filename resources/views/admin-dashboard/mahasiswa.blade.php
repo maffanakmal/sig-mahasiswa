@@ -524,7 +524,7 @@
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
-                            if (response.status == 200) {
+                            if (response.status === 200) {
                                 $('#mahasiswaTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
@@ -533,10 +533,17 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 });
+                            } else {
+                                // Untuk response custom selain 200 (misal 404 dari backend)
+                                Swal.fire({
+                                    icon: response.icon || "info",
+                                    title: response.title || "Info",
+                                    text: response.message || "Tidak ada data untuk dihapus.",
+                                });
                             }
                         },
                         error: function(xhr) {
-                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                            let errorResponse = xhr.responseJSON || {};
 
                             Swal.fire({
                                 icon: errorResponse.icon || "error",

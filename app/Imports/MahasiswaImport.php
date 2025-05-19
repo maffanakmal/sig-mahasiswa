@@ -40,8 +40,6 @@ class MahasiswaImport implements ToCollection
                     'jurusan' => $kodeJurusan,
                     'sekolah_asal' => $kodeSekolah,
                     'daerah_asal' => $kodeDaerah,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ];
             }
 

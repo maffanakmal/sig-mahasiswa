@@ -10,7 +10,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <p class="mb-2">Import Excel Daerah</p>
-        <form action="#" id="importDaerahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
+        <form action="#" id="importDaerahForm" enctype="multipart/form-data"
+            class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_daerah" id="import_daerah"
@@ -80,18 +81,18 @@
                                     <div class="invalid-feedback" id="error-nama_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="latitude" class="form-label">Latitude</label>
-                                    <input type="text" class="form-control" id="latitude"
-                                        placeholder="Masukkan Latitude" name="latitude" value="{{ old('latitude') }}"
+                                    <label for="latitude_daerah" class="form-label">Latitude</label>
+                                    <input type="text" class="form-control" id="latitude_daerah"
+                                        placeholder="Masukkan Latitude" name="latitude_daerah" value="{{ old('latitude_daerah') }}"
                                         required>
-                                    <div class="invalid-feedback" id="error-latitude"></div>
+                                    <div class="invalid-feedback" id="error-latitude_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="longitude" class="form-label">Longitude</label>
-                                    <input type="text" class="form-control" id="longitude"
-                                        placeholder="Masukkan Longitude" name="longitude" value="{{ old('longitude') }}"
+                                    <label for="longitude_daerah" class="form-label">Longitude</label>
+                                    <input type="text" class="form-control" id="longitude_daerah"
+                                        placeholder="Masukkan Longitude" name="longitude_daerah" value="{{ old('longitude_daerah') }}"
                                         required>
-                                    <div class="invalid-feedback" id="error-longitude"></div>
+                                    <div class="invalid-feedback" id="error-longitude_daerah"></div>
                                 </div>
                                 <div class="modal-footer px-0">
                                     <button type="button" class="btn btn-secondary btn-sm"
@@ -132,13 +133,13 @@
                     // Update input ketika marker digeser
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
-                        document.getElementById('latitude').value = latlng.lat;
-                        document.getElementById('longitude').value = latlng.lng;
+                        document.getElementById('latitude_daerah').value = latlng.lat;
+                        document.getElementById('longitude_daerah').value = latlng.lng;
                     });
 
                     // Set nilai awal input
-                    document.getElementById('latitude').value = defaultCenter[0];
-                    document.getElementById('longitude').value = defaultCenter[1];
+                    document.getElementById('latitude_daerah').value = defaultCenter[0];
+                    document.getElementById('longitude_daerah').value = defaultCenter[1];
 
                     // Kontrol tombol reset
                     var resetControl = L.control({
@@ -154,8 +155,8 @@
                             marker.setLatLng(defaultCenter);
 
                             // Update input juga
-                            document.getElementById('latitude').value = defaultCenter[0];
-                            document.getElementById('longitude').value = defaultCenter[1];
+                            document.getElementById('latitude_daerah').value = defaultCenter[0];
+                            document.getElementById('longitude_daerah').value = defaultCenter[1];
                         };
                         return div;
                     };
@@ -191,12 +192,12 @@
                         name: 'nama_daerah',
                     },
                     {
-                        data: 'latitude',
-                        name: 'latitude',
+                        data: 'latitude_daerah',
+                        name: 'latitude_daerah',
                     },
                     {
-                        data: 'longitude',
-                        name: 'longitude',
+                        data: 'longitude_daerah',
+                        name: 'longitude_daerah',
                     },
                     {
                         data: 'action',
@@ -377,11 +378,11 @@
                     $('#kode_daerah_edit').val(response.daerah.daerah_uuid);
                     $('#kode_daerah').val(response.daerah.kode_daerah);
                     $('#nama_daerah').val(response.daerah.nama_daerah);
-                    $('#latitude').val(response.daerah.latitude);
-                    $('#longitude').val(response.daerah.longitude);
+                    $('#latitude_daerah').val(response.daerah.latitude_daerah);
+                    $('#longitude_daerah').val(response.daerah.longitude_daerah);
 
-                    let lat = response.daerah.latitude;
-                    let lng = response.daerah.longitude;
+                    let lat = response.daerah.latitude_daerah;
+                    let lng = response.daerah.longitude_daerah;
 
                     if (marker) {
                         marker.setLatLng([lat, lng]);
@@ -492,7 +493,7 @@
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
-                            if (response.status == 200) {
+                            if (response.status === 200) {
                                 $('#daerahTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
@@ -501,10 +502,17 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 });
+                            } else {
+                                // Untuk response custom selain 200 (misal 404 dari backend)
+                                Swal.fire({
+                                    icon: response.icon || "info",
+                                    title: response.title || "Info",
+                                    text: response.message || "Tidak ada data untuk dihapus.",
+                                });
                             }
                         },
                         error: function(xhr) {
-                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                            let errorResponse = xhr.responseJSON || {};
 
                             Swal.fire({
                                 icon: errorResponse.icon || "error",

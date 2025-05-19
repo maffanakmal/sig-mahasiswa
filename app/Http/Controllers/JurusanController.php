@@ -71,12 +71,13 @@ class JurusanController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_jurusan' => 'required|regex:/^\d{1,2}$/|unique:jurusan,kode_jurusan',
+                    'kode_jurusan' => 'required|numeric|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:jurusan,kode_jurusan',
                     'nama_jurusan' => 'required|string|max:100',
                 ],
                 [
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah tidak boleh lebih dari 2 karakter.',
+                    'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
+                    'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'nama_jurusan.required' => 'Nama daerah harus diisi.',
                     'nama_jurusan.string' => 'Nama daerah harus berupa string.',
                     'nama_jurusan.max' => 'Nama daerah tidak boleh lebih dari 100 karakter.',
@@ -89,10 +90,8 @@ class JurusanController extends Controller
             INSERT INTO jurusan (
                 jurusan_uuid, 
                 kode_jurusan,
-                nama_jurusan,
-                created_at, 
-                updated_at
-            ) VALUES (?, ?, ?, NOW(), NOW())
+                nama_jurusan
+            ) VALUES (?, ?, ?)
         ", [
                 $jurusan_uuid,
                 $validatedData['kode_jurusan'],
@@ -128,6 +127,7 @@ class JurusanController extends Controller
             ],
             [
                 'import_jurusan.mimes' => 'File harus berupa file Excel (xlsx, xls).',
+                'import_jurusan.required' => 'Form input excel tidak boleh kosong.'
             ]);
 
             // Import the Excel file
@@ -191,12 +191,13 @@ class JurusanController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'kode_jurusan'      => 'required|regex:/^\d{1,2}$/|unique:jurusan,kode_jurusan,' . $jurusan->jurusan_uuid . ',jurusan_uuid',
+                    'kode_jurusan'      => 'required|numeric|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:jurusan,kode_jurusan,' . $jurusan->jurusan_uuid . ',jurusan_uuid',
                     'nama_jurusan'      => 'required|string|max:100',
                 ],
                 [
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah tidak boleh lebih dari 2 karakter.',
+                    'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
+                    'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'nama_jurusan.required' => 'Nama daerah harus diisi.',
                     'nama_jurusan.string' => 'Nama daerah harus berupa string.',
                     'nama_jurusan.max' => 'Nama daerah tidak boleh lebih dari 100 karakter.',
@@ -206,8 +207,7 @@ class JurusanController extends Controller
             DB::update("
             UPDATE jurusan SET 
                 kode_jurusan = ?, 
-                nama_jurusan = ?,
-                updated_at = NOW()
+                nama_jurusan = ?
             WHERE jurusan_uuid = ?
         ", [
                 $validatedData['kode_jurusan'],
@@ -267,6 +267,17 @@ class JurusanController extends Controller
     public function destroyAll()
     {
         try {
+            $count = DB::table('jurusan')->count();
+
+            if ($count === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Tidak Ada Data",
+                    "message" => "Tidak ada data jurusan yang dapat dihapus.",
+                    "icon" => "warning"
+                ]);
+            }
+
             DB::table('jurusan')->delete();
 
             return response()->json([
