@@ -6,7 +6,7 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header mb-2">
-                @if (session('loggedInUser')['role'] === 'Warek 3')
+            @if (session('loggedInUser')['role'] === 'Warek 3')
                 <p class="mb-2">Filter Data</p>
                 <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
                     @csrf
@@ -31,12 +31,39 @@
                         <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
                     </div>
                 </form>
-                @endif
-            </div>
+            @endif
+        </div>
         <div class="card-body">
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
-                <p>Jumlah mahasiswa yang tampil: <span>0</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid mt-3">
+        <div class="row text-center">
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Mahasiswa di Peta</h6>
+                        <h3 class="text-primary" id="jumlah-tampil">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Daerah Tidak Ada</h6>
+                        <h3 class="text-warning" id="jumlah-daerah-null">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Jurusan Tidak Ada</h6>
+                        <h3 class="text-danger" id="jumlah-jurusan-null">0</h3>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -217,9 +244,20 @@
                         clearCircleMarkers();
 
                         const groupedData = {};
+                        let countTampil = 0;
+                        let countDaerahNull = 0;
+                        let countJurusanNull = 0;
 
                         mahasiswa.forEach(data => {
+                            if (!data.daerah) {
+                                countDaerahNull++;
+                            }
+                            if (!data.jurusan) {
+                                countJurusanNull++;
+                            }
+
                             if (!data.daerah) return;
+
                             const city = data.daerah.nama_daerah;
                             const lat = data.daerah.latitude_daerah;
                             const lng = data.daerah.longitude_daerah;
@@ -232,6 +270,7 @@
                                     longitude: lng
                                 };
                             }
+
                             groupedData[city].count++;
 
                             const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
@@ -240,7 +279,14 @@
                                 groupedData[city].jurusan[jurusanName] = 0;
                             }
                             groupedData[city].jurusan[jurusanName]++;
+
+                            countTampil++;
                         });
+
+                        // Tampilkan jumlah ke elemen <span>
+                        $('#jumlah-tampil').text(countTampil);
+                        $('#jumlah-daerah-null').text(countDaerahNull);
+                        $('#jumlah-jurusan-null').text(countJurusanNull);
 
                         renderMarkers(groupedData);
                     }
@@ -320,8 +366,8 @@
                         mahasiswa.forEach(data => {
                             if (!data.nama_daerah) return;
                             const city = data.nama_daerah;
-                            const lat = data.latitude;
-                            const lng = data.longitude;
+                            const lat = data.latitude_daerah;
+                            const lng = data.longitude_daerah;
 
                             if (!groupedData[city]) {
                                 groupedData[city] = {

@@ -57,9 +57,9 @@ Route::group(['middleware' => ['loginCheck', 'roleCheck:BAAKPSI']], function () 
     Route::get('/dashboard/sekolah/create', [SekolahController::class, 'create'])->name('sekolah.create');
     Route::post('/dashboard/sekolah/store', [SekolahController::class, 'store'])->name('sekolah.store');
     Route::post('/dashboard/sekolah/import', [SekolahController::class, 'import'])->name('sekolah.import');
-    Route::get('/dashboard/sekolah/show/{sekolah_id}', [SekolahController::class, 'show'])->name('sekolah.show');
-    Route::put('/dashboard/sekolah/update/{sekolah_id}', [SekolahController::class, 'update'])->name('sekolah.update');
-    Route::delete('/dashboard/sekolah/destroy/{sekolah_id}', [SekolahController::class, 'destroy'])->name('sekolah.destroy');
+    Route::get('/dashboard/sekolah/show/{npsn}', [SekolahController::class, 'show'])->name('sekolah.show');
+    Route::put('/dashboard/sekolah/update/{npsn}', [SekolahController::class, 'update'])->name('sekolah.update');
+    Route::delete('/dashboard/sekolah/destroy/{npsn}', [SekolahController::class, 'destroy'])->name('sekolah.destroy');
     Route::delete('/dashboard/sekolah/destroys', [SekolahController::class, 'destroyAll'])->name('sekolah.destroyAll');
 
     Route::get('/dashboard/jurusan', [JurusanController::class, 'index'])->name('jurusan.index');

@@ -40,8 +40,7 @@ class DaerahController extends Controller
                 'latitude_daerah',
                 'longitude_daerah',
             )
-                ->orderBy('daerah_uuid', 'DESC')
-                ->get();
+                ->orderBy('daerah_uuid', 'DESC');
 
             return DataTables::of($daerahs)
                 ->addIndexColumn()
@@ -77,15 +76,15 @@ class DaerahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_daerah' => 'required|regex:/^[0-9]+$/|digits_between:1,5|unique:daerah,kode_daerah',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|digits_between:1,4|unique:daerah,kode_daerah',
                     'nama_daerah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
                     'latitude_daerah' => 'required|numeric|between:-90,90',
                     'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
                 [
-                    'kode_daerah.required' => 'Kode daerah wajib diisi.',
+                    'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 5 digit.',
+                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 4 digit.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
@@ -160,7 +159,7 @@ class DaerahController extends Controller
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data daerah berhasil diimpor.",
+                "message" => "Data daerah berhasil diimport.",
                 "icon" => "success"
             ]);
         } catch (ValidationException $e) {
@@ -227,13 +226,13 @@ class DaerahController extends Controller
                 [
                     'kode_daerah'      => 'required|regex:/^[0-9]+$/|digits_between:1,5|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
                     'nama_daerah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                    'latitude_daerah' => 'required|numeric|between:-90,90',
-                    'longitude_daerah' => 'required|numeric|between:-180,180',
+                    'latitude_daerah' => 'required|numeric|max:20|between:-90,90',
+                    'longitude_daerah' => 'required|numeric|max:20|between:-180,180',
                 ],
                 [
-                    'kode_daerah.required' => 'Kode daerah wajib diisi.',
+                    'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 5 digit.',
+                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 4 digit.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
@@ -243,10 +242,12 @@ class DaerahController extends Controller
                     'latitude_daerah.required' => 'Latitude harus diisi.',
                     'latitude_daerah.numeric' => 'Latitude harus berupa angka.',
                     'latitude_daerah.between' => 'Latitude harus antara -90 dan 90.',
+                    'latitude_daerah.max' => 'Latitude tidak boleh lebih dari 20 karakter.',
 
                     'longitude_daerah.required' => 'Longitude harus diisi.',
                     'longitude_daerah.numeric' => 'Longitude harus berupa angka.',
                     'longitude_daerah.between' => 'Longitude harus antara -180 dan 180.',
+                    'longitude_daerah.max' => 'Longitude tidak boleh lebih dari 20 karakter.',
                 ]
             );
 

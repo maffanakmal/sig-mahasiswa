@@ -15,9 +15,9 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md bg-white sticky-top shadow-sm p-2" data-bs-theme="dark">
+    <nav class="navbar navbar-expand-md navbar-landing sticky-top shadow-sm p-2">
         <div class="container">
-            <a class="navbar-brand text-dark fw-bold" href="/">
+            <a class="navbar-brand text-white fw-bold" href="/">
                 USNIGIS
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
@@ -27,7 +27,7 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <li class="nav-item me-2 mb-2 mb-lg-0">
-                        <a class="btn btn-sm btn-warning rounded-5 px-4" href="{{ route('auth.login') }}">Masuk</a>
+                        <a class="btn btn-sm btn-light rounded-5 px-4" href="{{ route('auth.login') }}">Masuk</a>
                     </li>
                 </ul>
             </div>
@@ -37,11 +37,11 @@
     <div class="container min-vh-100 d-flex align-items-center justify-content-center">
         <div class="jumbotron text-center mb-4">
             <h1 class="display-6 fw-bold">Selamat datang di USNIGIS</h1>
-            <p class="lead">Sistem Informasi Geografis Mahasiswa Universitas Satya Negara Indonesia</p>
+            <p class="lead">Sistem Informasi Geografis Persebaran Mahasiswa Universitas Satya Negara Indonesia</p>
         </div>
     </div>
 
-    <div class="container min-vh-100">
+    {{-- <div class="container min-vh-100">
         <div class="card shadow-sm">
             <div class="card-header mb-2 d-flex justify-content-between align-items-center flex-wrap">
                 <h5 class="mb-0 text-center flex-grow-1">Dari mana aja sih mahasiswa USNI berasal?</h5>
@@ -70,11 +70,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
-    <div class="container">
+    <div class="container-fluid footer-landing">
         <footer class="d-flex justify-content-center align-items-center py-3">
-            <span class="mb-3 mb-md-0 text-dark">&copy; <span id="year"></span> akmal. </span>
+            <span class="mb-3 mb-md-0 text-white">&copy; <span id="year"></span> USNIGIS. </span>
         </footer>
     </div>
 
@@ -84,7 +84,7 @@
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
-    <script>
+    {{-- <script>
         // Buat koordinat awal dan zoom default
         var defaultCenter = [-2.3, 120]; // contoh koordinat
         var defaultZoom = 5;
@@ -255,15 +255,15 @@
                         mahasiswa.forEach(data => {
                             if (!data.daerah) return;
                             const city = data.daerah.nama_daerah;
-                            const lat = data.daerah.latitude;
-                            const lng = data.daerah.longitude;
+                            const lat = data.daerah.latitude_daerah;
+                            const lng = data.daerah.longitude_daerah;
 
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
                                     jurusan: {},
-                                    latitude: lat,
-                                    longitude: lng
+                                    latitude_daerah: lat,
+                                    longitude_daerah: lng
                                 };
                             }
                             groupedData[city].count++;
@@ -304,15 +304,15 @@
                         mahasiswa.forEach(data => {
                             if (!data.sekolah) return;
                             const sekolah = data.sekolah.nama_sekolah;
-                            const lat = data.sekolah.latitude;
-                            const lng = data.sekolah.longitude;
+                            const lat = data.sekolah.latitude_sekolah;
+                            const lng = data.sekolah.longitude_sekolah;
 
                             if (!groupedData[sekolah]) {
                                 groupedData[sekolah] = {
                                     count: 0,
                                     jurusan: {},
-                                    latitude: lat,
-                                    longitude: lng
+                                    latitude_sekolah: lat,
+                                    longitude_sekolah: lng
                                 };
                             }
                             groupedData[sekolah].count++;
@@ -332,9 +332,12 @@
                     console.error("Gagal memuat data sekolah:", xhr);
                 }
             });
-        }
-
-        document.getElementById("year").textContent = new Date().getFullYear();
+        } 
+    </script>--}}
+    <script>
+        $(document).ready(function() {
+            document.getElementById("year").textContent = new Date().getFullYear();
+        });
     </script>
 </body>
 

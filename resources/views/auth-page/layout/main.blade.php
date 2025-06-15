@@ -16,7 +16,7 @@
         <div class="container d-flex justify-content-center align-items-center min-vh-100">
             <div class="row border rounded-1 p-3 m-2 bg-white shadow box-area">
                 <div class="col-md-6 rounded-1 d-flex justify-content-center align-items-center flex-column left-box p-3"
-                    style="background-image: url({{ asset('img/logo-usni.png') }}); 
+                    style="background-image: url({{ asset('img/logo-usni2.png') }}); 
                             background-size: cover; 
                             background-position: center; 
                             background-repeat: no-repeat;">

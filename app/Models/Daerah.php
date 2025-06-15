@@ -27,12 +27,12 @@ class Daerah extends Model
 
     public function mahasiswa()
     {
-        return $this->hasMany(Mahasiswa::class, 'daerah_asal', 'kode_daerah');
+        return $this->hasMany(Mahasiswa::class, 'kode_daerah', 'kode_daerah');
     }
 
     public function sekolah()
     {
-        return $this->hasMany(Sekolah::class, 'daerah_sekolah', 'kode_daerah');
+        return $this->hasMany(Sekolah::class, 'kode_daerah', 'kode_daerah');
     }
 
     

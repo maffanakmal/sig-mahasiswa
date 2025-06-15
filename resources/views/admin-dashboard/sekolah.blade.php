@@ -32,10 +32,12 @@
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
+                            <th>NPSN</th>
                             <th>Nama Sekolah</th>
+                            <th>Alamat Sekolah</th>
                             <th>Daerah Sekolah</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
+                            <th>Latitude Sekolah</th>
+                            <th>Longitude Sekolah</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -62,7 +64,14 @@
                         <div class="col-md-4">
                             <form action="#" id="sekolahForm" enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" name="sekolah_id" id="sekolah_id">
+                                <input type="hidden" name="npsn_edit" id="npsn_edit">
+                                <div class="form-group mb-3">
+                                    <label for="npsn" class="form-label">Nomor Pokok Sekolah Nasional</label>
+                                    <input type="text" class="form-control" id="npsn"
+                                        placeholder="Masukkan NPSN" name="npsn"
+                                        value="{{ old('npsn') }}" required>
+                                    <div class="invalid-feedback" id="error-npsn"></div>
+                                </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
                                     <input type="text" class="form-control" id="nama_sekolah"
@@ -71,22 +80,29 @@
                                     <div class="invalid-feedback" id="error-nama_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="daerah_sekolah" class="form-label">Daerah Sekolah</label>
-                                    <select id="daerah_sekolah" name="daerah_sekolah" class="form-control select-daerah">
+                                    <label for="alamat_sekolah" class="form-label">Alamat Sekolah</label>
+                                    <input type="text" class="form-control" id="alamat_sekolah"
+                                        placeholder="Masukkan Alamat Sekolah" name="alamat_sekolah"
+                                        value="{{ old('alamat_sekolah') }}" required>
+                                    <div class="invalid-feedback" id="error-alamat_sekolah"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="kode_daerah" class="form-label">Daerah Sekolah</label>
+                                    <select id="kode_daerah" name="kode_daerah" class="form-control select-daerah">
                                         <option value="" selected disabled>Pilih Daerah Sekolah</option>
                                     </select>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="latitude_sekolah" class="form-label">Latitude</label>
+                                    <label for="latitude_sekolah" class="form-label">Latitude Sekolah</label>
                                     <input type="text" class="form-control" id="latitude_sekolah"
-                                        placeholder="Masukkan Latitude" name="latitude_sekolah" value="{{ old('latitude_sekolah') }}"
+                                        placeholder="Masukkan Latitude Sekolah" name="latitude_sekolah" value="{{ old('latitude_sekolah') }}"
                                         required>
                                     <div class="invalid-feedback" id="error-latitude_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="longitude_sekolah" class="form-label">Longitude</label>
+                                    <label for="longitude_sekolah" class="form-label">Longitude Sekolah</label>
                                     <input type="text" class="form-control" id="longitude_sekolah"
-                                        placeholder="Masukkan Longitude" name="longitude_sekolah" value="{{ old('longitude_sekolah') }}"
+                                        placeholder="Masukkan Longitude Sekolah" name="longitude_sekolah" value="{{ old('longitude_sekolah') }}"
                                         required>
                                     <div class="invalid-feedback" id="error-longitude_sekolah"></div>
                                 </div>
@@ -115,29 +131,27 @@
             var sekolahModal = document.getElementById('sekolahModal');
             sekolahModal.addEventListener('shown.bs.modal', function() {
                 if (!map) {
+                    // Inisialisasi peta dan marker...
                     map = L.map('mapInput').setView(defaultCenter, defaultZoom);
-
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
 
-                    // Tambah marker draggable
                     marker = L.marker(defaultCenter, {
                         draggable: true
-                    }).addTo(map);
-
-                    // Update input ketika marker digeser
+                    });
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
                         document.getElementById('latitude_sekolah').value = latlng.lat;
                         document.getElementById('longitude_sekolah').value = latlng.lng;
                     });
 
-                    // Set nilai awal input
-                    document.getElementById('latitude_sekolah').value = defaultCenter[0];
-                    document.getElementById('longitude_sekolah').value = defaultCenter[1];
+                    // Tambahkan marker hanya jika belum ada di map
+                    if (!map.hasLayer(marker)) {
+                        map.addLayer(marker);
+                    }
 
-                    // Kontrol tombol reset
+                    // Reset Control ...
                     var resetControl = L.control({
                         position: 'topleft'
                     });
@@ -149,18 +163,45 @@
                         div.onclick = function() {
                             map.setView(defaultCenter, defaultZoom);
                             marker.setLatLng(defaultCenter);
-
-                            // Update input juga
                             document.getElementById('latitude_sekolah').value = defaultCenter[0];
                             document.getElementById('longitude_sekolah').value = defaultCenter[1];
                         };
                         return div;
                     };
                     resetControl.addTo(map);
-
                 } else {
                     map.invalidateSize();
                 }
+
+                // Tampilkan marker jika belum
+                if (!map.hasLayer(marker)) {
+                    map.addLayer(marker);
+                }
+
+                if (method === 'create') {
+                    document.getElementById('latitude_sekolah').value = '';
+                    document.getElementById('longitude_sekolah').value = '';
+                    marker.setLatLng(defaultCenter);
+                    map.setView(defaultCenter, defaultZoom);
+                }
+
+                // if (method === 'update' && pendingLatLng) {
+                //     // Jika ada pendingLatLng, set marker dan view ke lokasi tersebut
+                //     document.getElementById('latitude_sekolah').value = pendingLatLng[0];
+                //     document.getElementById('longitude_sekolah').value = pendingLatLng[1];
+                //     // Set marker dan view ke pendingLatLng
+                //     pendingZoom = pendingZoom || defaultZoom; // Gunakan pendingZoom jika ada, atau defaultZoom
+
+                //     marker.setLatLng(pendingLatLng);
+                //     map.setView(pendingLatLng, pendingZoom);
+                //     pendingLatLng = null; // reset agar tidak tertimpa
+                // }
+            });
+
+            sekolahModal.addEventListener('hidden.bs.modal', function() {
+                // Reset pendingLatLng dan pendingZoom saat modal ditutup
+                pendingLatLng = null;
+                pendingZoom = defaultZoom;
             });
 
             sekolahTable();
@@ -169,7 +210,7 @@
         });
 
         let method;
-        let sekolah_id = null;
+        let npsn = null;
 
         function sekolahTable() {
             var table = $('#sekolahTable').DataTable({
@@ -179,15 +220,25 @@
                 ajax: '{{ route('sekolah.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false,
+                    },
+                    {
+                        data: 'npsn',
+                        name: 'npsn'
                     },
                     {
                         data: 'nama_sekolah',
                         name: 'nama_sekolah'
                     },
                     {
-                        data: 'daerah_sekolah',
-                        name: 'daerah_sekolah',
+                        data: 'alamat_sekolah',
+                        name: 'alamat_sekolah'
+                    },
+                    {
+                        data: 'kode_daerah',
+                        name: 'kode_daerah',
                     },
                     {
                         data: 'latitude_sekolah',
@@ -208,7 +259,7 @@
         function sekolahModal() {
             $('#sekolahForm')[0].reset();
             method = 'create';
-            sekolah_id;
+            npsn;
 
             $('#sekolahModal').modal('show');
             $('#sekolahModalLabel').text('Tambah Data Sekolah');
@@ -216,11 +267,11 @@
         }
 
         function selectDaerahSekolah() {
-            $('#daerah_sekolah').select2({
+            $('#kode_daerah').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#daerah_sekolah').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#kode_daerah').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -248,7 +299,7 @@
                     if (response.status == 200) {
 
                         response.daerah.forEach(function(item) {
-                            $('#daerah_sekolah').append(
+                            $('#kode_daerah').append(
                                 `<option value="${item.kode_daerah}">${item.nama_daerah}</option>`);
                         });
 
@@ -278,7 +329,7 @@
             let httpMethod = 'POST'; // Default method for create
 
             if (method === 'update') {
-                if (!sekolah_id) {
+                if (!npsn) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
@@ -287,7 +338,7 @@
                     return;
                 }
 
-                url = '{{ route('sekolah.update', '') }}/' + sekolah_id;
+                url = '{{ route('sekolah.update', '') }}/' + npsn;
                 formData.append('_method', 'PUT'); // Laravel expects PUT for updates
                 httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
             }
@@ -302,6 +353,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    console.log(response);
+
                     if (response.status == 200) {
                         $('#sekolahModal').modal('hide');
                         $('#sekolahForm').trigger('reset');
@@ -392,19 +445,15 @@
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Validation Error
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            let inputField = $('[name="' + key + '"]');
-                            let errorField = $('#error-' + key);
-                            inputField.addClass('is-invalid');
-                            if (errorField.length) {
-                                errorField.text(value[0]);
-                            }
-                        });
+                        let errorResponse = xhr.responseJSON;
 
-                        $('.form-control').on('input', function() {
-                            $(this).removeClass('is-invalid');
-                            $('#error-' + $(this).attr('name')).text('');
+                        let allErrors = Object.values(errorResponse.errors).flat().join('\n');
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.message || "Import Gagal",
+                            text: allErrors,
+                            showConfirmButton: true
                         });
 
                     } else {
@@ -421,32 +470,24 @@
         });
 
         function editSekolah(e) {
-            sekolah_id = e.getAttribute('data-id');
+            npsn = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('sekolah.show', '') }}/" + sekolah_id,
+                url: "{{ route('sekolah.show', '') }}/" + npsn,
                 type: "GET",
                 success: function(response) {
-                    $('#sekolah_id').val(response.sekolah.sekolah_uuid);
+                    $('#npsn').val(response.sekolah.npsn);
                     $('#nama_sekolah').val(response.sekolah.nama_sekolah);
-                    $('#daerah_sekolah').val(response.sekolah.daerah_sekolah);
+                    $('#alamat_sekolah').val(response.sekolah.alamat_sekolah);
+                    $('#kode_daerah').val(response.sekolah.kode_daerah);
                     $('#latitude_sekolah').val(response.sekolah.latitude_sekolah);
                     $('#longitude_sekolah').val(response.sekolah.longitude_sekolah);
 
-                    let lat = response.sekolah.latitude_sekolah;
-                    let lng = response.sekolah.longitude_sekolah;
-
-                    if (marker) {
-                        marker.setLatLng([lat, lng]);
-                    }
-
-                    if (map) {
-                        map.setView([lat, lng], 12); // bisa sesuaikan zoom level
-                    }
+                    
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel

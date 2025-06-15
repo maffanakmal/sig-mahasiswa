@@ -17,14 +17,14 @@ return new class extends Migration
             $table->smallInteger('tahun_masuk');
         
             // Foreign keys, sekarang bisa NULL
-            $table->integer('jurusan')->unsigned()->nullable();
-            $table->bigInteger('sekolah_asal')->unsigned()->nullable();
-            $table->bigInteger('daerah_asal')->unsigned()->nullable();
+            $table->integer('kode_jurusan')->unsigned()->nullable();
+            $table->bigInteger('npsn')->unsigned()->nullable();
+            $table->bigInteger('kode_daerah')->unsigned()->nullable();
         
             // Foreign key constraints
-            $table->foreign('jurusan')->references('kode_jurusan')->on('jurusan')->onDelete('cascade');
-            $table->foreign('sekolah_asal')->references('sekolah_id')->on('sekolah')->onDelete('cascade');
-            $table->foreign('daerah_asal')->references('kode_daerah')->on('daerah')->onDelete('cascade');
+            $table->foreign('kode_jurusan')->references('kode_jurusan')->on('jurusan')->onDelete('cascade');
+            $table->foreign('npsn')->references('npsn')->on('sekolah')->onDelete('cascade');
+            $table->foreign('kode_daerah')->references('kode_daerah')->on('daerah')->onDelete('cascade');
         });
         
     }

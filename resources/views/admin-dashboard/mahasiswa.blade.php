@@ -73,18 +73,18 @@
                             <div class="invalid-feedback" id="error-tahun_masuk"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="jurusan" name="jurusan" class="form-control select-jurusan">
-                                <option value="" selected disabled>Program Studi</option>
+                            <select id="kode_jurusan" name="kode_jurusan" class="form-control select-kode_jurusan">
+                                <option value="" selected disabled>Pilih Jurusan</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="sekolah_asal" name="sekolah_asal" class="form-control select-sekolah">
-                                <option value="" selected disabled>Sekolah Asal</option>
+                            <select id="npsn" name="npsn" class="form-control select-npsn">
+                                <option value="" selected disabled>Pilih Sekolah Asal</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="daerah_asal" name="daerah_asal" class="form-control select-daerah">
-                                <option value="" selected disabled>Daerah Asal</option>
+                            <select id="kode_daerah" name="kode_daerah" class="form-control select-kode_daerah">
+                                <option value="" selected disabled>Pilih Daerah Asal</option>
                             </select>
                         </div>
                 </div>
@@ -130,16 +130,16 @@
                         name: 'tahun_masuk',
                     },
                     {
-                        data: 'jurusan',
-                        name: 'jurusan',
+                        data: 'kode_jurusan',
+                        name: 'kode_jurusan',
                     },
                     {
-                        data: 'sekolah_asal',
-                        name: 'sekolah_asal',
+                        data: 'npsn',
+                        name: 'npsn',
                     },
                     {
-                        data: 'daerah_asal',
-                        name: 'daerah_asal',
+                        data: 'kode_daerah',
+                        name: 'kode_daerah',
                     },
                     {
                         data: 'action',
@@ -160,11 +160,11 @@
         }
 
         function selectDaerahAsal() {
-            $('#daerah_asal').select2({
+            $('#kode_daerah').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#daerah_asal').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#kode_daerah').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -177,11 +177,11 @@
         }
 
         function selectSekolahAsal() {
-            $('#sekolah_asal').select2({
+            $('#npsn').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#sekolah_asal').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#npsn').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -194,11 +194,11 @@
         }
 
         function selectJurusan() {
-            $('#jurusan').select2({
+            $('#kode_jurusan').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#jurusan').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#kode_jurusan').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -221,17 +221,17 @@
                     if (response.status == 200) {
 
                         response.daerah.forEach(function(item) {
-                            $('#daerah_asal').append(
+                            $('#kode_daerah').append(
                                 `<option value="${item.kode_daerah}">${item.nama_daerah}</option>`);
                         });
 
                         response.sekolah.forEach(function(item) {
-                            $('#sekolah_asal').append(
-                                `<option value="${item.sekolah_id}">${item.nama_sekolah}</option>`);
+                            $('#npsn').append(
+                                `<option value="${item.npsn}">${item.nama_sekolah}</option>`);
                         });
 
                         response.jurusan.forEach(function(item) {
-                            $('#jurusan').append(
+                            $('#kode_jurusan').append(
                                 `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
                         });
 
@@ -377,19 +377,15 @@
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Validation Error
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            let inputField = $('[name="' + key + '"]');
-                            let errorField = $('#error-' + key);
-                            inputField.addClass('is-invalid');
-                            if (errorField.length) {
-                                errorField.text(value[0]);
-                            }
-                        });
+                        let errorResponse = xhr.responseJSON;
 
-                        $('.form-control').on('input', function() {
-                            $(this).removeClass('is-invalid');
-                            $('#error-' + $(this).attr('name')).text('');
+                        let allErrors = Object.values(errorResponse.errors).flat().join('\n');
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.message || "Import Gagal",
+                            text: allErrors,
+                            showConfirmButton: true
                         });
 
                     } else {
@@ -419,10 +415,9 @@
                     $('#nim').val(response.mahasiswa.mahasiswa_uuid);
                     $('#nim').val(response.mahasiswa.nim);
                     $('#tahun_masuk').val(response.mahasiswa.tahun_masuk);
-                    $('#jurusan').val(response.mahasiswa.jurusan);
-                    $('#sekolah_asal').val(response.mahasiswa.sekolah_asal);
-                    $('#daerah_asal').val(response.mahasiswa.daerah_asal);
-                    $('#status_mahasiswa').val(response.mahasiswa.status_mahasiswa);
+                    $('#kode_jurusan').val(response.mahasiswa.kode_jurusan);
+                    $('#npsn').val(response.mahasiswa.npsn);
+                    $('#kode_daerah').val(response.mahasiswa.kode_daerah);
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel

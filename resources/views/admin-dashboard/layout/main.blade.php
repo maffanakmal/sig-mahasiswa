@@ -30,38 +30,38 @@
                 </button>
             </div>
             <ul class="sidebar-nav">
-                <li class="sidebar-item">
+                <li class="sidebar-item {{ Request::is('dashboard/home') ? 'status-active' : '' }}">
                     <a href="{{ route('home.index') }}" class="sidebar-link">
                         <i class='bx bx-home'></i>
                         <span>Beranda</span>
                     </a>
                 </li>
                 @if (session('loggedInUser')['role'] === 'BAAKPSI')
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ Request::is('dashboard/pengguna') ? 'status-active' : '' }}">
                         <a href="{{ route('pengguna.index') }}" class="sidebar-link">
                             <i class='bx bx-user'></i>
                             <span>Pengguna</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ Request::is('dashboard/daerah') ? 'status-active' : '' }}">
                         <a href="{{ route('daerah.index') }}" class="sidebar-link">
                             <i class='bx bx-map'></i>
                             <span>Daerah</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ Request::is('dashboard/sekolah') ? 'status-active' : '' }}">
                         <a href="{{ route('sekolah.index') }}" class="sidebar-link">
                             <i class='bx bxs-school'></i>
                             <span>Sekolah</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ Request::is('dashboard/jurusan') ? 'status-active' : '' }}">
                         <a href="{{ route('jurusan.index') }}" class="sidebar-link">
                             <i class='bx bx-book'></i>
                             <span>Jurusan</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ Request::is('dashboard/mahasiswa') ? 'status-active' : '' }}">
                         <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
                             <i class='bx bxs-graduation'></i>
                             <span>Mahasiswa</span>
@@ -81,10 +81,10 @@
                             <i class="caret-nav bx bx-caret-down rotate"></i>
                         </a>
                         <ul id="collapseOne" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                            <li class="sidebar-item">
+                            <li class="sidebar-item {{ Request::is('dashboard/peta/daerah') ? 'status-active' : '' }}">
                                 <a href="{{ route('dashboard.peta.daerah') }}" class="sidebar-link"> Daerah </a>
                             </li>
-                            <li class="sidebar-item">
+                            <li class="sidebar-item  {{ Request::is('dashboard/peta/sekolah') ? 'status-active' : '' }}">
                                 <a href="{{ route('dashboard.peta.sekolah') }}" class="sidebar-link"> Sekolah </a>
                             </li>
                         </ul>
@@ -106,14 +106,9 @@
                                 </span>
                             </div>
                             <div class="caret-icon mx-1" data-bs-toggle="dropdown" type="button" aria-expanded="false">
-                                <i class="bx bx-caret-down"></i>
+                                <i class="bx bx-caret-down text-white" style="font-size: 20px"></i>
                             </div>
                             <div class="dropdown-menu dropdown-menu-end rounded-1 border-0 shadow mt-3">
-                                <a href="" class="dropdown-item">
-                                    <i class="bx bx-cog"></i>
-                                    <span>Setting</span>
-                                </a>
-                                <div class="dropdown-divider"></div>
                                 <form action="#" id="logout-form">
                                     @csrf
                                     <a href="javascript:void(0)" class="dropdown-item" id="btn-logout">
@@ -169,7 +164,7 @@
                                     timer: 1500
                                 }).then(() => {
                                     window.location.href =
-                                        "/"; // Ubah ke tujuan
+                                        "/";
                                 });
                             }
                         },

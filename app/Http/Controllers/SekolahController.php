@@ -22,15 +22,17 @@ class SekolahController extends Controller
     {
         $data = [
             'title' => 'Sekolah Page',
-            'sekolah' => Sekolah::where('sekolah_uuid', $request->sekolah_id)->first(['sekolah_id', 'nama_sekolah', 'daerah_sekolah', 'latitude_sekolah', 'longitude_sekolah'])
+            'sekolah' => Sekolah::where('sekolah_uuid', $request->npsn)->first(['npsn', 'nama_sekolah', 'alamat_sekolah', 'kode_daerah', 'latitude_sekolah', 'longitude_sekolah'])
         ];
 
         if ($request->ajax()) {
-            $sekolahs = Sekolah::leftjoin('daerah', 'sekolah.daerah_sekolah', '=', 'daerah.kode_daerah')
+            $sekolahs = Sekolah::leftjoin('daerah', 'sekolah.kode_daerah', '=', 'daerah.kode_daerah')
                 ->select(
+                    'sekolah.npsn',
                     'sekolah.sekolah_uuid',
                     'sekolah.nama_sekolah',
-                    'daerah.nama_daerah as daerah_sekolah',
+                    'sekolah.alamat_sekolah',
+                    'daerah.nama_daerah as kode_daerah',
                     'sekolah.latitude_sekolah',
                     'sekolah.longitude_sekolah',
                 )
@@ -39,6 +41,9 @@ class SekolahController extends Controller
 
             return DataTables::of($sekolahs)
                 ->addIndexColumn()
+                ->editColumn('kode_daerah', function ($row) {
+                    return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
+                })
                 ->addColumn('action', function ($sekolah) {
                     return '<button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-warning btn-sm" onclick="editSekolah(this)">
                                 <i class="bx bx-pencil"></i>
@@ -47,7 +52,7 @@ class SekolahController extends Controller
                                 <i class="bx bx-trash"></i>
                             </button>';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'kode_daerah'])
                 ->make(true);
         }
 
@@ -84,19 +89,35 @@ class SekolahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
+                    'npsn' => 'required|regex:/^[0-9]+$/|digits_between:1,8|unique:sekolah,npsn',
                     'nama_sekolah' => 'required|string|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
-                    'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
+                    'alamat_sekolah' => 'required|string|max:255',
+                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
+                    'npsn.required' => 'NPSN harus diisi.',
+                    'npsn.regex' => 'NPSN hanya boleh berisi angka.',
+                    'npsn.digits_between' => 'NPSN harus terdiri dari 1 hingga 8 digit.',
+                    'npsn.unique' => 'NPSN sudah terdaftar.',
+
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
                     'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
-                    'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
+
+                    'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
+                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 255 karakter.',
+                    'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
+
+                    'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
+                    'kode_daerah.numeric' => 'Kode daerah harus berupa angka.',
+                    'kode_daerah.exists' => 'Kode daerah tidak valid.',
+
                     'latitude_sekolah.required' => 'Latitude harus diisi.',
                     'latitude_sekolah.numeric' => 'Latitude harus berupa angka.',
                     'latitude_sekolah.between' => 'Latitude harus antara -90 dan 90.',
+
                     'longitude_sekolah.required' => 'Longitude harus diisi.',
                     'longitude_sekolah.numeric' => 'Longitude harus berupa angka.',
                     'longitude_sekolah.between' => 'Longitude harus antara -180 dan 180.',
@@ -106,17 +127,21 @@ class SekolahController extends Controller
             $sekolah_uuid = Str::uuid();
 
             DB::insert("
-            INSERT INTO sekolah (
-                sekolah_uuid, 
-                nama_sekolah,
-                daerah_sekolah,
-                latitude_sekolah,
-                longitude_sekolah
-            ) VALUES (?, ?, ?, ?, ?)
-        ", [
+    INSERT INTO sekolah (
+        npsn,
+        sekolah_uuid, 
+        nama_sekolah,
+        alamat_sekolah,
+        kode_daerah,
+        latitude_sekolah,
+        longitude_sekolah
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+", [
+                $validatedData['npsn'],
                 $sekolah_uuid,
                 $validatedData['nama_sekolah'],
-                $validatedData['daerah_sekolah'],
+                $validatedData['alamat_sekolah'],
+                $validatedData['kode_daerah'],
                 $validatedData['latitude_sekolah'],
                 $validatedData['longitude_sekolah'],
             ]);
@@ -183,13 +208,15 @@ class SekolahController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($sekolah_id)
+    public function show($npsn)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->select(
+            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->select(
+                'npsn',
                 'sekolah_uuid',
                 'nama_sekolah',
-                'daerah_sekolah',
+                'alamat_sekolah',
+                'kode_daerah',
                 'latitude_sekolah',
                 'longitude_sekolah',
             )->firstOrFail();
@@ -219,26 +246,42 @@ class SekolahController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $sekolah_id)
+    public function update(Request $request, $npsn)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->firstOrFail(); // Cari user berdasarkan UUID
+            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate(
                 [
-                    'nama_sekolah'      => 'required|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
-                    'daerah_sekolah' => 'required|string|exists:daerah,kode_daerah',
+                    'npsn' => 'required|regex:/^[0-9]+$/|digits_between:1,8|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'nama_sekolah' => 'required|string|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
+                    'alamat_sekolah' => 'required|string|max:255',
+                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
+                    'npsn.required' => 'NPSN harus diisi.',
+                    'npsn.regex' => 'NPSN hanya boleh berisi angka.',
+                    'npsn.digits_between' => 'NPSN harus terdiri dari 1 hingga 8 digit.',
+                    'npsn.unique' => 'NPSN sudah terdaftar.',
+
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
                     'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
-                    'daerah_sekolah.required' => 'Daerah sekolah tidak boleh kosong.',
+
+                    'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
+                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 255 karakter.',
+                    'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
+
+                    'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
+                    'kode_daerah.numeric' => 'Kode daerah harus berupa angka.',
+                    'kode_daerah.exists' => 'Kode daerah tidak valid.',
+
                     'latitude_sekolah.required' => 'Latitude harus diisi.',
                     'latitude_sekolah.numeric' => 'Latitude harus berupa angka.',
                     'latitude_sekolah.between' => 'Latitude harus antara -90 dan 90.',
+
                     'longitude_sekolah.required' => 'Longitude harus diisi.',
                     'longitude_sekolah.numeric' => 'Longitude harus berupa angka.',
                     'longitude_sekolah.between' => 'Longitude harus antara -180 dan 180.',
@@ -247,17 +290,21 @@ class SekolahController extends Controller
 
             DB::update("
             UPDATE sekolah SET 
+                npsn = ?, 
                 nama_sekolah = ?, 
-                daerah_sekolah = ?,
+                alamat_sekolah = ?,
+                kode_daerah = ?,
                 latitude_sekolah = ?,
                 longitude_sekolah = ?
             WHERE sekolah_uuid = ?
         ", [
+                $validatedData['npsn'],
                 $validatedData['nama_sekolah'],
-                $validatedData['daerah_sekolah'],
+                $validatedData['alamat_sekolah'],
+                $validatedData['kode_daerah'],
                 $validatedData['latitude_sekolah'],
                 $validatedData['longitude_sekolah'],
-                $sekolah_id
+                $npsn
             ]);
 
             return response()->json([
@@ -284,10 +331,10 @@ class SekolahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($sekolah_id)
+    public function destroy($npsn)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_id)->firstOrFail();
+            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->firstOrFail();
 
             if ($sekolah) {
                 $sekolah->delete();

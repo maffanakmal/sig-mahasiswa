@@ -85,26 +85,24 @@ class UsersController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'nama_user' => [
-                    'required',
-                    'string',
-                    'max:100',
-                    'regex:/^[a-zA-Z0-9\s.,-]+$/'
-                ],
+                'nama_user' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
                 'username' => 'required|string|max:50|unique:users,username',
                 'password' => 'required|string|min:5|max:60|confirmed',
                 'role' => 'required|in:BAAKPSI,Warek 3,PMB',
             ], [
-                'nama_user.required' => 'Nama user tidak boleh kosong.',
-                'nama_user.regex' => 'Nama user tidak boleh mengandung karakter khusus.',
-                'nama_user.max' => 'Nama user tidak boleh lebih dari 100 karakter.',
-                'username.required' => 'Username wajib diisi.',
+                'nama_user.required' => 'Nama pengguna harus diisi.',
+                'nama_user.regex' => 'Nama pengguna tidak boleh mengandung karakter khusus.',
+                'nama_user.max' => 'Nama pengguna tidak boleh lebih dari 100 karakter.',
+
+                'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
-                'password.required' => 'Password wajib diisi.',
+
+                'password.required' => 'Password harus diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.confirmed' => 'Konfirmasi password tidak cocok.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
+
                 'role.required' => 'Role harus dipilih.',
                 'role.in' => 'Role yang dipilih tidak valid.',
             ]);
@@ -229,20 +227,19 @@ class UsersController extends Controller
             }
 
             DB::update("
-                UPDATE users SET 
-                    nama_user = ?, 
-                    username = ?,
-                    password = ?, 
-                    role = ?,
-                WHERE user_uuid = ?
-            ", [
+    UPDATE users SET 
+        nama_user = ?, 
+        username = ?,
+        password = ?, 
+        role = ?
+    WHERE user_uuid = ?
+", [
                 $validatedData['nama_user'],
                 $validatedData['username'],
                 $hashedPassword,
                 $validatedData['role'],
                 $user_id
             ]);
-
 
             return response()->json([
                 "status" => 200,

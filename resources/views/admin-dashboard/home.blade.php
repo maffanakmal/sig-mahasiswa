@@ -5,18 +5,54 @@
         <h3 class="fw-bold fs-4 mb-3">Dashboard</h3>
     </div>
     <div class="row">
+        @if (session('loggedInUser')['role'] === 'BAAKPSI')
         <div class="col-md-3">
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-                                <img src="{{ asset('img/graduating-student.png') }}" alt="#">
+                                <img src="{{ asset('img/programmer.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
-                            <h6 class="card-title">Mahasiswa</h6>
-                            <p class="card-text" id="mahasiswaCount"></p>
+                            <h6 class="card-title">Pengguna</h6>
+                            <p class="card-text" id="penggunaCount"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="icon-card-wrapper">
+                                <img src="{{ asset('img/map.png') }}" alt="#">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="card-title">Daerah</h6>
+                            <p class="card-text" id="daerahCount"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="icon-card-wrapper">
+                                <img src="{{ asset('img/school.png') }}" alt="#">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="card-title">Sekolah</h6>
+                            <p class="card-text" id="sekolahAsalCount"></p>
                         </div>
                     </div>
                 </div>
@@ -45,29 +81,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="icon-card-wrapper">
-                                <img src="{{ asset('img/school.png') }}" alt="#">
+                                <img src="{{ asset('img/graduating-student.png') }}" alt="#">
                             </div>
                         </div>
                         <div class="col-6">
-                            <h6 class="card-title">Sekolah Asal</h6>
-                            <p class="card-text" id="sekolahAsalCount"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="icon-card-wrapper">
-                                <img src="{{ asset('img/map.png') }}" alt="#">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <h6 class="card-title">Daerah</h6>
-                            <p class="card-text" id="daerahCount"></p>
+                            <h6 class="card-title">Mahasiswa</h6>
+                            <p class="card-text" id="mahasiswaCount"></p>
                         </div>
                     </div>
                 </div>
@@ -95,6 +114,7 @@
                         $('#jurusanCount').text(response.jurusan);
                         $('#sekolahAsalCount').text(response.asal_sekolah);
                         $('#daerahCount').text(response.daerah);
+                        $('#penggunaCount').text(response.pengguna);
                     }
                 },
                 error: function(xhr) {

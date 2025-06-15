@@ -14,36 +14,57 @@ class MahasiswaImport implements ToCollection
 {
     public function collection(Collection $collection)
     {
-        // Ambil semua referensi satu kali untuk efisiensi
-        $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')->toArray();
-        $jurusanList = Jurusan::pluck('kode_jurusan', 'nama_jurusan')->toArray();
-        $sekolahList = Sekolah::pluck('sekolah_id', 'nama_sekolah')->toArray();
-
         $data = [];
-        $index = 1;
 
-        foreach ($collection as $row) {
-            if ($index > 1) {
-                $namaDaerah = $row[4] ?? '';
-                $kodeDaerah = $daerahList[$namaDaerah] ?? null;
+        // Ambil referensi dan ubah key menjadi lowercase
+        $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')
+            ->mapWithKeys(fn($kode, $nama) => [strtolower(trim($nama)) => $kode])
+            ->toArray();
 
-                $namaJurusan = $row[2] ?? '';
-                $kodeJurusan = $jurusanList[$namaJurusan] ?? null;
+        $jurusanList = Jurusan::pluck('kode_jurusan', 'nama_jurusan')
+            ->mapWithKeys(fn($kode, $nama) => [strtolower(trim($nama)) => $kode])
+            ->toArray();
 
-                $namaSekolah = $row[3] ?? '';
-                $kodeSekolah = $sekolahList[$namaSekolah] ?? null;
+        $sekolahList = Sekolah::pluck('npsn', 'nama_sekolah')
+            ->mapWithKeys(fn($npsn, $nama) => [strtolower(trim($nama)) => $npsn])
+            ->toArray();
 
-                $data[] = [
-                    'mahasiswa_uuid' => Str::uuid(),
-                    'nim' => $row[0] ?? '',
-                    'tahun_masuk' => $row[1] ?? '',
-                    'jurusan' => $kodeJurusan,
-                    'sekolah_asal' => $kodeSekolah,
-                    'daerah_asal' => $kodeDaerah,
-                ];
+        // Ambil NIM yang sudah ada untuk hindari duplikat
+        $existingNIMs = Mahasiswa::pluck('nim')->toArray();
+        $processedNIMs = [];
+
+        foreach ($collection as $index => $row) {
+            if ($index === 0 || !isset($row[0]) || !is_numeric($row[0])) {
+                continue;
             }
 
-            $index++;
+            $nim = trim((string)$row[0]);
+            $tahunMasuk = (int)($row[1] ?? 0);
+
+            $namaJurusan = strtolower(trim($row[2] ?? ''));
+            $kodeJurusan = $jurusanList[$namaJurusan] ?? null;
+
+            $namaSekolah = strtolower(trim($row[3] ?? ''));
+            $npsn = $sekolahList[$namaSekolah] ?? null;
+
+            $namaDaerah = strtolower(trim($row[4] ?? ''));
+            $kodeDaerah = $daerahList[$namaDaerah] ?? null;
+
+            // Hindari NIM duplikat
+            if (in_array($nim, $existingNIMs) || in_array($nim, $processedNIMs)) {
+                continue;
+            }
+
+            $data[] = [
+                'mahasiswa_uuid' => Str::uuid(),
+                'nim' => $nim,
+                'tahun_masuk' => $tahunMasuk,
+                'kode_jurusan' => $kodeJurusan,
+                'npsn' => $npsn,
+                'kode_daerah' => $kodeDaerah,
+            ];
+
+            $processedNIMs[] = $nim;
         }
 
         if (!empty($data)) {

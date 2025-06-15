@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Kota;
+use App\Models\User;
 use App\Models\Daerah;
+use App\Models\Jurusan;
+use App\Models\Sekolah;
 use App\Models\Kelurahan;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
@@ -16,19 +19,22 @@ class HomeController extends Controller
     {
         return view('admin-dashboard.home', [
             'title' => 'Home Page',
+            'status' => 'active',
         ]);
     }
 
     public function dataCount()
     {
         try {
+            $pengguna = User::count();
             $mahasiswa = Mahasiswa::count();
-            $asal_sekolah = DB::table('mahasiswa')->distinct('sekolah_asal')->count('sekolah_asal');
-            $jurusan = DB::table('mahasiswa')->distinct('jurusan')->count('jurusan');
+            $asal_sekolah = Sekolah::count();
+            $jurusan = Jurusan::count();
             $daerah = Daerah::count();
 
             return response()->json([
                 'status' => 200,
+                'pengguna' => $pengguna,
                 'daerah' => $daerah,
                 'mahasiswa' => $mahasiswa,
                 'asal_sekolah' => $asal_sekolah,

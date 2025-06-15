@@ -16,28 +16,58 @@ class SekolahImport implements ToCollection
      */
     public function collection(Collection $collection)
     {
-        $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')->toArray();
-
         $data = [];
-        $index = 1;
 
-        foreach ($collection as $row) {
-            if ($index > 1) {
-                $namaDaerah = $row[1] ?? '';
-                $kodeDaerah = $daerahList[$namaDaerah] ?? null;
+        // Ambil semua NPSN yang sudah ada di database
+        $existingNpsn = Sekolah::pluck('npsn')->toArray();
 
-                $data[] = [
-                    'sekolah_uuid' => Str::uuid(),
-                    'nama_sekolah' => $row[0] ?? '',
-                    'daerah_sekolah' => $kodeDaerah,
-                    'latitude_sekolah' => $row[2] ?? '',
-                    'longitude_sekolah' => $row[3] ?? '',
-                ];
+        // Ambil semua nama daerah dari database dan ubah ke lowercase
+        $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')
+            ->mapWithKeys(function ($kode, $nama) {
+                return [strtolower(trim($nama)) => $kode];
+            })
+            ->toArray();
+
+        // Simpan NPSN yang sudah diproses dari file Excel
+        $processedNpsn = [];
+
+        foreach ($collection as $index => $row) {
+            // Lewati baris pertama (header)
+            if ($index === 0) {
+                continue;
             }
 
-            $index++;
+            $npsn = $row[0] ?? null;
+
+            // Validasi: hanya proses baris dengan NPSN numerik
+            if (!is_numeric($npsn)) {
+                continue;
+            }
+
+            $npsn = (int) $npsn;
+
+            // Skip jika NPSN sudah ada di DB atau sudah diproses di file ini
+            if (in_array($npsn, $existingNpsn) || in_array($npsn, $processedNpsn)) {
+                continue;
+            }
+
+            $namaDaerah = strtolower(trim($row[3] ?? ''));
+            $kodeDaerah = $daerahList[$namaDaerah] ?? null;
+
+            $data[] = [
+                'sekolah_uuid' => Str::uuid(),
+                'npsn' => $npsn,
+                'nama_sekolah' => $row[1] ?? '',
+                'alamat_sekolah' => $row[2] ?? '',
+                'kode_daerah' => $kodeDaerah,
+                'latitude_sekolah' => $row[4] ?? null,
+                'longitude_sekolah' => $row[5] ?? null,
+            ];
+
+            $processedNpsn[] = $npsn;
         }
 
+        // Insert jika ada data valid
         if (!empty($data)) {
             Sekolah::insert($data);
         }

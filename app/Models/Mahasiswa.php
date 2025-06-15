@@ -21,23 +21,23 @@ class Mahasiswa extends Model
         'mahasiswa_uuid',
         'nim',
         'tahun_masuk',
-        'jurusan',
-        'sekolah_asal',
+        'kode_jurusan',
+        'npsn',
         'daerah_asal',
     ];
 
     public function daerah()
     {
-        return $this->belongsTo(Daerah::class, 'daerah_asal', 'kode_daerah');
+        return $this->belongsTo(Daerah::class, 'kode_daerah', 'kode_daerah');
     }
 
     public function jurusan()
     {
-        return $this->belongsTo(Jurusan::class, 'jurusan', 'kode_jurusan');
+        return $this->belongsTo(Jurusan::class, 'kode_jurusan', 'kode_jurusan');
     }
 
     public function sekolah()
     {
-        return $this->belongsTo(Sekolah::class, 'sekolah_asal', 'sekolah_id');
+        return $this->belongsTo(Sekolah::class, 'npsn', 'npsn');
     }
 }

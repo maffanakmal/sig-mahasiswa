@@ -11,27 +11,29 @@ class Sekolah extends Model
 
     protected $table = 'sekolah';
 
-    protected $primaryKey = 'sekolah_id';
+    protected $primaryKey = 'npsn';
 
-    public $incrementing = true;
+    public $incrementing = false;
 
     protected $keyType = 'integer';
 
     protected $fillable = [
+        'npsn',
         'sekolah_uuid',
         'nama_sekolah',
-        'daerah_sekolah',
-        'latitude',
-        'longitude',
+        'alamat_sekolah',
+        'kode_daerah',
+        'latitude_daerah',
+        'longitude_daerah',
     ];
 
     public function daerah()
     {
-        return $this->belongsTo(Daerah::class, 'daerah_sekolah', 'kode_daerah');
+        return $this->belongsTo(Daerah::class, 'kode_daerah', 'kode_daerah');
     }
 
     public function mahasiswa()
     {
-        return $this->hasMany(Mahasiswa::class, 'sekolah_asal', 'sekolah_id');
+        return $this->hasMany(Mahasiswa::class, 'npsn', 'npsn');
     }
 }

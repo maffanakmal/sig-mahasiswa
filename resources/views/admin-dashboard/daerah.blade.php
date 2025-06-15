@@ -4,14 +4,13 @@
     <div class="mb-0">
         <h3 class="fw-bold fs-4 mb-3">Daftar Daerah</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <strong>Info!</strong> Untuk mengimpor data daerah, silakan unduh template <a
+            <strong>Info!</strong> Untuk mengimport data daerah, silakan unduh template <a
                 href="{{ asset('template/daerah_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <p class="mb-2">Import Excel Daerah</p>
-        <form action="#" id="importDaerahForm" enctype="multipart/form-data"
-            class="d-flex align-items-end gap-2 mb-3">
+        <form action="#" id="importDaerahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_daerah" id="import_daerah"
@@ -35,8 +34,8 @@
                             <th class="th-number">No</th>
                             <th>Kode Daerah</th>
                             <th>Nama Daerah</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
+                            <th>Latitude Daerah</th>
+                            <th>Longitude Daerah</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -70,28 +69,28 @@
                                     <label for="kode_daerah" class="form-label">Kode Daerah</label>
                                     <input type="text" class="form-control" id="kode_daerah"
                                         placeholder="Masukkan Kode Daerah" name="kode_daerah"
-                                        value="{{ old('kode_daerah') }}" autofocus required>
+                                        value="{{ old('kode_daerah') }}">
                                     <div class="invalid-feedback" id="error-kode_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_daerah" class="form-label">Nama Daerah</label>
                                     <input type="text" class="form-control" id="nama_daerah"
                                         placeholder="Masukkan Nama Daerah" name="nama_daerah"
-                                        value="{{ old('nama_daerah') }}" required>
+                                        value="{{ old('nama_daerah') }}">
                                     <div class="invalid-feedback" id="error-nama_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="latitude_daerah" class="form-label">Latitude</label>
+                                    <label for="latitude_daerah" class="form-label">Latitude Daerah</label>
                                     <input type="text" class="form-control" id="latitude_daerah"
-                                        placeholder="Masukkan Latitude" name="latitude_daerah" value="{{ old('latitude_daerah') }}"
-                                        required>
+                                        placeholder="Masukkan Latitude" name="latitude_daerah"
+                                        value="{{ old('latitude_daerah') }}">
                                     <div class="invalid-feedback" id="error-latitude_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="longitude_daerah" class="form-label">Longitude</label>
+                                    <label for="longitude_daerah" class="form-label">Longitude Daerah</label>
                                     <input type="text" class="form-control" id="longitude_daerah"
-                                        placeholder="Masukkan Longitude" name="longitude_daerah" value="{{ old('longitude_daerah') }}"
-                                        required>
+                                        placeholder="Masukkan Longitude" name="longitude_daerah"
+                                        value="{{ old('longitude_daerah') }}">
                                     <div class="invalid-feedback" id="error-longitude_daerah"></div>
                                 </div>
                                 <div class="modal-footer px-0">
@@ -119,29 +118,27 @@
             var daerahModal = document.getElementById('daerahModal');
             daerahModal.addEventListener('shown.bs.modal', function() {
                 if (!map) {
+                    // Inisialisasi peta dan marker...
                     map = L.map('mapInput').setView(defaultCenter, defaultZoom);
-
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
 
-                    // Tambah marker draggable
                     marker = L.marker(defaultCenter, {
                         draggable: true
-                    }).addTo(map);
-
-                    // Update input ketika marker digeser
+                    });
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
                         document.getElementById('latitude_daerah').value = latlng.lat;
                         document.getElementById('longitude_daerah').value = latlng.lng;
                     });
 
-                    // Set nilai awal input
-                    document.getElementById('latitude_daerah').value = defaultCenter[0];
-                    document.getElementById('longitude_daerah').value = defaultCenter[1];
+                    // Tambahkan marker hanya jika belum ada di map
+                    if (!map.hasLayer(marker)) {
+                        map.addLayer(marker);
+                    }
 
-                    // Kontrol tombol reset
+                    // Reset Control ...
                     var resetControl = L.control({
                         position: 'topleft'
                     });
@@ -153,19 +150,47 @@
                         div.onclick = function() {
                             map.setView(defaultCenter, defaultZoom);
                             marker.setLatLng(defaultCenter);
-
-                            // Update input juga
                             document.getElementById('latitude_daerah').value = defaultCenter[0];
                             document.getElementById('longitude_daerah').value = defaultCenter[1];
                         };
                         return div;
                     };
                     resetControl.addTo(map);
-
                 } else {
                     map.invalidateSize();
                 }
+
+                // Tampilkan marker jika belum
+                if (!map.hasLayer(marker)) {
+                    map.addLayer(marker);
+                }
+
+                if (method === 'create') {
+                    document.getElementById('latitude_daerah').value = '';
+                    document.getElementById('longitude_daerah').value = '';
+                    marker.setLatLng(defaultCenter);
+                    map.setView(defaultCenter, defaultZoom);
+                }
+
+                // if (method === 'update' && pendingLatLng) {
+                //     // Jika ada pendingLatLng, set marker dan view ke lokasi tersebut
+                //     document.getElementById('latitude_daerah').value = pendingLatLng[0];
+                //     document.getElementById('longitude_daerah').value = pendingLatLng[1];
+                //     // Set marker dan view ke pendingLatLng
+                //     pendingZoom = pendingZoom || defaultZoom; // Gunakan pendingZoom jika ada, atau defaultZoom
+
+                //     marker.setLatLng(pendingLatLng);
+                //     map.setView(pendingLatLng, pendingZoom);
+                //     pendingLatLng = null; // reset agar tidak tertimpa
+                // }
             });
+
+            daerahModal.addEventListener('hidden.bs.modal', function() {
+                // Reset pendingLatLng dan pendingZoom saat modal ditutup
+                pendingLatLng = null;
+                pendingZoom = defaultZoom;
+            });
+
 
             daerahTable();
         });
@@ -181,7 +206,9 @@
                 ajax: '{{ route('daerah.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'kode_daerah',
@@ -346,7 +373,7 @@
 
                         Swal.fire({
                             icon: errorResponse.icon || "error",
-                            title: errorResponse.message || "Validasi Gagal",
+                            title: errorResponse.message || "Import Gagal",
                             text: allErrors,
                             showConfirmButton: true
                         });
@@ -381,19 +408,13 @@
                     $('#latitude_daerah').val(response.daerah.latitude_daerah);
                     $('#longitude_daerah').val(response.daerah.longitude_daerah);
 
-                    let lat = response.daerah.latitude_daerah;
-                    let lng = response.daerah.longitude_daerah;
-
-                    if (marker) {
-                        marker.setLatLng([lat, lng]);
-                    }
-
-                    if (map) {
-                        map.setView([lat, lng], 12); // bisa sesuaikan zoom level
-                    }
+                    // var lat = parseFloat(response.daerah.latitude_daerah);
+                    // var lng = parseFloat(response.daerah.longitude_daerah);
+                    // pendingLatLng = [lat, lng];
+                    // pendingZoom = defaultZoom;
                 },
                 error: function(xhr) {
-                    if (xhr.status === 422) { // 422 = Error Validasi Laravel
+                    if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
                             let inputField = $('[name="' + key + '"]');
@@ -408,9 +429,8 @@
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
-
                     } else {
-                        let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                        let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
                             icon: errorResponse.icon || "error",
@@ -425,6 +445,7 @@
             $('#daerahModalLabel').text('Edit Data Daerah');
             $('#saveBtn').text('Ubah');
         }
+
 
         function deleteDaerah(e) {
             let kode_daerah = e.getAttribute('data-id');

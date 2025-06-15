@@ -40,15 +40,15 @@
                         @csrf
                         <input type="hidden" name="user_id" id="user_id">
                         <div class="form-group mb-3">
-                            <label for="nama_user" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="nama_user" placeholder="Masukkan Nama"
-                                name="nama_user" value="{{ old('nama_user') }}" pattern="[a-zA-Z0-9\s.,-]+" required>
+                            <label for="nama_user" class="form-label">Nama Pengguna</label>
+                            <input type="text" class="form-control" id="nama_user" placeholder="Masukkan Nama Pengguna"
+                                name="nama_user" value="{{ old('nama_user') }}">
                             <div class="invalid-feedback" id="error-nama_user"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" placeholder="Masukkan Username"
-                                name="username" value="{{ old('username') }}" required>
+                                name="username" value="{{ old('username') }}">
                             <div class="invalid-feedback" id="error-username"></div>
                         </div>
                         <!-- Password -->
@@ -70,7 +70,7 @@
                             <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" placeholder="Konfirmasi Password">
+                                    name="password_confirmation" placeholder="Masukkan Ulang Passowrd">
                                 <span class="input-group-text toggle-password" data-target="password_confirmation"
                                     style="cursor: pointer;">
                                     <i class='bx bx-show'></i>
@@ -83,6 +83,7 @@
                             <select id="role" name="role" class="form-control select-role">
                                 <option value="" selected disabled>Pilih Role</option>
                             </select>
+                            <div class="invalid-feedback" id="error-role"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
@@ -343,7 +344,7 @@
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
                 confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal",
+                cancelButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({

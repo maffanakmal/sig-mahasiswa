@@ -117,6 +117,13 @@ table.dataTable td {
 
 /* End reset */
 
+.navbar-landing {
+    background-color: var(--secondary-color);
+}
+
+.footer-landing {
+    background-color: var(--secondary-color);
+}
 
 .main-wrapper {
     display: flex;
@@ -244,6 +251,10 @@ a.sidebar-link:hover {
     font-size: .9rem;
 }
 
+.status-active {
+    background-color: var(--secondary-color);
+    border-left: 3px solid var(--secondary-color);
+}
 
 #dashboard-sidebar:not(.active) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
     display: block;
@@ -283,6 +294,7 @@ a.sidebar-link:hover {
     align-items: center;
     z-index: 1000;
     transition: all 0.25s ease-in-out;
+    padding-right: 10px;
 }
 
 #dashboard-sidebar.active + .main .navbar {

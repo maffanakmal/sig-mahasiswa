@@ -26,6 +26,7 @@ class AuthController extends Controller
             ], [
                 'username.required' => 'Username wajib diisi.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',

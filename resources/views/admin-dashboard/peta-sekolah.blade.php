@@ -7,39 +7,65 @@
     <div class="card shadow-sm">
         <div class="card-header mb-2">
             @if (session('loggedInUser')['role'] === 'Warek 3')
-            <p class="mb-2">Filter Data</p>
-            <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
-                @csrf
+                <p class="mb-2">Filter Data</p>
+                <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
+                    @csrf
 
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="tahun_masuk" name="tahun_masuk" class="form-control">
-                        <option value="" selected disabled>Tahun Masuk</option>
-                    </select>
-                </div>
+                    <div class="form-group" style="min-width: 180px;">
+                        <select id="tahun_masuk" name="tahun_masuk" class="form-control">
+                            <option value="" selected disabled>Tahun Masuk</option>
+                        </select>
+                    </div>
 
-                <div class="form-group" style="min-width: 180px;">
-                    <select id="jurusan" name="jurusan" class="form-control">
-                        <option value="" selected disabled>Jurusan</option>
-                    </select>
-                </div>
+                    <div class="form-group" style="min-width: 180px;">
+                        <select id="jurusan" name="jurusan" class="form-control">
+                            <option value="" selected disabled>Jurusan</option>
+                        </select>
+                    </div>
 
-                <div>
-                    <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
-                </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
+                    </div>
 
-                <div>
-                    <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
-                </div>
-            </form>
+                    <div>
+                        <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+                    </div>
+                </form>
             @endif
         </div>
         <div class="card-body">
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
-                <p>Jumlah mahasiswa yang tampil: <span>0</span></p>
             </div>
         </div>
     </div>
+    <div class="container-fluid mt-3">
+        <div class="row text-center">
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Mahasiswa di Peta</h6>
+                        <h3 class="text-primary" id="jumlah-tampil">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Sekolah Tidak Ada</h6>
+                        <h3 class="text-warning" id="jumlah-sekolah-null">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Jurusan Tidak Ada</h6>
+                        <h3 class="text-danger" id="jumlah-jurusan-null">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -217,8 +243,18 @@
                         clearCircleMarkers();
 
                         const groupedData = {};
+                        let countTampil = 0;
+                        let countSekolahNull = 0;
+                        let countJurusanNull = 0;
 
                         mahasiswa.forEach(data => {
+                            if (!data.sekolah) {
+                                countSekolahNull++;
+                            }
+                            if (!data.jurusan) {
+                                countJurusanNull++;
+                            }
+
                             if (!data.sekolah) return;
                             const sekolah = data.sekolah.nama_sekolah;
                             const lat = data.sekolah.latitude_sekolah;
@@ -240,7 +276,14 @@
                                 groupedData[sekolah].jurusan[jurusanName] = 0;
                             }
                             groupedData[sekolah].jurusan[jurusanName]++;
+
+                            countTampil++;
                         });
+
+                        $('#jumlah-tampil').text(countTampil);
+                        $('#jumlah-sekolah-null').text(countSekolahNull);
+                        $('#jumlah-jurusan-null').text(countJurusanNull);
+
 
                         renderMarkers(groupedData);
                     }
@@ -272,8 +315,10 @@
 
                         // Populate Jurusan
                         response.jurusan.forEach(function(item) {
-                        $('#jurusan').append(`<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
-                    });
+                            $('#jurusan').append(
+                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`
+                            );
+                        });
 
                     }
                 },
@@ -318,8 +363,8 @@
                         mahasiswa.forEach(data => {
                             if (!data.nama_sekolah) return;
                             const school = data.nama_sekolah;
-                            const lat = data.latitude;
-                            const lng = data.longitude;
+                            const lat = data.latitude_sekolah;
+                            const lng = data.longitude_sekolah;
 
                             if (!groupedData[school]) {
                                 groupedData[school] = {
@@ -330,7 +375,7 @@
                                 };
                             }
                             groupedData[school].count += data
-                            .total; // karena sudah grouped di SQL
+                                .total; // karena sudah grouped di SQL
 
                             const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
                             if (!groupedData[school].jurusan[jurusanName]) {

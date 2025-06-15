@@ -74,8 +74,8 @@ class DataController extends Controller
             ]);
 
             $query = DB::table('mahasiswa')
-                ->leftJoin('daerah', 'mahasiswa.daerah_asal', '=', 'daerah.kode_daerah')
-                ->leftJoin('jurusan', 'mahasiswa.jurusan', '=', 'jurusan.kode_jurusan')
+                ->leftJoin('daerah', 'mahasiswa.kode_daerah', '=', 'daerah.kode_daerah')
+                ->leftJoin('jurusan', 'mahasiswa.kode_jurusan', '=', 'jurusan.kode_jurusan')
                 ->select(
                     'daerah.nama_daerah',
                     'daerah.latitude_daerah',
@@ -95,7 +95,7 @@ class DataController extends Controller
             }
 
             if ($request->jurusan) {
-                $query->where('mahasiswa.jurusan', $request->jurusan);
+                $query->where('mahasiswa.kode_jurusan', $request->jurusan);
             }
 
             $mahasiswa = $query->get();
@@ -123,8 +123,8 @@ class DataController extends Controller
             ]);
 
             $query = DB::table('mahasiswa')
-                ->leftJoin('sekolah', 'mahasiswa.sekolah_asal', '=', 'sekolah.sekolah_id')
-                ->leftJoin('jurusan', 'mahasiswa.jurusan', '=', 'jurusan.kode_jurusan')
+                ->leftJoin('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
+                ->leftJoin('jurusan', 'mahasiswa.kode_jurusan', '=', 'jurusan.kode_jurusan')
                 ->select(
                     'sekolah.nama_sekolah',
                     'sekolah.latitude_sekolah',
@@ -144,7 +144,7 @@ class DataController extends Controller
             }
 
             if ($request->jurusan) {
-                $query->where('mahasiswa.jurusan', $request->jurusan);
+                $query->where('mahasiswa.kode_jurusan', $request->jurusan);
             }
 
             $mahasiswa = $query->get();

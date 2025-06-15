@@ -2,14 +2,14 @@
 
 @section('child-content')
     <div class="mb-0">
-        <h3 class="fw-bold fs-4 mb-3">Daftar Program Studi</h3>
+        <h3 class="fw-bold fs-4 mb-3">Daftar Jurusan</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <strong>Info!</strong> Untuk mengimpor data program studi, silakan unduh template <a
+            <strong>Info!</strong> Untuk mengimpor data jurusan, silakan unduh template <a
                 href="{{ asset('template/jurusan_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <p class="mb-2">Import Excel Program Studi</p>
+        <p class="mb-2">Import Excel Jurusan</p>
         <form action="#" id="importJurusanForm" enctype="multipart/form-data"
             class="d-flex align-items-end gap-2 mb-3">
             @csrf
@@ -33,8 +33,8 @@
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>Kode Program Studi</th>
-                            <th>Nama Program Studi</th>
+                            <th>Kode Jurusan</th>
+                            <th>Nama Jurusan</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -58,14 +58,14 @@
                         @csrf
                         <input type="hidden" name="jurusan_edit" id="jurusan_edit">
                         <div class="form-group mb-3">
-                            <label for="kode_jurusan" class="form-label">Kode Program Studi</label>
-                            <input type="text" class="form-control" id="kode_jurusan" placeholder="Masukkan Kode Program Studi"
+                            <label for="kode_jurusan" class="form-label">Kode Jurusan</label>
+                            <input type="text" class="form-control" id="kode_jurusan" placeholder="Masukkan Kode Jurusan"
                                 name="kode_jurusan" value="{{ old('kode_jurusan') }}" required>
                             <div class="invalid-feedback" id="error-kode_jurusan"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="nama_jurusan" class="form-label">Nama Program Studi</label>
-                            <input type="text" class="form-control" id="nama_jurusan" placeholder="Masukkan Nama Program Studi"
+                            <label for="nama_jurusan" class="form-label">Nama Jurusan</label>
+                            <input type="text" class="form-control" id="nama_jurusan" placeholder="Masukkan Nama Jurusan"
                                 name="nama_jurusan" value="{{ old('nama_jurusan') }}" required>
                             <div class="invalid-feedback" id="error-nama_jurusan"></div>
                         </div>
@@ -249,19 +249,15 @@
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) { // 422 = Validation Error
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            let inputField = $('[name="' + key + '"]');
-                            let errorField = $('#error-' + key);
-                            inputField.addClass('is-invalid');
-                            if (errorField.length) {
-                                errorField.text(value[0]);
-                            }
-                        });
+                        let errorResponse = xhr.responseJSON;
 
-                        $('.form-control').on('input', function() {
-                            $(this).removeClass('is-invalid');
-                            $('#error-' + $(this).attr('name')).text('');
+                        let allErrors = Object.values(errorResponse.errors).flat().join('\n');
+
+                        Swal.fire({
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.message || "Import Gagal",
+                            text: allErrors,
+                            showConfirmButton: true
                         });
 
                     } else {
