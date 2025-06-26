@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sekolah', function (Blueprint $table) {
-            $table->bigInteger('npsn')->unsigned()->primary();
+            $table->integer('npsn')->unsigned()->primary();
             $table->uuid('sekolah_uuid')->unique();
             $table->string('nama_sekolah', 100);
             $table->string('alamat_sekolah', 255);
-            $table->bigInteger('kode_daerah')->unsigned()->nullable();
+            $table->smallInteger('kode_daerah')->unsigned()->nullable();
             $table->string('latitude_sekolah', 20);
             $table->string('longitude_sekolah', 20);
 

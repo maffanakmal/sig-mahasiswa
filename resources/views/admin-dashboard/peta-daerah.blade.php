@@ -114,7 +114,7 @@
 
         legend.onAdd = function(map) {
             const div = L.DomUtil.create('div', 'info legend');
-            const grades = [0, 5, 10, 15, 20];
+            const grades = [1, 5, 10, 15, 20];
             const colors = [
                 "#FF9F00",
                 "#522546",
@@ -181,7 +181,9 @@
 
         $(document).ready(function() {
             mapFilter();
-            showDaerah()
+            showDaerah();
+            selectJurusan();
+            selectTahunMasuk();
         });
 
         function clearCircleMarkers() {
@@ -212,19 +214,21 @@
                         fillOpacity: 0.7
                     })
                     .bindPopup(`
-                <strong>${label}</strong><br>
-                Jumlah Mahasiswa: ${count}<br>
-                Jurusan:<br>
-                <ul style="margin: 0; padding-left: 18px;">
-                    ${jurusanList}
-                </ul>
-            `)
+    <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 1.4;">
+        <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${label}</div>
+        <div><strong>Jumlah Mahasiswa:</strong> ${count}</div>
+        <div style="margin-top: 5px;"><strong>Jurusan:</strong></div>
+        <ul style="margin: 4px 0 0 16px; padding: 0; list-style-type: disc;">
+            ${jurusanList}
+        </ul>
+    </div>
+`)
                     .on('mouseover', function() {
                         this.openPopup();
                     })
-                    .on('mouseout', function() {
-                        this.closePopup();
-                    })
+                    // .on('mouseout', function() {
+                    //     this.closePopup();
+                    // })
                     .addTo(map);
             });
         }
@@ -289,10 +293,21 @@
                         $('#jumlah-jurusan-null').text(countJurusanNull);
 
                         renderMarkers(groupedData);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message || 'Gagal mengambil data daerah.',
+                        });
                     }
                 },
                 error: function(xhr) {
-                    console.error("Gagal memuat data daerah:", xhr);
+                    console.error("AJAX error:", xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kesalahan Server',
+                        text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+                    });
                 }
             });
         }
@@ -339,8 +354,65 @@
             });
         }
 
+        function selectJurusan() {
+            $('#jurusan').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                minimumInputLength: 0, // Allow search immediately
+                dropdownParent: $('#jurusan').parent(), // Ensures proper z-index handling
+                language: {
+                    noResults: function() {
+                        return "Tidak ada hasil yang ditemukan";
+                    },
+                    searching: function() {
+                        return "Mencari...";
+                    }
+                }
+            }).on('select2:open', function() {
+                // Focus the search field when opened
+                setTimeout(function() {
+                    $('.select2-search__field').focus();
+                }, 0);
+            });
+        }
+
+        function selectTahunMasuk() {
+            $('#tahun_masuk').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                minimumInputLength: 0, // Allow search immediately
+                dropdownParent: $('#tahun_masuk').parent(), // Ensures proper z-index handling
+                language: {
+                    noResults: function() {
+                        return "Tidak ada hasil yang ditemukan";
+                    },
+                    searching: function() {
+                        return "Mencari...";
+                    }
+                }
+            }).on('select2:open', function() {
+                // Focus the search field when opened
+                setTimeout(function() {
+                    $('.select2-search__field').focus();
+                }, 0);
+            });
+        }
+
         $('#mapFilterForm').on('submit', function(e) {
             e.preventDefault();
+
+            const tahunMasuk = $('#tahun_masuk option:selected').val();
+            const jurusan = $('#jurusan option:selected').val();
+
+            // Validasi jika titik awal atau akhir kosong
+            if (!tahunMasuk || !jurusan) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Silakan pilih Tahun Masuk dan Jurusan terlebih dahulu.',
+                });
+                return;
+            }
 
             const formData = new FormData(this);
             const url = '{{ route('dashboard.peta.filter.show.daerah') }}';
@@ -358,13 +430,13 @@
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
-                        // Hapus marker lama
                         clearCircleMarkers();
 
                         const groupedData = {};
 
                         mahasiswa.forEach(data => {
                             if (!data.nama_daerah) return;
+
                             const city = data.nama_daerah;
                             const lat = data.latitude_daerah;
                             const lng = data.longitude_daerah;
@@ -377,8 +449,8 @@
                                     longitude: lng
                                 };
                             }
-                            groupedData[city].count += data
-                                .total; // karena sudah grouped di SQL
+
+                            groupedData[city].count += data.total;
 
                             const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
                             if (!groupedData[city].jurusan[jurusanName]) {
@@ -387,18 +459,45 @@
                             groupedData[city].jurusan[jurusanName] += data.total;
                         });
 
-
                         renderMarkers(groupedData);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message || 'Gagal mengambil data daerah.',
+                        });
                     }
                 },
                 error: function(xhr) {
                     console.error("AJAX error:", xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kesalahan Server',
+                        text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+                    });
                 }
             });
         });
 
+
         $('#resetFilterBtn').on('click', function() {
+            const tahunMasuk = $('#tahun_masuk option:selected').val();
+            const jurusan = $('#jurusan option:selected').val();
+
+            // Validasi jika titik awal atau akhir kosong
+            if (!tahunMasuk || !jurusan) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Anda belum melakukan filter data.',
+                });
+                return;
+            }
+
             $('#mapFilterForm')[0].reset();
+
+            $('#jurusan').val('').trigger('change');
+            $('#tahun_masuk').val('').trigger('change');
 
             showDaerah();
         });

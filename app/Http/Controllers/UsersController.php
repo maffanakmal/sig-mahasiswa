@@ -19,12 +19,14 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         $data = [
-            'title' => 'Pengguna Page',
+            'title' => 'USNIGIS | Halaman Pengguna',
             'pengguna' => User::where('user_uuid', $request->user_id)->first([
                 'user_uuid',
                 'nama_user',
                 'username',
+                'email',
                 'role',
+                'is_active',
             ]),
         ];
 
@@ -33,22 +35,31 @@ class UsersController extends Controller
                 'user_uuid',
                 'nama_user',
                 'username',
+                'email',
                 'role',
+                'is_active'
             )
                 ->orderBy('user_uuid', 'DESC')
                 ->get();
 
             return DataTables::of($users)
                 ->addIndexColumn()
+                ->editColumn('status', function ($user) {
+                    return $user->is_active
+                        ? '<span class="badge bg-success">Online</span>'
+                        : '<span class="badge bg-danger">Offline</span>';
+                })
                 ->addColumn('action', function ($user) {
-                    return '<button data-id="' . $user->user_uuid . '" class="btn btn-warning btn-sm" onclick="editUser(this)">
+                    $disabled = $user->is_active ? 'disabled' : '';
+
+                    return '<button data-id="' . $user->user_uuid . '" class="btn btn-warning btn-sm" onclick="editUser(this)" ' . $disabled . '>
                                 <i class="bx bx-pencil"></i>
                             </button>
-                            <button data-id="' . $user->user_uuid . '" class="btn btn-danger btn-sm" onclick="deleteUser(this)">
+                            <button data-id="' . $user->user_uuid . '" class="btn btn-danger btn-sm" onclick="deleteUser(this)" ' . $disabled . '>
                                 <i class="bx bx-trash"></i>
                             </button>';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'status'])
                 ->make(true);
         }
 
@@ -87,12 +98,17 @@ class UsersController extends Controller
             $validatedData = $request->validate([
                 'nama_user' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
                 'username' => 'required|string|max:50|unique:users,username',
+                'email' => 'nullable|email|max:100|unique:users,email',
                 'password' => 'required|string|min:5|max:60|confirmed',
                 'role' => 'required|in:BAAKPSI,Warek 3,PMB',
             ], [
                 'nama_user.required' => 'Nama pengguna harus diisi.',
                 'nama_user.regex' => 'Nama pengguna tidak boleh mengandung karakter khusus.',
                 'nama_user.max' => 'Nama pengguna tidak boleh lebih dari 100 karakter.',
+
+                'email.email' => 'Format email tidak valid.',
+                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.unique' => 'Email sudah digunakan.',
 
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
@@ -114,21 +130,27 @@ class UsersController extends Controller
                 user_uuid, 
                 nama_user,
                 username,
+                email,
                 password,
-                role
-            ) VALUES (?, ?, ?, ?, ?)
+                role,
+                updated_at,
+                created_at,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ", [
                 $user_uuid,
                 $validatedData['nama_user'],
                 $validatedData['username'],
+                $validatedData['email'] ?? null,
                 Hash::make($validatedData['password']),
                 $validatedData['role'],
+                now(),
+                now()
             ]);
 
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data pengguna berhasil ditambahkan.",
+                "message" => "Data pengguna baru berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
         } catch (ValidationException $e) {
@@ -149,13 +171,13 @@ class UsersController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($user_id)
+    public function show($user_uuid)
     {
         try {
-            $user = User::where('user_uuid', $user_id)->select(
-                'user_uuid',
+            $user = User::where('user_uuid', $user_uuid)->select(
                 'nama_user',
                 'username',
+                'email',
                 'password',
                 'role'
             )->firstOrFail();
@@ -185,10 +207,10 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $user_id)
+    public function update(Request $request, $user_uuid)
     {
         try {
-            $user = User::where('user_uuid', $user_id)->firstOrFail(); // Cari user berdasarkan UUID
+            $user = User::where('user_uuid', $user_uuid)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate([
                 'nama_user' => [
@@ -198,12 +220,16 @@ class UsersController extends Controller
                     'regex:/^[a-zA-Z0-9\s.,-]+$/'
                 ],
                 'username' => 'required|string|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
+                'email' => 'nullable|email|max:100|unique:users,email,' . $user->user_uuid . ',user_uuid', // jadikan nullable
                 'password' => 'nullable|string|min:5|max:60|confirmed', // jadikan nullable
                 'role' => 'required|in:BAAKPSI,Warek 3,PMB',
             ], [
                 'nama_user.required' => 'Nama user tidak boleh kosong.',
                 'nama_user.regex' => 'Nama user tidak boleh mengandung karakter khusus.',
                 'nama_user.max' => 'Nama user tidak boleh lebih dari 100 karakter.',
+                'email.email' => 'Format email tidak valid.',
+                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.unique' => 'Email sudah digunakan.',
                 'username.required' => 'Username wajib diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
@@ -230,16 +256,21 @@ class UsersController extends Controller
     UPDATE users SET 
         nama_user = ?, 
         username = ?,
+        email = ?,
         password = ?, 
-        role = ?
+        role = ?,
+        updated_at = ?
     WHERE user_uuid = ?
 ", [
                 $validatedData['nama_user'],
                 $validatedData['username'],
+                $validatedData['email'] ?? null,
                 $hashedPassword,
                 $validatedData['role'],
-                $user_id
+                now(),
+                $user->user_uuid
             ]);
+
 
             return response()->json([
                 "status" => 200,
@@ -265,10 +296,10 @@ class UsersController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($user_id)
+    public function destroy($user_uuid)
     {
         try {
-            $user = User::where('user_uuid', $user_id)->firstOrFail();
+            $user = User::where('user_uuid', $user_uuid)->firstOrFail();
 
             if ($user) {
                 $user->delete();

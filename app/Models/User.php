@@ -21,7 +21,9 @@ class User extends Model
         'user_uuid',
         'nama_user',
         'username',
+        'email',
         'password',
         'role',
+        'is_active',
     ];
 }

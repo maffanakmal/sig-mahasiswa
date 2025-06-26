@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id('user_id');
             $table->uuid('user_uuid')->unique();
-            $table->string('nama_user', 100); // Optional limit
-            $table->string('username', 50)->unique(); // Optional limit
-            $table->string('password', 60); // bcrypt length
+            $table->string('nama_user', 100);
+            $table->string('username', 50)->unique();
+            $table->string('email', 100)->unique()->nullable();
+            $table->string('password', 60);
+            $table->boolean('is_active')->default(0);
+            $table->timestamps();
             $table->enum('role', ['BAAKPSI', 'Warek 3', 'PMB']);
         });
     }

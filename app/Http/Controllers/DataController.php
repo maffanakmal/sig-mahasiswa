@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Daerah;
 use App\Models\Jurusan;
 use App\Models\Mahasiswa;
+use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +29,7 @@ class DataController extends Controller
     public function mapShow()
     {
         try {
-            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah'])->get();
+            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah.daerah'])->get();
 
             return response()->json([
                 'status' => 200,
@@ -49,11 +50,13 @@ class DataController extends Controller
         try {
             $tahunMasuk = Mahasiswa::distinct()->orderBy('tahun_masuk')->pluck('tahun_masuk');
             $jurusan = Jurusan::select('kode_jurusan', 'nama_jurusan')->orderBy('nama_jurusan')->distinct()->get();
+            $sekolah = Sekolah::select('npsn', 'nama_sekolah', 'latitude_sekolah', 'longitude_sekolah')->orderBy('nama_sekolah')->distinct()->get();
 
             return response()->json([
                 'status' => 200,
                 'tahun_masuk' => $tahunMasuk,
                 'jurusan' => $jurusan,
+                'sekolah' => $sekolah,
             ], 200);
         } catch (Exception $e) {
             return response()->json([

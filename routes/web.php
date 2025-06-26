@@ -29,6 +29,8 @@ Route::group(['middleware' => ['guestOnly']], function () {
 
     Route::get('/login', [AuthController::class, 'index'])->name('auth.login');
     Route::post('/login/auth', [AuthController::class, 'login'])->name('login.check');
+    Route::get('/login/reset', [AuthController::class, 'resetPassword'])->name('auth.reset.password');
+    Route::get('/login/reset/form', [AuthController::class, 'formResetPassword'])->name('auth.form.reset');
 });
 
 Route::group(['middleware' => ['loginCheck', 'roleCheck:BAAKPSI,Warek 3,PMB']], function () {
@@ -41,9 +43,9 @@ Route::group(['middleware' => ['loginCheck', 'roleCheck:BAAKPSI']], function () 
     Route::get('/dashboard/pengguna', [UsersController::class, 'index'])->name('pengguna.index');
     Route::get('/dashboard/pengguna/create', [UsersController::class, 'create'])->name('pengguna.create');
     Route::post('/dashboard/pengguna/store', [UsersController::class, 'store'])->name('pengguna.store');
-    Route::get('/dashboard/pengguna/show/{user_id}', [UsersController::class, 'show'])->name('pengguna.show');
-    Route::put('/dashboard/pengguna/update/{user_id}', [UsersController::class, 'update'])->name('pengguna.update');
-    Route::delete('/dashboard/pengguna/destroy/{user_id}', [UsersController::class, 'destroy'])->name('pengguna.destroy');
+    Route::get('/dashboard/pengguna/show/{user_uuid}', [UsersController::class, 'show'])->name('pengguna.show');
+    Route::put('/dashboard/pengguna/update/{user_uuid}', [UsersController::class, 'update'])->name('pengguna.update');
+    Route::delete('/dashboard/pengguna/destroy/{user_uuid}', [UsersController::class, 'destroy'])->name('pengguna.destroy');
 
     Route::get('/dashboard/daerah', [DaerahController::class, 'index'])->name('daerah.index');
     Route::post('/dashboard/daerah/store', [DaerahController::class, 'store'])->name('daerah.store');

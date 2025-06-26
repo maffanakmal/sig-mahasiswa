@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function index()
     {
         return view('auth-page.login', [
-            'title' => 'Login Page',
+            'title' => 'USNIGIS | Halaman Login',
         ]);
     }
 
@@ -26,13 +26,11 @@ class AuthController extends Controller
             ], [
                 'username.required' => 'Username wajib diisi.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
-
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
             ]);
 
-            // Gunakan data tervalidasi dari $validatedData
             $user = User::where('username', $validatedData['username'])->first();
 
             if (!$user || !Hash::check($validatedData['password'], $user->password)) {
@@ -44,11 +42,22 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            // Simpan data user ke session jika login berhasil
+            if ($user->is_active) {
+                return response()->json([
+                    "status" => 403,
+                    "title" => "Akun Sedang Online",
+                    "message" => "Akun ini sedang digunakan di perangkat lain.",
+                    "icon" => "warning"
+                ], 403);
+            }
+
+            $user->is_active = 1;
+            $user->save();
+
             $request->session()->put('loggedInUser', [
-                'user_id' => $user->user_id,
+                'user_uuid' => $user->user_uuid,
                 'nama_user' => $user->nama_user,
-                'role' => $user->role
+                'role' => $user->role,
             ]);
 
             return response()->json([
@@ -74,10 +83,34 @@ class AuthController extends Controller
 
     public function logout()
     {
+        $loggedInUser = session('loggedInUser');
+
+        if ($loggedInUser) {
+            $user = User::where('user_uuid', $loggedInUser['user_uuid'])->first();
+            if ($user) {
+                $user->is_active = 0;
+                $user->save();
+            }
+        }
+
         session()->forget('loggedInUser');
 
         return response()->json([
             'status' => 200
+        ]);
+    }
+
+    public function resetPassword()
+    {
+        return view('auth-page.reset-password', [
+            'title' => 'USNIGIS | Halaman Reset Password',
+        ]);
+    }
+
+    public function formResetPassword()
+    {
+        return view('auth-page.form-reset', [
+            'title' => 'USNIGIS | Halaman Reset Password',
         ]);
     }
 }

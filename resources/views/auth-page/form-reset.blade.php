@@ -1,35 +1,45 @@
 @extends('auth-page.layout.main')
 
 @section('child-auth')
-    <div class="header-text mb-4">
-        <p class="fs-3 text-center">Masuk ke Akun</p>
+    <div class="header-text mb-3">
+        <p class="fs-3 text-center">Reset Password</p>
     </div>
-    <form action="#" id="loginForm">
+    <form action="#" id="resetPasswordForm">
         @csrf
-        <div class="form-group mb-2">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" placeholder="Masukkan Username" name="username"
-                value="{{ old('username') }}" required>
-            <div class="invalid-feedback" id="error-username"></div>
+        <div class="form-group mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="text" class="form-control" id="email" placeholder="Masukkan Email" name="email"
+                value="{{ old('email') }}" required>
+            <div class="invalid-feedback" id="error-email"></div>
         </div>
-        <div class="form-group mb-4">
+        <!-- Password -->
+        <div class="form-group mb-3">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password"
-                    required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password">
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <i class='bx bx-show'></i>
                 </span>
             </div>
             <div class="invalid-feedback" id="error-password"></div>
         </div>
-        <div class="form-group mb-3">
-            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-login">Masuk</button>
+
+        <!-- Konfirmasi Password -->
+        <div class="form-group mb-4">
+            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
+                    placeholder="Masukkan Ulang Passowrd">
+                <span class="input-group-text toggle-password" data-target="password_confirmation" style="cursor: pointer;">
+                    <i class='bx bx-show'></i>
+                </span>
+            </div>
+            <div class="invalid-feedback" id="error-password_confirmation"></div>
         </div>
         <div class="form-group mb-3">
-            <p>Lupa password? <a href="{{ route('auth.reset.password') }}">Reset Password</a></p>
+            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-login">Ubah Password</button>
         </div>
-        <a href="{{ route('landing.index') }}" class="btn btn-outline-secondary w-100 fs-6">Kembali</a>
+        <a href="{{ route('auth.reset.password') }}">Kembali</a>
     </form>
 @endsection
 
@@ -93,44 +103,35 @@
                 error: function(xhr) {
                     $('#btn-login').text('Masuk');
 
-                    if (xhr.status == 422) {
-                        let errors = xhr.responseJSON.errors;
+                    if (xhr.status == 422) { // 422 = Error Validasi Laravel
+                        let errors = xhr.responseJSON.errors; // Pastikan objek errors ada
 
+                        // Loop semua error dan tampilkan di input yang sesuai
                         $.each(errors, function(key, value) {
                             let inputField = $('[name="' + key + '"]');
                             let errorField = $('#error-' + key);
                             inputField.addClass('is-invalid');
                             if (errorField.length) {
-                                errorField.text(value[0]);
+                                errorField.text(value[0]); // Ambil error pertama
                             }
                         });
 
+                        // Hapus error saat pengguna mengetik
                         $('.form-control').on('input', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
                     } else if (xhr.status == 401) {
-                        let errorResponse = xhr.responseJSON;
+                        let errorResponse = xhr.responseJSON
 
                         Swal.fire({
                             icon: errorResponse.icon,
                             title: errorResponse.title,
                             text: errorResponse.message,
                         });
-
-                    } else if (xhr.status == 403) {
-                        let errorResponse = xhr.responseJSON;
-
-                        Swal.fire({
-                            icon: errorResponse.icon || 'warning',
-                            title: errorResponse.title || 'Akses Ditolak',
-                            text: errorResponse.message ||
-                                'Anda tidak memiliki izin untuk login.',
-                        });
                     }
                 }
-
             });
         });
     </script>

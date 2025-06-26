@@ -16,7 +16,9 @@
                             <th class="th-number">No</th>
                             <th>Nama Pengguna</th>
                             <th>Username</th>
+                            <th>Email</th>
                             <th>Role</th>
+                            <th>Status Akun</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -50,6 +52,12 @@
                             <input type="text" class="form-control" id="username" placeholder="Masukkan Username"
                                 name="username" value="{{ old('username') }}">
                             <div class="invalid-feedback" id="error-username"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
+                                name="email" value="{{ old('email') }}">
+                            <div class="invalid-feedback" id="error-email"></div>
                         </div>
                         <!-- Password -->
                         <div class="form-group mb-3">
@@ -143,8 +151,16 @@
                         name: 'username',
                     },
                     {
+                        data: 'email',
+                        name: 'email',
+                    },
+                    {
                         data: 'role',
                         name: 'role',
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
                     },
                     {
                         data: 'action',
@@ -295,6 +311,7 @@
                     $('#user_id').val(response.user.user_uuid);
                     $('#nama_user').val(response.user.nama_user);
                     $('#username').val(response.user.username);
+                    $('#email').val(response.user.email);
                     $('#password').val(''); // kosongkan agar user isi sendiri jika ingin ganti
                     $('#password_confirmation').val('');
                     $('#role').val(response.user.role);

@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mahasiswa', function (Blueprint $table) {
-            $table->bigInteger('nim')->unsigned()->primary(); // Primary Key
+            $table->integer('nim')->unsigned()->primary(); // Primary Key
             $table->uuid('mahasiswa_uuid')->unique();
             $table->smallInteger('tahun_masuk');
         
             // Foreign keys, sekarang bisa NULL
-            $table->integer('kode_jurusan')->unsigned()->nullable();
-            $table->bigInteger('npsn')->unsigned()->nullable();
-            $table->bigInteger('kode_daerah')->unsigned()->nullable();
+            $table->smallInteger('kode_jurusan')->unsigned()->nullable();
+            $table->integer('npsn')->unsigned()->nullable();
+            $table->smallInteger('kode_daerah')->unsigned()->nullable();
         
             // Foreign key constraints
             $table->foreign('kode_jurusan')->references('kode_jurusan')->on('jurusan')->onDelete('cascade');
