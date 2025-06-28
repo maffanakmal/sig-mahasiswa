@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
                 'nama_user' => 'Admin BAAKPSI',
                 'username' => 'baakpsi_admin',
                 'email' => 'baakpsi@email.com',
-                'password' => Hash::make('password123'), // Ganti sesuai kebutuhan
+                'password' => Hash::make('password123'),
                 'role' => 'BAAKPSI',
             ],
             [

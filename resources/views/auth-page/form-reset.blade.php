@@ -6,10 +6,12 @@
     </div>
     <form action="#" id="resetPasswordForm">
         @csrf
+        <input type="hidden" name="email" value="{{ $email }}">
+        <input type="hidden" name="reset_token" value="{{ $reset_token }}">
         <div class="form-group mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="text" class="form-control" id="email" placeholder="Masukkan Email" name="email"
-                value="{{ old('email') }}" required>
+                value="{{ $email }}" disabled>
             <div class="invalid-feedback" id="error-email"></div>
         </div>
         <!-- Password -->
@@ -39,7 +41,6 @@
         <div class="form-group mb-3">
             <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-login">Ubah Password</button>
         </div>
-        <a href="{{ route('auth.reset.password') }}">Kembali</a>
     </form>
 @endsection
 
@@ -65,18 +66,11 @@
             });
         })
 
-        $('#loginForm').on('submit', function(e) {
+        $('#resetPasswordForm').on('submit', function(e) {
             e.preventDefault();
 
-            let btn = $('#btn-login');
-
-            // Add loading spinner inside the button
-            btn.html(
-                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
-            );
-
             const formData = new FormData(this);
-            let url = '{{ route('login.check') }}';
+            const url = '{{ route('auth.update.password') }}';
 
             $.ajax({
                 headers: {
@@ -96,39 +90,35 @@
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
-                            window.location.href = "{{ route('home.index') }}";
+                            window.location.href = "/login";
                         });
                     }
                 },
                 error: function(xhr) {
-                    $('#btn-login').text('Masuk');
-
-                    if (xhr.status == 422) { // 422 = Error Validasi Laravel
-                        let errors = xhr.responseJSON.errors; // Pastikan objek errors ada
-
-                        // Loop semua error dan tampilkan di input yang sesuai
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
                             let inputField = $('[name="' + key + '"]');
                             let errorField = $('#error-' + key);
                             inputField.addClass('is-invalid');
                             if (errorField.length) {
-                                errorField.text(value[0]); // Ambil error pertama
+                                errorField.text(value[0]);
                             }
                         });
 
-                        // Hapus error saat pengguna mengetik
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
-                    } else if (xhr.status == 401) {
-                        let errorResponse = xhr.responseJSON
+                    } else {
+                        let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
-                            icon: errorResponse.icon,
-                            title: errorResponse.title,
-                            text: errorResponse.message,
+                            icon: errorResponse.icon || "error",
+                            title: errorResponse.title || "Error",
+                            text: errorResponse.message ||
+                                "Terjadi kesalahan yang tidak diketahui.",
                         });
                     }
                 }

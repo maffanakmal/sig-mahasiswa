@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email', 100)->unique()->nullable();
             $table->string('password', 60);
             $table->boolean('is_active')->default(0);
+            $table->uuid('reset_token')->nullable();
+            $table->timestamp('token_expire')->nullable();
             $table->timestamps();
             $table->enum('role', ['BAAKPSI', 'Warek 3', 'PMB']);
         });

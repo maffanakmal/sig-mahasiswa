@@ -25,5 +25,7 @@ class User extends Model
         'password',
         'role',
         'is_active',
+        'reset_token',
+        'token_expire',
     ];
 }

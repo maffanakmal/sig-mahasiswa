@@ -126,17 +126,17 @@ class UsersController extends Controller
             $user_uuid = Str::uuid();
 
             DB::insert("
-            INSERT INTO users (
-                user_uuid, 
-                nama_user,
-                username,
-                email,
-                password,
-                role,
-                updated_at,
-                created_at,
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ", [
+    INSERT INTO users (
+        user_uuid, 
+        nama_user,
+        username,
+        email,
+        password,
+        role,
+        updated_at,
+        created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+", [
                 $user_uuid,
                 $validatedData['nama_user'],
                 $validatedData['username'],
@@ -275,7 +275,7 @@ class UsersController extends Controller
             return response()->json([
                 "status" => 200,
                 "title" => "Success",
-                "message" => "Data user berhasil diperbarui.",
+                "message" => "Data pengguna berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
         } catch (ValidationException $e) {

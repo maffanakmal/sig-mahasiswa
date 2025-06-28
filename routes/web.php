@@ -29,13 +29,19 @@ Route::group(['middleware' => ['guestOnly']], function () {
 
     Route::get('/login', [AuthController::class, 'index'])->name('auth.login');
     Route::post('/login/auth', [AuthController::class, 'login'])->name('login.check');
-    Route::get('/login/reset', [AuthController::class, 'resetPassword'])->name('auth.reset.password');
-    Route::get('/login/reset/form', [AuthController::class, 'formResetPassword'])->name('auth.form.reset');
+
+    Route::get('/login/validasi-email', [AuthController::class, 'validateEmail'])->name('auth.validate.email');
+    Route::post('/login/validasi-email/auth', [AuthController::class, 'authEmail'])->name('auth.email');
+
+    Route::get('/login/reset-password/{email}/{reset_token}', [AuthController::class, 'resetPassword'])->name('auth.reset.password');
+    Route::post('/login/reset-password/auth', [AuthController::class, 'updatePassword'])->name('auth.update.password');
 });
 
 Route::group(['middleware' => ['loginCheck', 'roleCheck:BAAKPSI,Warek 3,PMB']], function () {
     Route::get('/dashboard/home', [HomeController::class, 'index'])->name('home.index');
     Route::get('/dashboard/count', [HomeController::class, 'dataCount'])->name('home.count');
+    Route::get('/dashboard/pengaturan', [HomeController::class, 'pengaturanAkun'])->name('home.pengaturan');
+    Route::post('/dashboard/pengaturan/store', [HomeController::class, 'pengaturanAkunStore'])->name('home.pengaturan.store');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

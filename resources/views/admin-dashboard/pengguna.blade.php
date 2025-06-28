@@ -97,8 +97,9 @@
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
                         </div>
+                    
+                    </form>
                 </div>
-                </form>
             </div>
         </div>
     </div>

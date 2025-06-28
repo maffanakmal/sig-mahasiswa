@@ -7,16 +7,16 @@
     <form action="#" id="loginForm">
         @csrf
         <div class="form-group mb-2">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" placeholder="Masukkan Username" name="username"
-                value="{{ old('username') }}" required>
-            <div class="invalid-feedback" id="error-username"></div>
+            <label for="credentials" class="form-label">Username/Email</label>
+            <input type="text" class="form-control" id="credentials" placeholder="Masukkan Username atau Email" name="credentials"
+                value="{{ old('credentials') }}" maxlength="50" required>
+            <div class="invalid-feedback" id="error-credentials"></div>
         </div>
         <div class="form-group mb-4">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password"
-                    required>
+                    maxlength="60">
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <i class='bx bx-show'></i>
                 </span>
@@ -27,7 +27,7 @@
             <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-login">Masuk</button>
         </div>
         <div class="form-group mb-3">
-            <p>Lupa password? <a href="{{ route('auth.reset.password') }}">Reset Password</a></p>
+            <p>Lupa password? <a href="{{ route('auth.validate.email') }}">Reset Password</a></p>
         </div>
         <a href="{{ route('landing.index') }}" class="btn btn-outline-secondary w-100 fs-6">Kembali</a>
     </form>

@@ -84,7 +84,8 @@
                             <li class="sidebar-item {{ Request::is('dashboard/peta/daerah') ? 'status-active' : '' }}">
                                 <a href="{{ route('dashboard.peta.daerah') }}" class="sidebar-link"> Daerah </a>
                             </li>
-                            <li class="sidebar-item  {{ Request::is('dashboard/peta/sekolah') ? 'status-active' : '' }}">
+                            <li
+                                class="sidebar-item  {{ Request::is('dashboard/peta/sekolah') ? 'status-active' : '' }}">
                                 <a href="{{ route('dashboard.peta.sekolah') }}" class="sidebar-link"> Sekolah </a>
                             </li>
                         </ul>
@@ -109,6 +110,10 @@
                                 <i class="bx bx-caret-down text-white" style="font-size: 20px"></i>
                             </div>
                             <div class="dropdown-menu dropdown-menu-end rounded-1 border-0 shadow mt-3">
+                                <a href="{{ route('home.pengaturan') }}" class="dropdown-item mb-2">
+                                    <i class="bx bx-cog"></i>
+                                    <span>Pengaturan</span>
+                                </a>
                                 <form action="#" id="logout-form">
                                     @csrf
                                     <a href="javascript:void(0)" class="dropdown-item" id="btn-logout">
@@ -144,6 +149,7 @@
             e.preventDefault();
             Swal.fire({
                 title: 'Apakah Anda yakin ingin logout?',
+                text: 'Anda akan keluar dari sesi saat ini.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Logout',
@@ -151,20 +157,23 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('logout') }}", // Ubah sesuai route
+                        url: "{{ route('logout') }}",
                         method: 'POST',
-                        data: $('#logout-form').serialize(),
+                        data: $('#logout-form').serialize(), // Atau kosongkan jika tidak ada form
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         dataType: 'json',
                         success: function(res) {
                             if (res.status === 200) {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Logout Berhasil!',
+                                    icon: res.icon || 'success',
+                                    title: res.title || 'Logout berhasil!',
+                                    text: res.message || '',
                                     showConfirmButton: false,
                                     timer: 1500
                                 }).then(() => {
-                                    window.location.href =
-                                        "/";
+                                    window.location.replace("/");
                                 });
                             }
                         },
@@ -172,7 +181,8 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Terjadi kesalahan!',
-                                text: 'Gagal logout, silakan coba lagi.'
+                                text: xhr.responseJSON?.message ||
+                                    'Gagal logout, silakan coba lagi.'
                             });
                         }
                     });
