@@ -4,122 +4,63 @@
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <h3 class="fw-bold fs-4">Peta Persebaran Mahasiswa Berdasarkan Sekolah</h3>
     </div>
+    @if (empty($sekolah) || $sekolah->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>sekolah</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (empty($jurusan) || $jurusan->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>jurusan</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (empty($mahasiswa) || $mahasiswa->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>mahasiswa</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="card shadow-sm">
         <div class="card-header mb-2">
             @if (session('loggedInUser')['role'] === 'Warek 3')
-                <div class="form-filter mb-3">
-                    <p class="mb-2">Filter Data</p>
-                    <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
-                        @csrf
+                <p class="mb-2 fw-bolder">Search Data</p>
+                <form action="#" id="mapFilterForm" class="row g-2 align-items-center">
+                    {{-- CSRF Token --}}
+                    @csrf
 
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="tahun_masuk" name="tahun_masuk" class="form-control">
-                                <option value="" selected disabled>Pilih Tahun Masuk</option>
-                            </select>
-                        </div>
+                    <div class="col-md-4">
+                        <select id="sekolah" name="sekolah" class="form-select">
+                            <option value="" selected disabled>Sekolah</option>
+                        </select>
+                    </div>
 
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="jurusan" name="jurusan" class="form-control">
-                                <option value="" selected disabled>Pilih Jurusan</option>
-                            </select>
-                        </div>
+                    <div class="col-md-2">
+                        <select id="tahun_masuk" name="tahun_masuk" class="form-select">
+                            <option value="" selected disabled>Tahun Masuk</option>
+                        </select>
+                    </div>
 
-                        <div>
-                            <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
-                        </div>
+                    <div class="col-md-3">
+                        <select id="jurusan" name="jurusan" class="form-select">
+                            <option value="" selected disabled>Jurusan</option>
+                        </select>
+                    </div>
 
-                        <div>
-                            <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="form-jarak">
-                    <p class="mb-2">Hitung Jarak Sekolah</p>
-                    <form action="#" id="hitungJarakForm" class="d-flex align-items-end gap-2 flex-wrap">
-                        @csrf
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="titik_awal" name="titik_awal" class="form-control">
-                                <option value="" selected disabled>Pilih Kampus USNI</option>
-                                <option value="USNI A">USNI A</option>
-                                <option value="USNI B">USNI B</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="titik_akhir" name="titik_akhir" class="form-control">
-                                <option value="" selected disabled>Pilih Sekolah</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <button type="button" id="hitungJarakBtn" class="btn btn-primary">Hitung</button>
-                        </div>
-                        <div>
-                            <button type="button" id="resetJarakBtn" class="btn btn-danger">Reset</button>
-                        </div>
-                    </form>
-                </div>
-            @elseif (session('loggedInUser')['role'] === 'PMB')
-                <div class="form-jarak">
-                    <p class="mb-2">Hitung Jarak Sekolah</p>
-                    <form action="#" id="hitungJarakForm" class="d-flex align-items-end gap-2 flex-wrap">
-                        @csrf
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="titik_awal" name="titik_awal" class="form-control">
-                                <option value="" selected disabled>Pilih Kampus USNI</option>
-                                <option value="USNI A">USNI A</option>
-                                <option value="USNI B">USNI B</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" style="min-width: 180px;">
-                            <select id="titik_akhir" name="titik_akhir" class="form-control">
-                                <option value="" selected disabled>Pilih Sekolah</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <button type="button" id="hitungJarakBtn" class="btn btn-primary">Hitung</button>
-                        </div>
-                        <div>
-                            <button type="button" id="resetJarakBtn" class="btn btn-danger">Reset</button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary"><i class='bx  bx-search'></i> Cari </button>
+                        <button type="button" id="resetFilterBtn" class="btn btn-danger"><i class='bx  bx-refresh'></i>
+                            Reset </button>
+                    </div>
+                </form>
             @endif
         </div>
         <div class="card-body">
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
-            </div>
-        </div>
-    </div>
-    <div class="container-fluid mt-3">
-        <div class="row text-center">
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Mahasiswa di Peta</h6>
-                        <h3 class="text-primary" id="jumlah-tampil">0</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Sekolah Tidak Ada</h6>
-                        <h3 class="text-warning" id="jumlah-sekolah-null">0</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Jurusan Tidak Ada</h6>
-                        <h3 class="text-danger" id="jumlah-jurusan-null">0</h3>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -236,7 +177,7 @@
 
         $(document).ready(function() {
             mapFilter();
-            showSekolah();
+            // showSekolah();
             selectSekolah();
             selectJurusan();
             selectTahunMasuk();
@@ -385,7 +326,7 @@
 
                         $('#tahun_masuk').find('option:gt(0)').remove();
                         $('#jurusan').find('option:gt(0)').remove();
-                        $('#titik_akhir').find('option:gt(0)').remove();
+                        $('#sekolah').find('option:gt(0)').remove();
 
                         response.tahun_masuk.forEach(function(item) {
                             $('#tahun_masuk').append(`<option value="${item}">${item}</option>`);
@@ -398,8 +339,8 @@
                         });
 
                         response.sekolah.forEach(function(item) {
-                            $('#titik_akhir').append(
-                                `<option value="${item.latitude_sekolah} ${item.longitude_sekolah}">${item.nama_sekolah}</option>`
+                            $('#sekolah').append(
+                                `<option value="${item.npsn}">${item.nama_sekolah}</option>`
                             );
                         });
 
@@ -422,11 +363,11 @@
         }
 
         function selectSekolah() {
-            $('#titik_akhir').select2({
+            $('#sekolah').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#titik_akhir').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#sekolah').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -493,13 +434,13 @@
 
             const tahunMasuk = $('#tahun_masuk option:selected').val();
             const jurusan = $('#jurusan option:selected').val();
+            const sekolah = $('#sekolah option:selected').val();
 
-            // Validasi jika titik awal atau akhir kosong
-            if (!tahunMasuk || !jurusan) {
+            if (!sekolah && !jurusan && !tahunMasuk) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
-                    text: 'Silakan pilih Tahun Masuk dan Jurusan terlebih dahulu.',
+                    text: 'Anda harus memilih minimal satu filter sebelum mencari.',
                 });
                 return;
             }
@@ -527,35 +468,46 @@
                         mahasiswa.forEach(data => {
                             if (!data.nama_sekolah) return;
 
-                            const school = data.nama_sekolah;
+                            const city = data.nama_sekolah;
                             const lat = data.latitude_sekolah;
                             const lng = data.longitude_sekolah;
+                            const daerah = data.nama_daerah || '';
 
-                            if (!groupedData[school]) {
-                                groupedData[school] = {
+                            if (!groupedData[city]) {
+                                groupedData[city] = {
                                     count: 0,
                                     jurusan: {},
                                     latitude: lat,
-                                    longitude: lng
+                                    longitude: lng,
+                                    daerah: daerah,
                                 };
                             }
 
-                            groupedData[school].count += data.total;
+                            groupedData[city].count += data.total;
 
                             const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
-                            if (!groupedData[school].jurusan[jurusanName]) {
-                                groupedData[school].jurusan[jurusanName] = 0;
+                            if (!groupedData[city].jurusan[jurusanName]) {
+                                groupedData[city].jurusan[jurusanName] = 0;
                             }
-
-                            groupedData[school].jurusan[jurusanName] += data.total;
+                            groupedData[city].jurusan[jurusanName] += data.total;
                         });
 
+
                         renderMarkers(groupedData);
+                    } else if (response.status == 204) {
+                        clearCircleMarkers();
+
+                        Swal.fire({
+                            icon: response.icon,
+                            title: response.title,
+                            text: response.message,
+                        });
+
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: response.message || 'Terjadi kesalahan saat mengambil data.',
+                            text: response.message || 'Gagal mengambil data sekolah.',
                         });
                     }
                 },
@@ -563,7 +515,7 @@
                     console.error("AJAX error:", xhr.responseText);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal',
+                        title: 'Kesalahan Server',
                         text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
                     });
                 }
@@ -571,11 +523,11 @@
         });
 
         $('#resetFilterBtn').on('click', function() {
-            const tahunMasuk = $('#tahun_masuk option:selected').val();
+            const tahun_masuk = $('#tahun_masuk option:selected').val();
             const jurusan = $('#jurusan option:selected').val();
+            const sekolah = $('#sekolah option:selected').val();
 
-            // Validasi jika titik awal atau akhir kosong
-            if (!tahunMasuk || !jurusan) {
+            if (!tahun_masuk && !jurusan && !sekolah) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
@@ -585,211 +537,11 @@
             }
 
             $('#mapFilterForm')[0].reset();
-
-            $('#jurusan').val('').trigger('change');
+            $('#sekolah').val('').trigger('change');
             $('#tahun_masuk').val('').trigger('change');
+            $('#jurusan').val('').trigger('change');
 
-            showSekolah();
+            clearCircleMarkers();
         });
-
-        let distanceLine = null;
-        let distanceLegendControl = null;
-
-        function showDistanceLegend(asalLabel, tujuanLabel, jarakKm) {
-            if (distanceLegendControl) {
-                map.removeControl(distanceLegendControl);
-            }
-
-            distanceLegendControl = L.control({
-                position: 'bottomleft'
-            });
-            distanceLegendControl.onAdd = function(map) {
-                const div = L.DomUtil.create('div', 'info legend');
-                div.style.backgroundColor = 'white';
-                div.style.padding = '8px';
-                div.style.border = '1px solid #ccc';
-                div.style.boxShadow = '2px 2px 6px rgba(0,0,0,0.1)';
-                div.innerHTML = `
-            <h6 class="mb-1">Info Jarak</h6>
-            <strong>Asal:</strong> ${asalLabel}<br>
-            <strong>Tujuan:</strong> ${tujuanLabel}<br>
-            <strong>Jarak:</strong> ${jarakKm} km
-        `;
-                return div;
-            };
-            distanceLegendControl.addTo(map);
-        }
-
-        // Event tombol Hitung
-        $('#hitungJarakBtn').on('click', function() {
-            const asal = $('#titik_awal').val();
-            const tujuanOption = $('#titik_akhir option:selected');
-
-            if (!asal || !tujuanOption.val()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Peringatan',
-                    text: 'Silakan pilih kedua titik terlebih dahulu.',
-                });
-                return;
-            }
-
-            const tujuanLabel = tujuanOption.text();
-            const tujuanCoords = tujuanOption.val().split(' ');
-            const tujuanLatLng = L.latLng(parseFloat(tujuanCoords[0]), parseFloat(tujuanCoords[1]));
-
-            const asalLatLng = (asal === 'USNI A') ? usniALatLng : usniBLatLng;
-
-            // Hapus garis sebelumnya jika ada
-            if (distanceLine) {
-                map.removeLayer(distanceLine);
-            }
-
-            // Hitung dan tampilkan garis
-            distanceLine = L.polyline([asalLatLng, tujuanLatLng], {
-                color: 'red',
-                weight: 2
-            }).addTo(map);
-
-            const distanceInMeters = asalLatLng.distanceTo(tujuanLatLng);
-            const distanceInKm = (distanceInMeters / 1000).toFixed(2);
-
-            showDistanceLegend(asal, tujuanLabel, distanceInKm);
-        });
-
-        // Event tombol Reset
-        $('#resetJarakBtn').on('click', function() {
-            const asal = $('#titik_awal').val();
-            const tujuanOption = $('#titik_akhir option:selected');
-
-            if (!asal || !tujuanOption.val()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Peringatan',
-                    text: 'Anda belum melakukan perhitungan jarak.',
-                });
-                return;
-            }
-
-            $('#hitungJarakForm')[0].reset();
-
-            $('#titik_awal').val('').trigger('change');
-            $('#titik_akhir').val('').trigger('change');
-
-            if (distanceLine) {
-                map.removeLayer(distanceLine);
-                distanceLine = null;
-            }
-
-            if (distanceLegendControl) {
-                map.removeControl(distanceLegendControl);
-                distanceLegendControl = null;
-            }
-        });
-
-        // function haversineDistanceManual(lat1, lon1, lat2, lon2) {
-        //     const R = 6371000; // Jari-jari bumi dalam meter
-
-        //     // Ubah ke radian
-        //     const toRad = deg => deg * Math.PI / 180;
-
-        //     const φ1 = toRad(lat1);
-        //     const φ2 = toRad(lat2);
-        //     const Δφ = toRad(lat2 - lat1);
-        //     const Δλ = toRad(lon2 - lon1);
-
-        //     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        //         Math.cos(φ1) * Math.cos(φ2) *
-        //         Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-
-        //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        //     return R * c; // Hasil dalam meter
-        // }
-
-        // $('#hitungJarakBtn').on('click', function() {
-        //     const titikAwal = $('#titik_awal').val();
-        //     const titikAkhir = $('#titik_akhir').val();
-
-        //     if (!titikAwal || !titikAkhir) {
-        //         Swal.fire({
-        //             icon: 'warning',
-        //             title: 'Peringatan',
-        //             text: 'Silakan pilih kedua titik terlebih dahulu.'
-        //         });
-        //         return;
-        //     }
-
-        //     // Ambil koordinat titik awal berdasarkan kampus
-        //     let asalLat, asalLng;
-        //     if (titikAwal === "USNI A") {
-        //         asalLat = -6.241724;
-        //         asalLng = 106.783435;
-        //     } else if (titikAwal === "USNI B") {
-        //         asalLat = -6.2738302;
-        //         asalLng = 107.0200002;
-        //     }
-
-        //     // Ambil koordinat titik akhir dari value <option>
-        //     const [akhirLat, akhirLng] = titikAkhir.split(' ').map(Number);
-
-        //     if (isNaN(akhirLat) || isNaN(akhirLng)) {
-        //         Swal.fire({
-        //             icon: 'error',
-        //             title: 'Kesalahan',
-        //             text: 'Koordinat titik akhir tidak valid.'
-        //         });
-        //         return;
-        //     }
-
-        //     // Hitung jarak manual
-        //     const jarakMeter = haversineDistanceManual(asalLat, asalLng, akhirLat, akhirLng);
-        //     const jarakKm = (jarakMeter / 1000).toFixed(2);
-
-        //     // Tampilkan ke pengguna melalui legenda khusus
-        //     if (window.jarakLegend) {
-        //         map.removeControl(window.jarakLegend);
-        //     }
-
-        //     const legend = L.control({
-        //         position: 'bottomleft'
-        //     });
-
-        //     legend.onAdd = function(map) {
-        //         const div = L.DomUtil.create('div', 'info legend bg-white p-2 shadow-sm rounded');
-        //         div.innerHTML = `
-    //     <h6 class="mb-1">Info Jarak</h6>
-    //     <strong>Dari:</strong> ${titikAwal}<br>
-    //     <strong>Ke:</strong> ${$("#titik_akhir option:selected").text()}<br>
-    //     <strong>Jarak:</strong> ${jarakKm} km
-    // `;
-        //         return div;
-        //     };
-
-        //     legend.addTo(map);
-        //     window.jarakLegend = legend;
-
-        //     // Tambahkan garis penghubung
-        //     if (window.jarakLine) {
-        //         map.removeLayer(window.jarakLine);
-        //     }
-
-        //     window.jarakLine = L.polyline([
-        //         [asalLat, asalLng],
-        //         [akhirLat, akhirLng]
-        //     ], {
-        //         color: 'blue',
-        //         weight: 3,
-        //         opacity: 0.7,
-        //         dashArray: '5, 5'
-        //     }).addTo(map);
-
-        //     // Zoom agar kedua titik terlihat
-        //     const bounds = L.latLngBounds([
-        //         [asalLat, asalLng],
-        //         [akhirLat, akhirLng]
-        //     ]);
-        //     map.fitBounds(bounds);
-        // });
     </script>
 @endsection

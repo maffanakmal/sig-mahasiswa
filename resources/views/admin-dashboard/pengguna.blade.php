@@ -14,7 +14,7 @@
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>Nama Pengguna</th>
+                            <th>Nama Lengkap</th>
                             <th>Username</th>
                             <th>Email</th>
                             <th>Role</th>
@@ -40,23 +40,23 @@
                 <div class="modal-body">
                     <form action="#" id="penggunaForm" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="user_id" id="user_id">
+                        <input type="hidden" name="user_uuid" id="user_uuid">
                         <div class="form-group mb-3">
-                            <label for="nama_user" class="form-label">Nama Pengguna</label>
-                            <input type="text" class="form-control" id="nama_user" placeholder="Masukkan Nama Pengguna"
-                                name="nama_user" value="{{ old('nama_user') }}">
-                            <div class="invalid-feedback" id="error-nama_user"></div>
+                            <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="nama_lengkap" placeholder="Masukkan Nama Lengkap"
+                                name="nama_lengkap" value="{{ old('nama_lengkap') }}" maxlength="100" required>
+                            <div class="invalid-feedback" id="error-nama_lengkap"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" placeholder="Masukkan Username"
-                                name="username" value="{{ old('username') }}">
+                                name="username" value="{{ old('username') }}" maxlength="50" required>
                             <div class="invalid-feedback" id="error-username"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
-                                name="email" value="{{ old('email') }}">
+                                name="email" value="{{ old('email') }}" maxlength="100">
                             <div class="invalid-feedback" id="error-email"></div>
                         </div>
                         <!-- Password -->
@@ -64,7 +64,7 @@
                             <label for="password" class="form-label">Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Masukkan Password">
+                                    placeholder="Masukkan Password" minlength="5" maxlength="60">
                                 <span class="input-group-text toggle-password" data-target="password"
                                     style="cursor: pointer;">
                                     <i class='bx bx-show'></i>
@@ -78,7 +78,7 @@
                             <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" placeholder="Masukkan Ulang Passowrd">
+                                    name="password_confirmation" placeholder="Masukkan Ulang Passowrd" minlength="5" maxlength="60">
                                 <span class="input-group-text toggle-password" data-target="password_confirmation"
                                     style="cursor: pointer;">
                                     <i class='bx bx-show'></i>
@@ -88,16 +88,20 @@
                         </div>
                         <div class="form-group mb-3">
                             <label for="role" class="form-label">Role</label>
-                            <select id="role" name="role" class="form-control select-role">
+                            <select id="role" name="role" class="form-control select-role" required>
                                 <option value="" selected disabled>Pilih Role</option>
+                                <option value="BAAKPSI">BAAKPSI</option>
+                                <option value="Warek 3">Warek 3</option>
+                                <option value="PMB">PMB</option>
                             </select>
                             <div class="invalid-feedback" id="error-role"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                data-bs-dismiss="modal">Batal</button>
                             <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
                         </div>
-                    
+
                     </form>
                 </div>
             </div>
@@ -108,7 +112,7 @@
 @section('script')
     <script>
         let method;
-        let user_id = null;
+        let user_uuid = null;
 
         $(document).ready(function() {
             document.querySelectorAll(".toggle-password").forEach(toggle => {
@@ -130,7 +134,6 @@
             });
 
             penggunaTable();
-            showSelect();
         });
 
         function penggunaTable() {
@@ -144,8 +147,8 @@
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'nama_user',
-                        name: 'nama_user'
+                        data: 'nama_lengkap',
+                        name: 'nama_lengkap'
                     },
                     {
                         data: 'username',
@@ -174,42 +177,12 @@
         function penggunaModal() {
             $('#penggunaForm')[0].reset();
             method = 'create';
-            user_id;
+            user_uuid;
 
             $('#penggunaModal').modal('show');
             $('#penggunaModalLabel').text('Tambah Data Pengguna');
             $('#saveBtn').text('Simpan');
         }
-
-        function showSelect() {
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: '{{ route('pengguna.create') }}',
-                type: 'GET',
-                success: function(response) {
-                    if (response.status == 200) {
-                        response.role.forEach(function(role) {
-                            $('#role').append(
-                                `<option value="${role}">${role}</option>`
-                            );
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 500) {
-                        let errorResponse = xhr.responseJSON;
-                        Swal.fire({
-                            icon: errorResponse.icon || "error",
-                            title: errorResponse.title || "Error",
-                            text: errorResponse.message || "Terjadi kesalahan yang tidak diketahui.",
-                        });
-                    }
-                }
-            });
-        }
-
 
         $('#penggunaForm').on('submit', function(e) {
             e.preventDefault();
@@ -219,7 +192,7 @@
             let httpMethod = 'POST'; // Default method for create
 
             if (method === 'update') {
-                if (!user_id) {
+                if (!user_uuid) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
@@ -228,7 +201,7 @@
                     return;
                 }
 
-                url = '{{ route('pengguna.update', '') }}/' + user_id;
+                url = '{{ route('pengguna.update', '') }}/' + user_uuid;
                 formData.append('_method', 'PUT'); // Laravel expects PUT for updates
                 httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
             }
@@ -284,6 +257,13 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
+                    } else if (xhr.status === 400) {
+                        Swal.fire({
+                            icon: xhr.responseJSON.icon,
+                            title: xhr.responseJSON.title,
+                            text: xhr.responseJSON.message
+                        });
+                        return;
                     } else {
                         let errorResponse = xhr.responseJSON; // Ambil data JSON error
 
@@ -299,18 +279,18 @@
         });
 
         function editUser(e) {
-            user_id = e.getAttribute('data-id');
+            user_uuid = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('pengguna.show', '') }}/" + user_id,
+                url: "{{ route('pengguna.show', '') }}/" + user_uuid,
                 type: "GET",
                 success: function(response) {
-                    $('#user_id').val(response.user.user_uuid);
-                    $('#nama_user').val(response.user.nama_user);
+                    $('#user_uuid').val(response.user.user_uuid);
+                    $('#nama_lengkap').val(response.user.nama_lengkap);
                     $('#username').val(response.user.username);
                     $('#email').val(response.user.email);
                     $('#password').val(''); // kosongkan agar user isi sendiri jika ingin ganti
@@ -352,7 +332,7 @@
         }
 
         function deleteUser(e) {
-            let user_id = e.getAttribute('data-id');
+            let user_uuid = e.getAttribute('data-id');
 
             Swal.fire({
                 title: "Apakah anda yakin?",
@@ -366,7 +346,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('pengguna.destroy', '') }}/" + user_id,
+                        url: "{{ route('pengguna.destroy', '') }}/" + user_uuid,
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body

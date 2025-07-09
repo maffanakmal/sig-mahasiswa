@@ -15,10 +15,10 @@ return new class extends Migration
             $table->integer('npsn')->unsigned()->primary();
             $table->uuid('sekolah_uuid')->unique();
             $table->string('nama_sekolah', 100);
-            $table->string('alamat_sekolah', 255);
-            $table->smallInteger('kode_daerah')->unsigned()->nullable();
-            $table->string('latitude_sekolah', 20);
-            $table->string('longitude_sekolah', 20);
+            $table->text('alamat_sekolah');
+            $table->integer('kode_daerah')->unsigned()->nullable();
+            $table->decimal('latitude_sekolah', 18, 15);
+            $table->decimal('longitude_sekolah', 18, 15);
 
             $table->foreign('kode_daerah')->references('kode_daerah')->on('daerah')->onDelete('cascade');
         });

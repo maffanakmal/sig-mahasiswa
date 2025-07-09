@@ -4,6 +4,12 @@
     <div class="mb-0 d-flex justify-content-between align-items-center">
         <h3 class="fw-bold fs-4 mb-3">Dashboard</h3>
     </div>
+    @if ($user && empty($user->email))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Perhatian!</strong> Anda belum memiliki email. Silakan lengkapi data di <a href="{{ route('home.pengaturan') }}">Pengaturan Akun</a>.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
     <div class="row">
         @if (session('loggedInUser')['role'] === 'BAAKPSI')
         <div class="col-md-3">
@@ -92,7 +98,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 @endsection
 

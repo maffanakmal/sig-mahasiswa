@@ -35,7 +35,7 @@
                             <th class="th-number">No</th>
                             <th>NIM</th>
                             <th>Tahun Masuk</th>
-                            <th>Jurusan</th>
+                            <th>Program Studi</th>
                             <th>Sekolah Asal</th>
                             <th>Daerah Asal</th>
                             <th class="th-aksi">Action</th>
@@ -63,27 +63,27 @@
                         <div class="form-group mb-3">
                             <label for="nim" class="form-label">NIM</label>
                             <input type="text" class="form-control" id="nim" placeholder="Masukkan NIM"
-                                name="nim" value="{{ old('nim') }}" required>
+                                name="nim" value="{{ old('nim') }}" maxlength="10" required>
                             <div class="invalid-feedback" id="error-nim"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
                             <input type="text" class="form-control" id="tahun_masuk" placeholder="Masukkan Tahun Masuk"
-                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" required>
+                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" maxlength="4" required>
                             <div class="invalid-feedback" id="error-tahun_masuk"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="kode_jurusan" name="kode_jurusan" class="form-control select-kode_jurusan">
-                                <option value="" selected disabled>Pilih Jurusan</option>
+                            <select id="kode_prodi" name="kode_prodi" class="form-control select-kode_prodi" required>
+                                <option value="" selected disabled>Pilih Program Studi</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="npsn" name="npsn" class="form-control select-npsn">
+                            <select id="npsn" name="npsn" class="form-control select-npsn" required>
                                 <option value="" selected disabled>Pilih Sekolah Asal</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <select id="kode_daerah" name="kode_daerah" class="form-control select-kode_daerah">
+                            <select id="kode_daerah" name="kode_daerah" class="form-control select-kode_daerah" required>
                                 <option value="" selected disabled>Pilih Daerah Asal</option>
                             </select>
                         </div>
@@ -108,7 +108,7 @@
             showSelect();
             selectDaerahAsal();
             selectSekolahAsal();
-            selectJurusan();
+            selectProdi();
         });
 
         function mahasiswaTable() {
@@ -130,8 +130,8 @@
                         name: 'tahun_masuk',
                     },
                     {
-                        data: 'kode_jurusan',
-                        name: 'kode_jurusan',
+                        data: 'kode_prodi',
+                        name: 'kode_prodi',
                     },
                     {
                         data: 'npsn',
@@ -193,12 +193,12 @@
             })
         }
 
-        function selectJurusan() {
-            $('#kode_jurusan').select2({
+        function selectProdi() {
+            $('#kode_prodi').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#kode_jurusan').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#kode_prodi').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -230,19 +230,19 @@
                                 `<option value="${item.npsn}">${item.nama_sekolah}</option>`);
                         });
 
-                        response.jurusan.forEach(function(item) {
-                            $('#kode_jurusan').append(
-                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`);
+                        response.prodi.forEach(function(item) {
+                            $('#kode_prodi').append(
+                                `<option value="${item.kode_prodi}">${item.nama_prodi}</option>`);
                         });
 
-                        selectDaerahAsal(); // Initialize select2 after appending options
-                        selectSekolahAsal(); // Initialize select2 after appending options
-                        selectJurusan(); // Initialize select2 after appending options
+                        selectDaerahAsal();
+                        selectSekolahAsal();
+                        selectProdi();
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 500) {
-                        let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                        let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
                             icon: errorResponse.icon || "error",
@@ -260,7 +260,7 @@
 
             const formData = new FormData(this);
             let url = '{{ route('mahasiswa.store') }}';
-            let httpMethod = 'POST'; // Default method for create
+            let httpMethod = 'POST';
 
             if (method === 'update') {
                 if (!nim) {
@@ -273,8 +273,8 @@
                 }
 
                 url = '{{ route('mahasiswa.update', '') }}/' + nim;
-                formData.append('_method', 'PUT'); // Laravel expects PUT for updates
-                httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
+                formData.append('_method', 'PUT');
+                httpMethod = 'POST';
             }
 
             $.ajax({
@@ -319,6 +319,14 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
+                    } else if (xhr.status === 400) {
+                        Swal.fire({
+                            icon: xhr.responseJSON.icon,
+                            title: xhr.responseJSON.title,
+                            text: xhr.responseJSON.message
+                        });
+                        return;
+                    
                     } else {
                         let errorResponse = xhr.responseJSON; // Ambil data JSON error
 
@@ -412,10 +420,10 @@
                 url: "{{ route('mahasiswa.show', '') }}/" + nim,
                 type: "GET",
                 success: function(response) {
-                    $('#nim').val(response.mahasiswa.mahasiswa_uuid);
+                    $('#nim_edit').val(response.mahasiswa.mahasiswa_uuid);
                     $('#nim').val(response.mahasiswa.nim);
                     $('#tahun_masuk').val(response.mahasiswa.tahun_masuk);
-                    $('#kode_jurusan').val(response.mahasiswa.kode_jurusan);
+                    $('#kode_prodi').val(response.mahasiswa.kode_prodi);
                     $('#npsn').val(response.mahasiswa.npsn);
                     $('#kode_daerah').val(response.mahasiswa.kode_daerah);
                 },
@@ -529,7 +537,6 @@
                                     timer: 1500
                                 });
                             } else {
-                                // Untuk response custom selain 200 (misal 404 dari backend)
                                 Swal.fire({
                                     icon: response.icon || "info",
                                     title: response.title || "Info",

@@ -69,28 +69,28 @@
                                     <label for="kode_daerah" class="form-label">Kode Daerah</label>
                                     <input type="text" class="form-control" id="kode_daerah"
                                         placeholder="Masukkan Kode Daerah" name="kode_daerah"
-                                        value="{{ old('kode_daerah') }}">
+                                        value="{{ old('kode_daerah') }}" maxlength="4" required>
                                     <div class="invalid-feedback" id="error-kode_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_daerah" class="form-label">Nama Daerah</label>
                                     <input type="text" class="form-control" id="nama_daerah"
                                         placeholder="Masukkan Nama Daerah" name="nama_daerah"
-                                        value="{{ old('nama_daerah') }}">
+                                        value="{{ old('nama_daerah') }}" maxlength="100" required>
                                     <div class="invalid-feedback" id="error-nama_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="latitude_daerah" class="form-label">Latitude Daerah</label>
                                     <input type="text" class="form-control" id="latitude_daerah"
                                         placeholder="Masukkan Latitude" name="latitude_daerah"
-                                        value="{{ old('latitude_daerah') }}">
+                                        value="{{ old('latitude_daerah') }}" required>
                                     <div class="invalid-feedback" id="error-latitude_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="longitude_daerah" class="form-label">Longitude Daerah</label>
                                     <input type="text" class="form-control" id="longitude_daerah"
                                         placeholder="Masukkan Longitude" name="longitude_daerah"
-                                        value="{{ old('longitude_daerah') }}">
+                                        value="{{ old('longitude_daerah') }}" required>
                                     <div class="invalid-feedback" id="error-longitude_daerah"></div>
                                 </div>
                                 <div class="modal-footer px-0">
@@ -307,6 +307,14 @@
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
+                        
+                    } else if (xhr.status === 400) {
+                        Swal.fire({
+                            icon: xhr.responseJSON.icon,
+                            title: xhr.responseJSON.title,
+                            text: xhr.responseJSON.message
+                        });
+                        return;
 
                     } else {
                         let errorResponse = xhr.responseJSON; // Ambil data JSON error

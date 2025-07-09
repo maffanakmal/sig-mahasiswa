@@ -18,11 +18,11 @@ class Daerah extends Model
     protected $keyType = 'integer';
 
     protected $fillable = [
-        'daerah_uuid',
         'kode_daerah',
+        'daerah_uuid',
         'nama_daerah',
-        'latitude',
-        'longitude',
+        'latitude_daerah',
+        'longitude_daerah',
     ];
 
     public function mahasiswa()

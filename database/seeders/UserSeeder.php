@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         DB::table('users')->insert([
             [
                 'user_uuid' => (string) Str::uuid(),
-                'nama_user' => 'Admin BAAKPSI',
+                'nama_lengkap' => 'Admin BAAKPSI',
                 'username' => 'baakpsi_admin',
                 'email' => 'baakpsi@email.com',
                 'password' => Hash::make('password123'),
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_uuid' => (string) Str::uuid(),
-                'nama_user' => 'Warek 3 User',
+                'nama_lengkap' => 'Warek 3 User',
                 'username' => 'warek3_user',
                 'email' => 'warek3@email.com',
                 'password' => Hash::make('password123'),
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_uuid' => (string) Str::uuid(),
-                'nama_user' => 'PMB User',
+                'nama_lengkap' => 'PMB User',
                 'username' => 'pmb_user',
                 'email' => 'pmb@email.com',
                 'password' => Hash::make('password123'),

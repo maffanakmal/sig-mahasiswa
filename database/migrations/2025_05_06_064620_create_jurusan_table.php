@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jurusan', function (Blueprint $table) {
-            $table->smallInteger('kode_jurusan')->unsigned()->primary();
-            $table->uuid('jurusan_uuid')->unique();
-            $table->string('nama_jurusan', 50);
+        Schema::create('prodi', function (Blueprint $table) {
+            $table->integer('kode_prodi')->unsigned()->primary();
+            $table->uuid('prodi_uuid')->unique();
+            $table->string('nama_prodi', 50);
         });
     }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jurusan');
+        Schema::dropIfExists('prodi');
     }
 };

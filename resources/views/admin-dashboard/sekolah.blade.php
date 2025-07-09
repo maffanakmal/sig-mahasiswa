@@ -69,26 +69,26 @@
                                     <label for="npsn" class="form-label">Nomor Pokok Sekolah Nasional</label>
                                     <input type="text" class="form-control" id="npsn"
                                         placeholder="Masukkan NPSN" name="npsn"
-                                        value="{{ old('npsn') }}" required>
+                                        value="{{ old('npsn') }}" maxlength="10" required>
                                     <div class="invalid-feedback" id="error-npsn"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
                                     <input type="text" class="form-control" id="nama_sekolah"
                                         placeholder="Masukkan Nama Sekolah" name="nama_sekolah"
-                                        value="{{ old('nama_sekolah') }}" required>
+                                        value="{{ old('nama_sekolah') }}" maxlength="100" required>
                                     <div class="invalid-feedback" id="error-nama_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="alamat_sekolah" class="form-label">Alamat Sekolah</label>
                                     <input type="text" class="form-control" id="alamat_sekolah"
                                         placeholder="Masukkan Alamat Sekolah" name="alamat_sekolah"
-                                        value="{{ old('alamat_sekolah') }}" required>
+                                        value="{{ old('alamat_sekolah') }}" maxlength="255" required>
                                     <div class="invalid-feedback" id="error-alamat_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="kode_daerah" class="form-label">Daerah Sekolah</label>
-                                    <select id="kode_daerah" name="kode_daerah" class="form-control select-daerah">
+                                    <select id="kode_daerah" name="kode_daerah" class="form-control select-daerah" required>
                                         <option value="" selected disabled>Pilih Daerah Sekolah</option>
                                     </select>
                                 </div>
@@ -386,6 +386,14 @@
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
+
+                    } else if (xhr.status === 400) {
+                        Swal.fire({
+                            icon: xhr.responseJSON.icon,
+                            title: xhr.responseJSON.title,
+                            text: xhr.responseJSON.message
+                        });
+                        return;
 
                     } else {
                         let errorResponse = xhr.responseJSON; // Ambil data JSON error

@@ -2,39 +2,39 @@
 
 @section('child-content')
     <div class="mb-0">
-        <h3 class="fw-bold fs-4 mb-3">Daftar Jurusan</h3>
+        <h3 class="fw-bold fs-4 mb-3">Daftar Program Studi</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <strong>Info!</strong> Untuk mengimpor data jurusan, silakan unduh template <a
+            <strong>Info!</strong> Untuk mengimpor data program studi, silakan unduh template <a
                 href="{{ asset('template/jurusan_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <p class="mb-2">Import Excel Jurusan</p>
-        <form action="#" id="importJurusanForm" enctype="multipart/form-data"
+        <p class="mb-2">Import Excel Program Studi</p>
+        <form action="#" id="importProdiForm" enctype="multipart/form-data"
             class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
-                <input type="file" class="form-control" name="import_jurusan" id="import_jurusan"
+                <input type="file" class="form-control" name="import_prodi" id="import_prodi"
                     aria-describedby="btnImport" aria-label="Upload">
                 <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
                     Import</button>
-                <div class="invalid-feedback" id="error-import_jurusan"></div>
+                <div class="invalid-feedback" id="error-import_prodi"></div>
             </div>
         </form>
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="jurusanDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="jurusanModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="prodiDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="prodiModal()"><i class='bx bx-plus'></i> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="jurusanTable" class="table table-striped" style="width:100%">
+                <table id="prodiTable" class="table table-striped" style="width:100%">
                     <thead>
                         <tr>
                             <th class="th-number">No</th>
-                            <th>Kode Jurusan</th>
-                            <th>Nama Jurusan</th>
+                            <th>Kode Program Studi</th>
+                            <th>Nama Program Studi</th>
                             <th class="th-aksi">Action</th>
                         </tr>
                     </thead>
@@ -46,28 +46,28 @@
         </div>
     </div>
 
-    <div class="modal fade" id="jurusanModal" tabindex="-1" aria-labelledby="jurusanModalLabel" aria-hidden="true">
+    <div class="modal fade" id="prodiModal" tabindex="-1" aria-labelledby="prodiModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="jurusanModalLabel">Tambah data</h1>
+                    <h1 class="modal-title fs-5" id="prodiModalLabel">Tambah data</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="jurusanForm" enctype="multipart/form-data">
+                    <form action="#" id="prodiForm" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="jurusan_edit" id="jurusan_edit">
+                        <input type="hidden" name="prodi_edit" id="prodi_edit">
                         <div class="form-group mb-3">
-                            <label for="kode_jurusan" class="form-label">Kode Jurusan</label>
-                            <input type="text" class="form-control" id="kode_jurusan" placeholder="Masukkan Kode Jurusan"
-                                name="kode_jurusan" value="{{ old('kode_jurusan') }}" required>
-                            <div class="invalid-feedback" id="error-kode_jurusan"></div>
+                            <label for="kode_prodi" class="form-label">Kode Program Studi</label>
+                            <input type="text" class="form-control" id="kode_prodi" placeholder="Masukkan Kode Program Studi"
+                                name="kode_prodi" value="{{ old('kode_prodi') }}" maxlength="10" required>
+                            <div class="invalid-feedback" id="error-kode_prodi"></div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="nama_jurusan" class="form-label">Nama Jurusan</label>
-                            <input type="text" class="form-control" id="nama_jurusan" placeholder="Masukkan Nama Jurusan"
-                                name="nama_jurusan" value="{{ old('nama_jurusan') }}" required>
-                            <div class="invalid-feedback" id="error-nama_jurusan"></div>
+                            <label for="nama_prodi" class="form-label">Nama Program Studi</label>
+                            <input type="text" class="form-control" id="nama_prodi" placeholder="Masukkan Nama Program Studi"
+                                name="nama_prodi" value="{{ old('nama_prodi') }}" maxlength="50" required>
+                            <div class="invalid-feedback" id="error-nama_prodi"></div>
                         </div>
                 </div>
                 <div class="modal-footer">
@@ -83,31 +83,29 @@
 @section('script')
     <script>
         let method;
-        let kode_jurusan = null;
+        let kode_prodi = null;
 
         $(document).ready(function() {
-            jurusanTable();
-            showSelect();
-            selectDaerahJurusan();
+            prodiTable();
         });
 
-        function jurusanTable() {
-            var table = $('#jurusanTable').DataTable({
+        function prodiTable() {
+            var table = $('#prodiTable').DataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: '{{ route('jurusan.index') }}',
+                ajax: '{{ route('prodi.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'kode_jurusan',
-                        name: 'kode_jurusan'
+                        data: 'kode_prodi',
+                        name: 'kode_prodi'
                     },
                     {
-                        data: 'nama_jurusan',
-                        name: 'nama_jurusan',
+                        data: 'nama_prodi',
+                        name: 'nama_prodi',
                     },
                     {
                         data: 'action',
@@ -117,36 +115,36 @@
             });
         }
 
-        function jurusanModal() {
-            $('#jurusanForm')[0].reset();
+        function prodiModal() {
+            $('#prodiForm')[0].reset();
             method = 'create';
-            kode_jurusan;
+            kode_prodi;
 
-            $('#jurusanModal').modal('show');
-            $('#jurusanModalLabel').text('Tambah Data Jurusan');
+            $('#prodiModal').modal('show');
+            $('#prodiModalLabel').text('Tambah Data Program Studi');
             $('#saveBtn').text('Simpan');
         }
 
-        $('#jurusanForm').on('submit', function(e) {
+        $('#prodiForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('jurusan.store') }}';
-            let httpMethod = 'POST'; // Default method for create
+            let url = '{{ route('prodi.store') }}';
+            let httpMethod = 'POST';
 
             if (method === 'update') {
-                if (!kode_jurusan) {
+                if (!kode_prodi) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
-                        text: 'Jurusan ID tidak ditemukan.',
+                        text: 'Program Studi tidak ditemukan.',
                     });
                     return;
                 }
 
-                url = '{{ route('jurusan.update', '') }}/' + kode_jurusan;
-                formData.append('_method', 'PUT'); // Laravel expects PUT for updates
-                httpMethod = 'POST'; // FormData does not support PUT, so use POST with `_method`
+                url = '{{ route('prodi.update', '') }}/' + kode_prodi;
+                formData.append('_method', 'PUT');
+                httpMethod = 'POST';
             }
 
             $.ajax({
@@ -160,10 +158,10 @@
                 processData: false,
                 success: function(response) {
                     if (response.status == 200) {
-                        $('#jurusanModal').modal('hide');
-                        $('#jurusanForm').trigger('reset');
+                        $('#prodiModal').modal('hide');
+                        $('#prodiForm').trigger('reset');
 
-                        $('#jurusanTable').DataTable().ajax.reload();
+                        $('#prodiTable').DataTable().ajax.reload();
 
                         Swal.fire({
                             icon: response.icon,
@@ -191,8 +189,16 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
+                    } else if (xhr.status === 400) {
+                        Swal.fire({
+                            icon: xhr.responseJSON.icon,
+                            title: xhr.responseJSON.title,
+                            text: xhr.responseJSON.message
+                        });
+                        return;
+                    
                     } else {
-                        let errorResponse = xhr.responseJSON; // Ambil data JSON error
+                        let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
                             icon: errorResponse.icon || "error",
@@ -205,12 +211,12 @@
             });
         });
 
-        $('#importJurusanForm').on('submit', function(e) {
+        $('#importProdiForm').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            let url = '{{ route('jurusan.import') }}';
-            let httpMethod = 'POST'; // Default method for create
+            let url = '{{ route('prodi.import') }}';
+            let httpMethod = 'POST';
 
             $.ajax({
                 headers: {
@@ -232,10 +238,9 @@
                             }
                         });
 
-                        $('#importJurusanForm')[0].reset();
-                        $('#jurusanTable').DataTable().ajax.reload();
+                        $('#importProdiForm')[0].reset();
+                        $('#prodiTable').DataTable().ajax.reload();
 
-                        // Setelah sedikit delay agar spinner sempat terlihat
                         setTimeout(() => {
                             Swal.fire({
                                 icon: response.icon,
@@ -244,11 +249,11 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             });
-                        }, 1000); // delay 0.8 detik sebelum tampil hasil
+                        }, 1000);
                     }
                 },
                 error: function(xhr) {
-                    if (xhr.status === 422) { // 422 = Validation Error
+                    if (xhr.status === 422) {
                         let errorResponse = xhr.responseJSON;
 
                         let allErrors = Object.values(errorResponse.errors).flat().join('\n');
@@ -261,35 +266,35 @@
                         });
 
                     } else {
-                        let errorResponse = xhr.responseJSON; // Get JSON error data
+                        let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
                             icon: errorResponse.icon || "error",
                             title: errorResponse.title || "Error",
-                            text: errorResponse.message || "An unknown error occurred.",
+                            text: errorResponse.message || "Terjadi kesalahan yang tidak diketahui.",
                         });
                     }
                 }
             });
         });
 
-        function editJurusan(e) {
-            kode_jurusan = e.getAttribute('data-id');
+        function editProdi(e) {
+            kode_prodi = e.getAttribute('data-id');
             method = 'update';
 
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{ route('jurusan.show', '') }}/" + kode_jurusan,
+                url: "{{ route('prodi.show', '') }}/" + kode_prodi,
                 type: "GET",
                 success: function(response) {
-                    $('#jurusan_edit').val(response.jurusan.jurusan_uuid);
-                    $('#kode_jurusan').val(response.jurusan.kode_jurusan);
-                    $('#nama_jurusan').val(response.jurusan.nama_jurusan);
+                    $('#prodi_edit').val(response.prodi.prodi_uuid);
+                    $('#kode_prodi').val(response.prodi.kode_prodi);
+                    $('#nama_prodi').val(response.prodi.nama_prodi);
                 },
                 error: function(xhr) {
-                    if (xhr.status === 422) { // 422 = Error Validasi Laravel
+                    if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
                             let inputField = $('[name="' + key + '"]');
@@ -317,13 +322,13 @@
                 }
             });
 
-            $('#jurusanModal').modal('show');
-            $('#jurusanModalLabel').text('Edit Data Jurusan');
+            $('#prodiModal').modal('show');
+            $('#prodiModalLabel').text('Edit Data Program Studi');
             $('#saveBtn').text('Ubah');
         }
 
-        function deleteJurusan(e) {
-            let kode_jurusan = e.getAttribute('data-id');
+        function deleteProdi(e) {
+            let kode_prodi = e.getAttribute('data-id');
 
             Swal.fire({
                 title: "Apakah anda yakin?",
@@ -337,14 +342,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('jurusan.destroy', '') }}/" + kode_jurusan,
+                        url: "{{ route('prodi.destroy', '') }}/" + kode_prodi,
                         type: "DELETE",
                         data: {
                             _token: "{{ csrf_token() }}", // Kirim token dalam body
                         },
                         success: function(response) {
                             if (response.status == 200) {
-                                $('#jurusanTable').DataTable().ajax.reload();
+                                $('#prodiTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,
@@ -369,7 +374,7 @@
             });
         }
 
-        function jurusanDeleteAll() {
+        function prodiDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
                 text: "Menghapus semua data secara permanen",
@@ -382,14 +387,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('jurusan.destroyAll') }}",
+                        url: "{{ route('prodi.destroyAll') }}",
                         type: "DELETE",
                         data: {
-                            _token: "{{ csrf_token() }}", // Kirim token dalam body
+                            _token: "{{ csrf_token() }}",
                         },
                         success: function(response) {
                             if (response.status === 200) {
-                                $('#jurusanTable').DataTable().ajax.reload();
+                                $('#prodiTable').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: response.icon,
                                     title: response.title,
@@ -398,7 +403,6 @@
                                     timer: 1500
                                 });
                             } else {
-                                // Untuk response custom selain 200 (misal 404 dari backend)
                                 Swal.fire({
                                     icon: response.icon || "info",
                                     title: response.title || "Info",

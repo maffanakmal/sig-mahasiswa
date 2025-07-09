@@ -49,21 +49,23 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            if ($user->is_active) {
-                return response()->json([
-                    "status" => 403,
-                    "title" => "Akun Sedang Online",
-                    "message" => "Akun ini sedang digunakan di perangkat lain.",
-                    "icon" => "warning"
-                ], 403);
-            }
+            // if ($user->is_active) {
+            //     return response()->json([
+            //         "status" => 403,
+            //         "title" => "Akun Sedang Online",
+            //         "message" => "Akun ini sedang digunakan di perangkat lain.",
+            //         "icon" => "warning"
+            //     ], 403);
+            // }
 
             $user->is_active = 1;
+            $user->last_active = now();
+            $user->timestamps = false;
             $user->save();
 
             $request->session()->put('loggedInUser', [
                 'user_uuid' => $user->user_uuid,
-                'nama_user' => $user->nama_user,
+                'nama_lengkap' => $user->nama_lengkap,
                 'role' => $user->role,
             ]);
 
@@ -97,6 +99,7 @@ class AuthController extends Controller
                 $user = User::where('user_uuid', $loggedInUser['user_uuid'])->first();
                 if ($user) {
                     $user->is_active = 0;
+                    $user->timestamps = false;
                     $user->save();
                 }
             }

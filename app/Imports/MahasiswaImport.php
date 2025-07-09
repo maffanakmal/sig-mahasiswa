@@ -21,7 +21,7 @@ class MahasiswaImport implements ToCollection
             ->mapWithKeys(fn($kode, $nama) => [strtolower(trim($nama)) => $kode])
             ->toArray();
 
-        $jurusanList = Jurusan::pluck('kode_jurusan', 'nama_jurusan')
+        $prodiList = Jurusan::pluck('kode_prodi', 'nama_prodi')
             ->mapWithKeys(fn($kode, $nama) => [strtolower(trim($nama)) => $kode])
             ->toArray();
 
@@ -41,8 +41,8 @@ class MahasiswaImport implements ToCollection
             $nim = trim((string)$row[0]);
             $tahunMasuk = (int)($row[1] ?? 0);
 
-            $namaJurusan = strtolower(trim($row[2] ?? ''));
-            $kodeJurusan = $jurusanList[$namaJurusan] ?? null;
+            $namaProdi = strtolower(trim($row[2] ?? ''));
+            $kodeProdi = $prodiList[$namaProdi] ?? null;
 
             $namaSekolah = strtolower(trim($row[3] ?? ''));
             $npsn = $sekolahList[$namaSekolah] ?? null;
@@ -59,7 +59,7 @@ class MahasiswaImport implements ToCollection
                 'mahasiswa_uuid' => Str::uuid(),
                 'nim' => $nim,
                 'tahun_masuk' => $tahunMasuk,
-                'kode_jurusan' => $kodeJurusan,
+                'kode_prodi' => $kodeProdi,
                 'npsn' => $npsn,
                 'kode_daerah' => $kodeDaerah,
             ];

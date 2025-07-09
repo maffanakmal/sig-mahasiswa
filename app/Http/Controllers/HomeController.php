@@ -3,23 +3,24 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\Models\Kota;
 use App\Models\User;
 use App\Models\Daerah;
 use App\Models\Jurusan;
 use App\Models\Sekolah;
-use App\Models\Kelurahan;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        $loggedInUser = session('loggedInUser');
+        $user = User::where('user_uuid', $loggedInUser['user_uuid'])->first();
+
         return view('admin-dashboard.home', [
             'title' => 'USNIGIS | Halaman Dashboard',
             'status' => 'active',
+            'user' => $user,
         ]);
     }
 
@@ -94,20 +95,28 @@ class HomeController extends Controller
                 ], 404);
             }
 
-            $request->validate([
-                'nama_user' => 'required|string|max:255',
+            $validated = $request->validate([
+                'nama_lengkap' => 'required|string|max:255',
                 'username' => 'required|string|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
-                'email' => 'nullable|email|max:100|unique:users,email,' . $user->user_uuid . ',user_uuid', // jadikan nullable
+                'email' => 'nullable|email|max:100|unique:users,email,' . $user->user_uuid . ',user_uuid',
             ]);
 
-            $user->update([
-                'nama_user' => $request->nama_user,
-                'username' => $request->username,
-                'email' => $request->email,
-            ]);
+            // 💡 Cek apakah data tidak berubah
+            if (
+                $user->nama_lengkap === $validated['nama_lengkap'] &&
+                $user->username === $validated['username'] &&
+                $user->email === $validated['email']
+            ) {
+                return response()->json([
+                    'status' => 400,
+                    'title' => 'Tidak Ada Perubahan',
+                    'message' => 'Anda belum mengubah data apapun.',
+                    'icon' => 'info'
+                ], 400);
+            }
 
-            // Optional: update session nama user
-            session()->put('loggedInUser.nama_user', $request->nama_user);
+            $user->update($validated);
+            session()->put('loggedInUser.nama_lengkap', $validated['nama_lengkap']);
 
             return response()->json([
                 'status' => 200,

@@ -21,7 +21,7 @@ class SekolahController extends Controller
     public function index(Request $request)
     {
         $data = [
-            'title' => 'Sekolah Page',
+            'title' => 'USNIGIS | Halaman Sekolah',
             'sekolah' => Sekolah::where('sekolah_uuid', $request->npsn)->first(['npsn', 'nama_sekolah', 'alamat_sekolah', 'kode_daerah', 'latitude_sekolah', 'longitude_sekolah'])
         ];
 
@@ -208,12 +208,11 @@ class SekolahController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($npsn)
+    public function show($sekolah_uuid)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->select(
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_uuid)->select(
                 'npsn',
-                'sekolah_uuid',
                 'nama_sekolah',
                 'alamat_sekolah',
                 'kode_daerah',
@@ -246,10 +245,10 @@ class SekolahController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $npsn)
+    public function update(Request $request, $sekolah_uuid)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->firstOrFail(); // Cari user berdasarkan UUID
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_uuid)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate(
                 [
@@ -288,6 +287,23 @@ class SekolahController extends Controller
                 ]
             );
 
+            $dataTidakBerubah =
+                $sekolah->npsn == $validatedData['npsn'] &&
+                $sekolah->nama_sekolah === $validatedData['nama_sekolah'] &&
+                $sekolah->alamat_sekolah == $validatedData['alamat_sekolah'] &&
+                $sekolah->kode_daerah == $validatedData['kode_daerah'] &&
+                $sekolah->latitude_sekolah == $validatedData['latitude_sekolah'] &&
+                $sekolah->longitude_sekolah == $validatedData['longitude_sekolah'];
+
+            if ($dataTidakBerubah) {
+                return response()->json([
+                    'status' => 400,
+                    'title' => 'Tidak Ada Perubahan',
+                    'message' => 'Data pengguna tidak mengalami perubahan.',
+                    'icon' => 'info'
+                ], 400);
+            }
+
             DB::update("
             UPDATE sekolah SET 
                 npsn = ?, 
@@ -304,7 +320,7 @@ class SekolahController extends Controller
                 $validatedData['kode_daerah'],
                 $validatedData['latitude_sekolah'],
                 $validatedData['longitude_sekolah'],
-                $npsn
+                $sekolah_uuid
             ]);
 
             return response()->json([
@@ -331,10 +347,10 @@ class SekolahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($npsn)
+    public function destroy($sekolah_uuid)
     {
         try {
-            $sekolah = Sekolah::where('sekolah_uuid', $npsn)->firstOrFail();
+            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_uuid)->firstOrFail();
 
             if ($sekolah) {
                 $sekolah->delete();

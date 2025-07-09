@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'loginCheck' => \App\Http\Middleware\LoginCheck::class,
         'guestOnly' => \App\Http\Middleware\GuestOnly::class,
         'roleCheck' => \App\Http\Middleware\RoleCheck::class,
+        'checkSession' => \App\Http\Middleware\CheckSession::class,
     ];
 }

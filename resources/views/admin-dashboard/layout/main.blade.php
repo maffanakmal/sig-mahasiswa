@@ -55,10 +55,10 @@
                             <span>Sekolah</span>
                         </a>
                     </li>
-                    <li class="sidebar-item {{ Request::is('dashboard/jurusan') ? 'status-active' : '' }}">
-                        <a href="{{ route('jurusan.index') }}" class="sidebar-link">
+                    <li class="sidebar-item {{ Request::is('dashboard/prodi') ? 'status-active' : '' }}">
+                        <a href="{{ route('prodi.index') }}" class="sidebar-link">
                             <i class='bx bx-book'></i>
-                            <span>Jurusan</span>
+                            <span>Program Studi</span>
                         </a>
                     </li>
                     <li class="sidebar-item {{ Request::is('dashboard/mahasiswa') ? 'status-active' : '' }}">
@@ -100,7 +100,7 @@
                         <li class="nav-item dropdown d-flex align-items-center">
                             <div class="user-info me-2 text-end">
                                 <span class="user-name d-block fw-bold text-white">
-                                    {{ session('loggedInUser')['nama_user'] ?? 'Guest' }}
+                                    {{ session('loggedInUser')['nama_lengkap'] ?? 'Guest' }}
                                 </span>
                                 <span class="user-title text-white">
                                     {{ session('loggedInUser')['role'] ?? 'User' }}
@@ -159,7 +159,7 @@
                     $.ajax({
                         url: "{{ route('logout') }}",
                         method: 'POST',
-                        data: $('#logout-form').serialize(), // Atau kosongkan jika tidak ada form
+                        data: $('#logout-form').serialize(),
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

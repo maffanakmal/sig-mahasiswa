@@ -15,13 +15,11 @@ class JurusanImport implements ToCollection
     public function collection(Collection $collection)
     {
         $data = [];
-        $processedKodeJurusan = [];
+        $processedKodeProdi = [];
 
-        // Ambil semua kode_jurusan yang sudah ada di database
-        $existingKodeJurusan = Jurusan::pluck('kode_jurusan')->toArray();
+        $existingKodeProdi = Jurusan::pluck('kode_prodi')->toArray();
 
         foreach ($collection as $index => $row) {
-            // Lewati baris pertama (header)
             if ($index === 0) {
                 continue;
             }
@@ -29,23 +27,21 @@ class JurusanImport implements ToCollection
             $kode = trim($row[0] ?? '');
             $nama = trim($row[1] ?? '');
 
-            // Skip jika salah satu kolom kosong
             if (empty($kode) || empty($nama)) {
                 continue;
             }
 
-            // Skip jika duplikat di DB atau di file Excel
-            if (in_array($kode, $existingKodeJurusan) || in_array($kode, $processedKodeJurusan)) {
+            if (in_array($kode, $existingKodeProdi) || in_array($kode, $processedKodeProdi)) {
                 continue;
             }
 
             $data[] = [
-                'jurusan_uuid' => Str::uuid(),
-                'kode_jurusan' => $kode,
-                'nama_jurusan' => $nama,
+                'prodi_uuid' => Str::uuid(),
+                'kode_prodi' => $kode,
+                'nama_prodi' => $nama,
             ];
 
-            $processedKodeJurusan[] = $kode;
+            $processedKodeProdi[] = $kode;
         }
 
         if (!empty($data)) {

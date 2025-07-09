@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('mahasiswa', function (Blueprint $table) {
             $table->integer('nim')->unsigned()->primary(); // Primary Key
             $table->uuid('mahasiswa_uuid')->unique();
-            $table->smallInteger('tahun_masuk');
+            $table->year('tahun_masuk');
         
             // Foreign keys, sekarang bisa NULL
-            $table->smallInteger('kode_jurusan')->unsigned()->nullable();
+            $table->integer('kode_prodi')->unsigned()->nullable();
             $table->integer('npsn')->unsigned()->nullable();
-            $table->smallInteger('kode_daerah')->unsigned()->nullable();
+            $table->integer('kode_daerah')->unsigned()->nullable();
         
             // Foreign key constraints
-            $table->foreign('kode_jurusan')->references('kode_jurusan')->on('jurusan')->onDelete('cascade');
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('prodi')->onDelete('cascade');
             $table->foreign('npsn')->references('npsn')->on('sekolah')->onDelete('cascade');
             $table->foreign('kode_daerah')->references('kode_daerah')->on('daerah')->onDelete('cascade');
         });

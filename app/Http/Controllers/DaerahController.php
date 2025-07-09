@@ -22,9 +22,8 @@ class DaerahController extends Controller
     public function index(Request $request)
     {
         $data = [
-            'title' => 'Daerah Page',
+            'title' => 'USNIGIS | Halaman Daerah',
             'daerah' => Daerah::where('daerah_uuid', $request->kode_daerah)->first([
-                'daerah_uuid',
                 'kode_daerah',
                 'nama_daerah',
                 'latitude_daerah',
@@ -181,11 +180,10 @@ class DaerahController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($kode_daerah)
+    public function show($daerah_uuid)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->select(
-                'daerah_uuid',
+            $daerah = Daerah::where('daerah_uuid', $daerah_uuid)->select(
                 'kode_daerah',
                 'nama_daerah',
                 'latitude_daerah',
@@ -217,17 +215,17 @@ class DaerahController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $kode_daerah)
+    public function update(Request $request, $daerah_uuid)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->firstOrFail(); // Cari user berdasarkan UUID
+            $daerah = Daerah::where('daerah_uuid', $daerah_uuid)->firstOrFail();
 
             $validatedData = $request->validate(
                 [
                     'kode_daerah'      => 'required|regex:/^[0-9]+$/|digits_between:1,5|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
                     'nama_daerah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                    'latitude_daerah' => 'required|numeric|max:20|between:-90,90',
-                    'longitude_daerah' => 'required|numeric|max:20|between:-180,180',
+                    'latitude_daerah' => 'required|numeric|between:-90,90',
+                    'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
                 [
                     'kode_daerah.required' => 'Kode daerah harus diisi.',
@@ -242,14 +240,27 @@ class DaerahController extends Controller
                     'latitude_daerah.required' => 'Latitude harus diisi.',
                     'latitude_daerah.numeric' => 'Latitude harus berupa angka.',
                     'latitude_daerah.between' => 'Latitude harus antara -90 dan 90.',
-                    'latitude_daerah.max' => 'Latitude tidak boleh lebih dari 20 karakter.',
 
                     'longitude_daerah.required' => 'Longitude harus diisi.',
                     'longitude_daerah.numeric' => 'Longitude harus berupa angka.',
                     'longitude_daerah.between' => 'Longitude harus antara -180 dan 180.',
-                    'longitude_daerah.max' => 'Longitude tidak boleh lebih dari 20 karakter.',
                 ]
             );
+
+            $dataTidakBerubah =
+                $daerah->kode_daerah == $validatedData['kode_daerah'] &&
+                $daerah->nama_daerah === $validatedData['nama_daerah'] &&
+                (float)$daerah->latitude_daerah == (float)$validatedData['latitude_daerah'] &&
+                (float)$daerah->longitude_daerah == (float)$validatedData['longitude_daerah'];
+
+            if ($dataTidakBerubah) {
+                return response()->json([
+                    'status' => 400,
+                    'title' => 'Tidak Ada Perubahan',
+                    'message' => 'Data pengguna tidak mengalami perubahan.',
+                    'icon' => 'info'
+                ], 400);
+            }
 
             DB::update("
             UPDATE daerah SET 
@@ -263,7 +274,7 @@ class DaerahController extends Controller
                 $validatedData['nama_daerah'],
                 $validatedData['latitude_daerah'],
                 $validatedData['longitude_daerah'],
-                $kode_daerah
+                $daerah_uuid
             ]);
 
             return response()->json([
@@ -290,10 +301,10 @@ class DaerahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($kode_daerah)
+    public function destroy($daerah_uuid)
     {
         try {
-            $daerah = Daerah::where('daerah_uuid', $kode_daerah)->firstOrFail();
+            $daerah = Daerah::where('daerah_uuid', $daerah_uuid)->firstOrFail();
 
             if ($daerah) {
                 $daerah->delete();

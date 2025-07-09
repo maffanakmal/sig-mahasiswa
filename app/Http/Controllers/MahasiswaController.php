@@ -24,19 +24,19 @@ class MahasiswaController extends Controller
     public function index(Request $request)
     {
         $data = [
-            'title' => 'Mahasiswa Page',
-            'mahasiswa' => Mahasiswa::where('mahasiswa_uuid', $request->nim)->first(['nim', 'tahun_masuk', 'kode_jurusan', 'npsn', 'kode_daerah'])
+            'title' => 'USNIGIS | Halaman Mahasiswa',
+            'mahasiswa' => Mahasiswa::where('mahasiswa_uuid', $request->nim)->first(['nim', 'tahun_masuk', 'kode_prodi', 'npsn', 'kode_daerah'])
         ];
 
         if ($request->ajax()) {
             $mahasiswas = Mahasiswa::leftJoin('daerah', 'mahasiswa.kode_daerah', '=', 'daerah.kode_daerah')
                 ->leftJoin('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
-                ->leftJoin('jurusan', 'mahasiswa.kode_jurusan', '=', 'jurusan.kode_jurusan')
+                ->leftJoin('prodi', 'mahasiswa.kode_prodi', '=', 'prodi.kode_prodi')
                 ->select(
                     'mahasiswa.mahasiswa_uuid',
                     'mahasiswa.nim',
                     'mahasiswa.tahun_masuk',
-                    'jurusan.nama_jurusan as kode_jurusan',
+                    'prodi.nama_prodi as kode_prodi',
                     'sekolah.nama_sekolah as npsn',
                     'daerah.nama_daerah as kode_daerah',
                 )
@@ -46,8 +46,8 @@ class MahasiswaController extends Controller
 
             return DataTables::of($mahasiswas)
                 ->addIndexColumn()
-                ->editColumn('kode_jurusan', function ($row) {
-                    return $row->kode_jurusan ?? '<span class="text-muted">Tidak ada</span>';
+                ->editColumn('kode_prodi', function ($row) {
+                    return $row->kode_prodi ?? '<span class="text-muted">Tidak ada</span>';
                 })
                 ->editColumn('npsn', function ($row) {
                     return $row->npsn ?? '<span class="text-muted">Tidak ada</span>';
@@ -63,7 +63,7 @@ class MahasiswaController extends Controller
                     <i class="bx bx-trash"></i>
                 </button>';
                 })
-                ->rawColumns(['action', 'kode_jurusan', 'npsn', 'kode_daerah']) // penting agar HTML-nya dirender
+                ->rawColumns(['action', 'kode_prodi', 'npsn', 'kode_daerah']) // penting agar HTML-nya dirender
                 ->make(true);
         }
 
@@ -78,13 +78,13 @@ class MahasiswaController extends Controller
     {
         try {
             $daerah = Daerah::select(['kode_daerah', 'nama_daerah'])->get();
-            $jurusan = Jurusan::select(['kode_jurusan', 'nama_jurusan'])->get();
+            $prodi = Jurusan::select(['kode_prodi', 'nama_prodi'])->get();
             $sekolah = Sekolah::select(['npsn', 'nama_sekolah'])->get();
 
             return response()->json([
                 'status' => 200,
                 'daerah' => $daerah,
-                'jurusan' => $jurusan,
+                'prodi' => $prodi,
                 'sekolah' => $sekolah,
             ]);
         } catch (Exception $e) {
@@ -106,15 +106,15 @@ class MahasiswaController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'nim'              => 'required|string|max:100|unique:mahasiswa,nim',
-                    'tahun_masuk'      => 'required|digits:4',
-                    'kode_jurusan'          => 'required|string|exists:jurusan,kode_jurusan',
-                    'npsn'     => 'required|string|exists:sekolah,nspn',
-                    'kode_daerah'      => 'required|string|exists:daerah,kode_daerah',
+                    'nim' => 'required|numeric|max:10|unique:mahasiswa,nim',
+                    'tahun_masuk' => 'required|digits:4',
+                    'kode_prodi' => 'required|numeric|exists:prodi,kode_prodi',
+                    'npsn' => 'required|numeric|exists:sekolah,nspn',
+                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
                 ],
                 [
                     'nim.unique' => 'NIM sudah terdaftar.',
-                    'kode_jurusan.exists' => 'Jurusan tidak valid.',
+                    'kode_prodi.exists' => 'Program Studi tidak valid.',
                     'npsn.exists' => 'Sekolah asal tidak valid.',
                     'kode_daerah.exists' => 'Daerah asal tidak valid.',
                     'tahun_masuk.digits' => 'Tahun masuk harus terdiri dari 4 digit.',
@@ -128,7 +128,7 @@ class MahasiswaController extends Controller
                 mahasiswa_uuid, 
                 nim, 
                 tahun_masuk, 
-                kode_jurusan, 
+                kode_prodi, 
                 npsn, 
                 kode_daerah
             ) VALUES (?, ?, ?, ?, ?, ?)
@@ -136,7 +136,7 @@ class MahasiswaController extends Controller
                 $mahasiswa_uuid,
                 $validatedData['nim'],
                 $validatedData['tahun_masuk'],
-                $validatedData['kode_jurusan'],
+                $validatedData['kode_prodi'],
                 $validatedData['npsn'],
                 $validatedData['kode_daerah'],
             ]);
@@ -203,14 +203,14 @@ class MahasiswaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($nim)
+    public function show($mahasiswa_uuid)
     {
         try {
-            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $nim)->select(
+            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $mahasiswa_uuid)->select(
                 'mahasiswa_uuid',
                 'nim',
                 'tahun_masuk',
-                'kode_jurusan',
+                'kode_prodi',
                 'npsn',
                 'kode_daerah',
             )->firstOrFail();
@@ -240,43 +240,60 @@ class MahasiswaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $nim)
+    public function update(Request $request, $mahasiswa_uuid)
     {
         try {
-            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $nim)->firstOrFail(); // Cari user berdasarkan UUID
+            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $mahasiswa_uuid)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate(
                 [
-                    'nim'              => 'required|string|max:100|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
-                    'tahun_masuk'      => 'required|digits:4',
-                    'kode_jurusan'          => 'required|string|exists:jurusan,kode_jurusan',
-                    'npsn'     => 'required|string|exists:sekolah,sekolah_id',
-                    'kode_daerah'      => 'required|string|exists:daerah,kode_daerah',
+                    'nim' => 'required|string|max:100|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
+                    'tahun_masuk' => 'required|digits:4',
+                    'kode_prodi'=> 'required|numeric|exists:prodi,kode_prodi',
+                    'npsn' => 'required|numeric|exists:sekolah,npsn',
+                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
                 ],
                 [
                     'nim.unique' => 'NIM sudah terdaftar.',
-                    'kode_jurusan.exists' => 'Jurusan tidak valid.',
+                    'kode_prodi.exists' => 'Program Studi tidak valid.',
                     'npsn.exists' => 'Sekolah asal tidak valid.',
-                    'kode_jurusan.exists' => 'Daerah asal tidak valid.',
+                    'kode_daerah.exists' => 'Daerah asal tidak valid.',
                     'tahun_masuk.digits' => 'Tahun masuk harus terdiri dari 4 digit.',
                 ]
             );
+
+            $dataTidakBerubah =
+                $mahasiswa->nim == $validatedData['nim'] &&
+                $mahasiswa->tahun_masuk == $validatedData['tahun_masuk'] &&
+                $mahasiswa->kode_prodi == $validatedData['kode_prodi'] &&
+                $mahasiswa->npsn == $validatedData['npsn'] &&
+                $mahasiswa->kode_daerah == $validatedData['kode_daerah'];
+               
+
+            if ($dataTidakBerubah) {
+                return response()->json([
+                    'status' => 400,
+                    'title' => 'Tidak Ada Perubahan',
+                    'message' => 'Data pengguna tidak mengalami perubahan.',
+                    'icon' => 'info'
+                ], 400);
+            }
 
             DB::update("
             UPDATE mahasiswa SET 
                 nim = ?, 
                 tahun_masuk = ?, 
-                kode_jurusan = ?, 
+                kode_prodi = ?, 
                 npsn = ?, 
                 kode_daerah = ?
             WHERE mahasiswa_uuid = ?
         ", [
                 $validatedData['nim'],
                 $validatedData['tahun_masuk'],
-                $validatedData['kode_jurusan'],
+                $validatedData['kode_prodi'],
                 $validatedData['npsn'],
                 $validatedData['kode_daerah'],
-                $nim
+                $mahasiswa_uuid
             ]);
 
             return response()->json([
@@ -303,10 +320,10 @@ class MahasiswaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($nim)
+    public function destroy($mahasiswa_uuid)
     {
         try {
-            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $nim)->firstOrFail();
+            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $mahasiswa_uuid)->firstOrFail();
 
             if ($mahasiswa) {
                 $mahasiswa->delete();

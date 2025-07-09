@@ -4,31 +4,57 @@
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <h3 class="fw-bold fs-4">Peta Persebaran Mahasiswa Berdasarkan Daerah</h3>
     </div>
+    @if (empty($daerah) || $daerah->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>daerah</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (empty($jurusan) || $jurusan->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>jurusan</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (empty($mahasiswa) || $mahasiswa->isEmpty())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Perhatian!</strong> Data <strong>mahasiswa</strong> belum diunggah admin.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card shadow-sm">
         <div class="card-header mb-2">
             @if (session('loggedInUser')['role'] === 'Warek 3')
-                <p class="mb-2">Filter Data</p>
-                <form action="#" id="mapFilterForm" class="d-flex align-items-end gap-2 flex-wrap">
+                <p class="mb-2 fw-bolder">Search Data</p>
+                <form action="#" id="mapFilterForm" class="row g-2 align-items-center">
+                    {{-- CSRF Token --}}
                     @csrf
 
-                    <div class="form-group" style="min-width: 180px;">
-                        <select id="tahun_masuk" name="tahun_masuk" class="form-control">
+                    <div class="col-md-4">
+                        <select id="daerah" name="daerah" class="form-select">
+                            <option value="" selected disabled>Daerah</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <select id="tahun_masuk" name="tahun_masuk" class="form-select">
                             <option value="" selected disabled>Tahun Masuk</option>
                         </select>
                     </div>
 
-                    <div class="form-group" style="min-width: 180px;">
-                        <select id="jurusan" name="jurusan" class="form-control">
+                    <div class="col-md-3">
+                        <select id="jurusan" name="jurusan" class="form-select">
                             <option value="" selected disabled>Jurusan</option>
                         </select>
                     </div>
 
-                    <div>
-                        <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i> Cari</button>
-                    </div>
-
-                    <div>
-                        <button type="button" id="resetFilterBtn" class="btn btn-danger">Reset</button>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary"><i class='bx  bx-search'></i> Cari </button>
+                        <button type="button" id="resetFilterBtn" class="btn btn-danger"><i class='bx  bx-refresh'></i>
+                            Reset </button>
                     </div>
                 </form>
             @endif
@@ -38,35 +64,6 @@
                 <div id="map" class="mb-3"></div>
             </div>
         </div>
-    </div>
-    <div class="container-fluid mt-3">
-        <div class="row text-center">
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Mahasiswa di Peta</h6>
-                        <h3 class="text-primary" id="jumlah-tampil">0</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Daerah Tidak Ada</h6>
-                        <h3 class="text-warning" id="jumlah-daerah-null">0</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title">Jurusan Tidak Ada</h6>
-                        <h3 class="text-danger" id="jumlah-jurusan-null">0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     </div>
 @endsection
 
@@ -181,9 +178,10 @@
 
         $(document).ready(function() {
             mapFilter();
-            showDaerah();
+            // showDaerah();
             selectJurusan();
             selectTahunMasuk();
+            selectDaerah();
         });
 
         function clearCircleMarkers() {
@@ -321,19 +319,23 @@
                 type: 'GET',
                 success: function(response) {
                     if (response.status == 200) {
-                        // Clear existing options (except placeholder)
+                        $('#daerah').find('option:gt(0)').remove();
                         $('#tahun_masuk').find('option:gt(0)').remove();
                         $('#jurusan').find('option:gt(0)').remove();
 
-                        // Populate Tahun Masuk
                         response.tahun_masuk.forEach(function(item) {
                             $('#tahun_masuk').append(`<option value="${item}">${item}</option>`);
                         });
 
-                        // Populate Jurusan
                         response.jurusan.forEach(function(item) {
                             $('#jurusan').append(
                                 `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`
+                            );
+                        });
+
+                        response.daerah.forEach(function(item) {
+                            $('#daerah').append(
+                                `<option value="${item.kode_daerah}">${item.nama_daerah}</option>`
                             );
                         });
 
@@ -398,18 +400,40 @@
             });
         }
 
+        function selectDaerah() {
+            $('#daerah').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                minimumInputLength: 0, // Allow search immediately
+                dropdownParent: $('#daerah').parent(), // Ensures proper z-index handling
+                language: {
+                    noResults: function() {
+                        return "Tidak ada hasil yang ditemukan";
+                    },
+                    searching: function() {
+                        return "Mencari...";
+                    }
+                }
+            }).on('select2:open', function() {
+                // Focus the search field when opened
+                setTimeout(function() {
+                    $('.select2-search__field').focus();
+                }, 0);
+            });
+        }
+
         $('#mapFilterForm').on('submit', function(e) {
             e.preventDefault();
 
             const tahunMasuk = $('#tahun_masuk option:selected').val();
             const jurusan = $('#jurusan option:selected').val();
+            const daerah = $('#daerah option:selected').val();
 
-            // Validasi jika titik awal atau akhir kosong
-            if (!tahunMasuk || !jurusan) {
+            if (!daerah && !jurusan && !tahunMasuk) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
-                    text: 'Silakan pilih Tahun Masuk dan Jurusan terlebih dahulu.',
+                    text: 'Anda harus memilih minimal satu filter sebelum mencari.',
                 });
                 return;
             }
@@ -460,6 +484,15 @@
                         });
 
                         renderMarkers(groupedData);
+                    } else if (response.status == 204) {
+                        clearCircleMarkers();
+
+                        Swal.fire({
+                            icon: response.icon,
+                            title: response.title,
+                            text: response.message,
+                        });
+
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -481,11 +514,11 @@
 
 
         $('#resetFilterBtn').on('click', function() {
-            const tahunMasuk = $('#tahun_masuk option:selected').val();
+            const tahun_masuk = $('#tahun_masuk option:selected').val();
             const jurusan = $('#jurusan option:selected').val();
+            const daerah = $('#daerah option:selected').val();
 
-            // Validasi jika titik awal atau akhir kosong
-            if (!tahunMasuk || !jurusan) {
+            if (!tahun_masuk && !jurusan && !daerah) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
@@ -495,11 +528,12 @@
             }
 
             $('#mapFilterForm')[0].reset();
-
-            $('#jurusan').val('').trigger('change');
+            $('#daerah').val('').trigger('change');
             $('#tahun_masuk').val('').trigger('change');
+            $('#jurusan').val('').trigger('change');
 
-            showDaerah();
+            // Hapus semua marker lingkaran
+            clearCircleMarkers();
         });
     </script>
 @endsection

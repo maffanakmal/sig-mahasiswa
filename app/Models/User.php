@@ -19,12 +19,13 @@ class User extends Model
 
     protected $fillable = [
         'user_uuid',
-        'nama_user',
+        'nama_lengkap',
         'username',
         'email',
         'password',
         'role',
         'is_active',
+        'last_active',
         'reset_token',
         'token_expire',
     ];

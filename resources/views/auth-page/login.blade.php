@@ -4,19 +4,25 @@
     <div class="header-text mb-4">
         <p class="fs-3 text-center">Masuk ke Akun</p>
     </div>
+    @if (session('session_expired'))
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <strong>Sesi habis:</strong> {{ session('session_expired') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <form action="#" id="loginForm">
         @csrf
         <div class="form-group mb-2">
             <label for="credentials" class="form-label">Username/Email</label>
-            <input type="text" class="form-control" id="credentials" placeholder="Masukkan Username atau Email" name="credentials"
-                value="{{ old('credentials') }}" maxlength="50" required>
+            <input type="text" class="form-control" id="credentials" placeholder="Masukkan Username atau Email"
+                name="credentials" value="{{ old('credentials') }}" maxlength="50" required>
             <div class="invalid-feedback" id="error-credentials"></div>
         </div>
         <div class="form-group mb-4">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password"
-                    maxlength="60">
+                    maxlength="60" required>
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <i class='bx bx-show'></i>
                 </span>
@@ -54,6 +60,7 @@
                 });
             });
         })
+
 
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();

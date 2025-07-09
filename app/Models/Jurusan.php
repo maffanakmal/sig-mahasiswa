@@ -9,17 +9,17 @@ class Jurusan extends Model
 {
     use HasFactory;
 
-    protected $table = 'jurusan';
+    protected $table = 'prodi';
 
-    protected $primaryKey = 'kode_jurusan';
+    protected $primaryKey = 'kode_prodi';
 
     public $incrementing = false;
 
     protected $keyType = 'integer';
 
     protected $fillable = [
-        'jurusan_uuid',
-        'kode_jurusan',
-        'nama_jurusan',
+        'prodi_uuid',
+        'kode_prodi',
+        'nama_prodi',
     ];
 }

@@ -21,7 +21,7 @@ class Mahasiswa extends Model
         'mahasiswa_uuid',
         'nim',
         'tahun_masuk',
-        'kode_jurusan',
+        'kode_prodi',
         'npsn',
         'daerah_asal',
     ];
@@ -31,9 +31,9 @@ class Mahasiswa extends Model
         return $this->belongsTo(Daerah::class, 'kode_daerah', 'kode_daerah');
     }
 
-    public function jurusan()
+    public function prodi()
     {
-        return $this->belongsTo(Jurusan::class, 'kode_jurusan', 'kode_jurusan');
+        return $this->belongsTo(Jurusan::class, 'kode_prodi', 'kode_prodi');
     }
 
     public function sekolah()

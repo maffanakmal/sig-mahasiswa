@@ -10,10 +10,10 @@
                 @csrf
                 <input type="hidden" name="user_uuid" id="user_uuid" value="{{ $user->user_uuid }}">
                 <div class="form-group mb-3">
-                    <label for="nama_user" class="form-label">Nama Pengguna</label>
-                    <input type="text" class="form-control" id="nama_user" placeholder="Masukkan Nama Pengguna"
-                        name="nama_user" value="{{ $user->nama_user }}">
-                    <div class="invalid-feedback" id="error-nama_user"></div>
+                    <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                    <input type="text" class="form-control" id="nama_lengkap" placeholder="Masukkan Nama Lengkap"
+                        name="nama_lengkap" value="{{ $user->nama_lengkap }}">
+                    <div class="invalid-feedback" id="error-nama_lengkap"></div>
                 </div>
                 <div class="form-group mb-3">
                     <label for="username" class="form-label">Username</label>
@@ -27,7 +27,7 @@
                         value="{{ $user->email }}">
                     <div class="invalid-feedback" id="error-email"></div>
                 </div>
-                <div class="form-group mb-3">
+                <div class="form-group mb-4">
                     <label for="role" class="form-label">Role</label>
                     <input type="role" class="form-control" id="role" name="role" placeholder="Role"
                         value="{{ $user->role }}" disabled>
@@ -35,7 +35,7 @@
                 </div>
                 <div class="saveBtn d-flex justify-content-between">
                     <a href="{{ route('home.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
-                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Ubah Pengaturan</button>
+                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">Simpan</button>
                 </div>
             </form>
         </div>
@@ -88,9 +88,16 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
+                    } else if (xhr.status === 400) {
+                        let response = xhr.responseJSON;
+                        Swal.fire({
+                            icon: response.icon || 'info',
+                            title: response.title || 'Tidak Ada Perubahan',
+                            text: response.message || 'Tidak ada perubahan pada data.',
+                        });
+
                     } else {
                         let errorResponse = xhr.responseJSON;
-
                         Swal.fire({
                             icon: errorResponse.icon || "error",
                             title: errorResponse.title || "Error",
@@ -99,6 +106,7 @@
                         });
                     }
                 }
+
             });
         });
     </script>
