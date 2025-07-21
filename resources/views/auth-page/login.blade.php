@@ -67,8 +67,7 @@
 
             let btn = $('#btn-login');
 
-            // Add loading spinner inside the button
-            btn.html(
+            btn.prop('disabled', true).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
             );
 
@@ -85,6 +84,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('Masuk');
+
                     if (response.status === 200) {
                         Swal.fire({
                             icon: response.icon,
@@ -98,7 +99,7 @@
                     }
                 },
                 error: function(xhr) {
-                    $('#btn-login').text('Masuk');
+                    btn.prop('disabled', false).html('Masuk');
 
                     if (xhr.status == 422) {
                         let errors = xhr.responseJSON.errors;
@@ -117,27 +118,42 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
-                    } else if (xhr.status == 401) {
+                    } else if (xhr.status == 401 || xhr.status == 403) {
                         let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
-                            icon: errorResponse.icon,
-                            title: errorResponse.title,
-                            text: errorResponse.message,
+                            icon: errorResponse.icon || 'error',
+                            title: errorResponse.title || 'Login Gagal',
+                            text: errorResponse.message || 'Terjadi kesalahan otentikasi.',
                         });
 
-                    } else if (xhr.status == 403) {
+                    } else if (xhr.status == 404) {
                         let errorResponse = xhr.responseJSON;
 
                         Swal.fire({
-                            icon: errorResponse.icon || 'warning',
-                            title: errorResponse.title || 'Akses Ditolak',
+                            icon: errorResponse.icon || 'error',
+                            title: errorResponse.title || 'Akun Tidak Ditemukan',
                             text: errorResponse.message ||
-                                'Anda tidak memiliki izin untuk login.',
+                                'Username atau email tidak ditemukan.',
+                        });
+
+                    } else if (xhr.status == 500) {
+                        let errorResponse = xhr.responseJSON;
+
+                        Swal.fire({
+                            icon: errorResponse.icon || 'error',
+                            title: errorResponse.title || 'Kesalahan Server',
+                            text: errorResponse.message || 'Terjadi kesalahan di server.',
+                        });
+
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Kesalahan Tidak Dikenal',
+                            text: 'Terjadi kesalahan yang tidak diketahui.',
                         });
                     }
                 }
-
             });
         });
     </script>

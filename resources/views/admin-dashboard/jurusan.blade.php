@@ -117,6 +117,9 @@
 
         function prodiModal() {
             $('#prodiForm')[0].reset();
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             method = 'create';
             kode_prodi;
 
@@ -127,6 +130,11 @@
 
         $('#prodiForm').on('submit', function(e) {
             e.preventDefault();
+
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
 
             const formData = new FormData(this);
             let url = '{{ route('prodi.store') }}';
@@ -157,6 +165,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (response.status == 200) {
                         $('#prodiModal').modal('hide');
                         $('#prodiForm').trigger('reset');
@@ -173,6 +183,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -184,10 +196,11 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
+
 
                     } else if (xhr.status === 400) {
                         Swal.fire({
@@ -282,6 +295,11 @@
             kode_prodi = e.getAttribute('data-id');
             method = 'update';
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -289,11 +307,15 @@
                 url: "{{ route('prodi.show', '') }}/" + kode_prodi,
                 type: "GET",
                 success: function(response) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     $('#prodi_edit').val(response.prodi.prodi_uuid);
                     $('#kode_prodi').val(response.prodi.kode_prodi);
                     $('#nama_prodi').val(response.prodi.nama_prodi);
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -305,7 +327,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });

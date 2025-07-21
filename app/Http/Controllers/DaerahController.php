@@ -75,19 +75,19 @@ class DaerahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_daerah' => 'required|regex:/^[0-9]+$/|digits_between:1,4|unique:daerah,kode_daerah',
-                    'nama_daerah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|max:10|unique:daerah,kode_daerah',
+                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
                     'latitude_daerah' => 'required|numeric|between:-90,90',
                     'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
                 [
                     'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 4 digit.',
+                    'kode_daerah.max' => 'Kode daerah tidak boleh lebih dari 10 karakter.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
-                    'nama_daerah.regex' => 'Nama daerah mengandung karakter tidak valid.',
+                    'nama_daerah.regex' => 'Nama daerah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_daerah.max' => 'Nama daerah tidak boleh lebih dari 100 karakter.',
 
                     'latitude_daerah.required' => 'Latitude harus diisi.',
@@ -120,7 +120,7 @@ class DaerahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data daerah berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
@@ -157,7 +157,7 @@ class DaerahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data daerah berhasil diimport.",
                 "icon" => "success"
             ]);
@@ -222,15 +222,15 @@ class DaerahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'kode_daerah'      => 'required|regex:/^[0-9]+$/|digits_between:1,5|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
-                    'nama_daerah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'kode_daerah'      => 'required|regex:/^[0-9]+$/|max:10|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
+                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
                     'latitude_daerah' => 'required|numeric|between:-90,90',
                     'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
                 [
                     'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.digits_between' => 'Kode daerah tidak boleh lebih dari 4 digit.',
+                    'kode_daerah.max' => 'Kode daerah tidak boleh lebih dari 10 karakter.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
@@ -257,7 +257,7 @@ class DaerahController extends Controller
                 return response()->json([
                     'status' => 400,
                     'title' => 'Tidak Ada Perubahan',
-                    'message' => 'Data pengguna tidak mengalami perubahan.',
+                    'message' => 'Data daerah tidak mengalami perubahan.',
                     'icon' => 'info'
                 ], 400);
             }
@@ -279,7 +279,7 @@ class DaerahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data daerah berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
@@ -311,7 +311,7 @@ class DaerahController extends Controller
 
                 return response()->json([
                     "status" => 200,
-                    "title" => "Success",
+                    "title" => "Berhasil!",
                     "message" => "Data daerah berhasil dihapus.",
                     "icon" => "success"
                 ]);
@@ -344,7 +344,7 @@ class DaerahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Semua data daerah berhasil dihapus.",
                 "icon" => "success"
             ]);

@@ -4,13 +4,13 @@
     <div class="header-text mb-3">
         <p class="fs-3 text-center">Lupa Password</p>
     </div>
-    <p>Masukkan email anda dan kita akan mengirimkan link untuk reset password.</p>
+    <p>Kami akan kirimkan link reset password ke email Anda.</p>
     <form action="#" id="resetForm">
         @csrf
         <div class="form-group mb-5">
             <label for="email" class="form-label">Email</label>
             <input type="text" class="form-control" id="email" placeholder="Masukkan Email" name="email"
-                value="{{ old('email') }}" required>
+                value="{{ old('email') }}" maxlength="50" required>
             <div class="invalid-feedback" id="error-email"></div>
         </div>
         <div class="form-group mb-3">
@@ -26,8 +26,8 @@
             e.preventDefault();
 
             let btn = $('#btn-reset');
-            btn.prop('disabled', true);
-            btn.html(
+            
+            btn.prop('disabled', true).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
             );
 
@@ -44,8 +44,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false);
-                    btn.html('Reset Password');
+                    btn.prop('disabled', false).html('Reset Password');
 
                     if (response.status === 200) {
                         Swal.fire({
@@ -58,8 +57,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false);
-                    btn.html('Reset Password');
+                    btn.prop('disabled', false).html('Reset Password');
 
                     if (xhr.status == 422) {
                         let errors = xhr.responseJSON.errors;

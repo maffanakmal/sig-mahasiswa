@@ -9,6 +9,8 @@ use App\Models\Jurusan;
 use App\Models\Sekolah;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class HomeController extends Controller
 {
@@ -30,8 +32,40 @@ class HomeController extends Controller
             $pengguna = User::count();
             $mahasiswa = Mahasiswa::count();
             $asal_sekolah = Sekolah::count();
-            $jurusan = Jurusan::count();
+            $prodi = Jurusan::count();
             $daerah = Daerah::count();
+            $mahasiswaIncompleteCount = Mahasiswa::where(function ($query) {
+                $query->whereNull('kode_daerah')
+                    ->orWhereNull('npsn')
+                    ->orWhereNull('kode_prodi');
+            })->count();
+
+            $daerahTerbanyak = DB::table('mahasiswa')
+                ->join('daerah', 'mahasiswa.kode_daerah', '=', 'daerah.kode_daerah')
+                ->select('daerah.nama_daerah', DB::raw('COUNT(*) as total_mahasiswa'))
+                ->groupBy('daerah.nama_daerah')
+                ->orderByDesc('total_mahasiswa')
+                ->limit(5)
+                ->get();
+
+            $sekolahTipe = DB::table('mahasiswa')
+                ->join('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
+                ->select(
+                    DB::raw("
+            CASE 
+                WHEN sekolah.nama_sekolah LIKE '%SMK%' THEN 'SMK'
+                WHEN sekolah.nama_sekolah LIKE '%SMA%' THEN 'SMA'
+                WHEN sekolah.nama_sekolah LIKE '%MAK%' THEN 'MAK'
+                WHEN sekolah.nama_sekolah LIKE '%MA%' THEN 'MA'
+                ELSE 'Lainnya'
+            END as jenis_sekolah
+        "),
+                    DB::raw('COUNT(*) as total')
+                )
+                ->groupBy('jenis_sekolah')
+                ->orderByDesc('total')
+                ->get();
+
 
             return response()->json([
                 'status' => 200,
@@ -39,7 +73,16 @@ class HomeController extends Controller
                 'daerah' => $daerah,
                 'mahasiswa' => $mahasiswa,
                 'asal_sekolah' => $asal_sekolah,
-                'jurusan' => $jurusan,
+                'prodi' => $prodi,
+                'mahasiswaIncompleteCount' => $mahasiswaIncompleteCount,
+                'daerahChart' => [
+                    'labels' => $daerahTerbanyak->pluck('nama_daerah'),
+                    'values' => $daerahTerbanyak->pluck('total_mahasiswa'),
+                ],
+                'sekolahChart' => [
+                    'labels' => $sekolahTipe->pluck('jenis_sekolah'),
+                    'values' => $sekolahTipe->pluck('total'),
+                ],
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -50,6 +93,7 @@ class HomeController extends Controller
             ], 500);
         }
     }
+
 
     public function pengaturanAkun()
     {
@@ -96,16 +140,38 @@ class HomeController extends Controller
             }
 
             $validated = $request->validate([
-                'nama_lengkap' => 'required|string|max:255',
-                'username' => 'required|string|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
-                'email' => 'nullable|email|max:100|unique:users,email,' . $user->user_uuid . ',user_uuid',
+                'nama_lengkap' => [
+                    'required',
+                    'string',
+                    'max:100',
+                    'regex:/^[a-zA-Z0-9\s.,-]+$/'
+                ],
+                'username' => 'required|string|max:50|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:users,username,' . $user->user_uuid . ',user_uuid',
+                'email' => 'nullable|email|max:50|unique:users,email,' . $user->user_uuid . ',user_uuid',
+            ],
+            [
+                'nama_lengkap.required' => 'Nama lengkap harus diisi.',
+                'nama_lengkap.string' => 'Nama lengkap harus berupa teks.',
+                'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
+                'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                
+                'username.required' => 'Username harus diisi.',
+                'username.string' => 'Username harus berupa teks.',
+                'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                'username.unique' => 'Username sudah digunakan.',
+
+                'email.email' => 'Format email tidak valid.',
+                'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
+                'email.unique' => 'Email sudah digunakan.',
             ]);
 
-            // 💡 Cek apakah data tidak berubah
+            $emailSama = $user->email === ($validated['email'] ?? null);
+
             if (
                 $user->nama_lengkap === $validated['nama_lengkap'] &&
                 $user->username === $validated['username'] &&
-                $user->email === $validated['email']
+                $emailSama
             ) {
                 return response()->json([
                     'status' => 400,
@@ -124,6 +190,12 @@ class HomeController extends Controller
                 'message' => 'Pengaturan akun berhasil diperbarui.',
                 'icon' => 'success'
             ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'errors' => $e->errors(),
+                'icon' => 'error'
+            ], 422);
         } catch (Exception $e) {
             return response()->json([
                 "status" => 500,

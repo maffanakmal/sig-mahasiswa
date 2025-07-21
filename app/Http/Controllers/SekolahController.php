@@ -89,29 +89,30 @@ class SekolahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|digits_between:1,8|unique:sekolah,npsn',
-                    'nama_sekolah' => 'required|string|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
-                    'alamat_sekolah' => 'required|string|max:255',
-                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
+                    'npsn' => 'required|regex:/^[0-9]+$/|max:10|unique:sekolah,npsn',
+                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'alamat_sekolah' => 'required|string|min:5|max:1000',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
-                    'npsn.digits_between' => 'NPSN harus terdiri dari 1 hingga 8 digit.',
+                    'npsn.max' => 'NPSN maksimal 10 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
-                    'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
+                    'nama_sekolah.regex' => 'Nama sekolah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
 
                     'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
-                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 255 karakter.',
                     'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
+                    'alamat_sekolah.min' => 'Alamat sekolah minimal 5 karakter.',
+                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 1000 karakter.',
 
                     'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
-                    'kode_daerah.numeric' => 'Kode daerah harus berupa angka.',
+                    'kode_daerah.regex' => 'Kode daerah hanya boleh berisi angka.',
                     'kode_daerah.exists' => 'Kode daerah tidak valid.',
 
                     'latitude_sekolah.required' => 'Latitude harus diisi.',
@@ -148,7 +149,7 @@ class SekolahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data sekolah berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
@@ -185,8 +186,8 @@ class SekolahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
-                "message" => "Data sekolah berhasil diimpor.",
+                "title" => "Berhasil!",
+                "message" => "Data sekolah berhasil diimport.",
                 "icon" => "success"
             ]);
         } catch (ValidationException $e) {
@@ -252,29 +253,30 @@ class SekolahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|digits_between:1,8|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
-                    'nama_sekolah' => 'required|string|max:100|regex:/^[\pL\pN\s\.\,\-\'"]+$/u',
-                    'alamat_sekolah' => 'required|string|max:255',
-                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
+                    'npsn' => 'required|regex:/^[0-9]+$/|max:10|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'alamat_sekolah' => 'required|string|min:5|max:1000',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
                 ],
                 [
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
-                    'npsn.digits_between' => 'NPSN harus terdiri dari 1 hingga 8 digit.',
+                    'npsn.max' => 'NPSN maksimal 10 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
-                    'nama_sekolah.regex' => 'Nama sekolah mengandung karakter tidak valid.',
+                    'nama_sekolah.regex' => 'Nama sekolah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
 
                     'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
-                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 255 karakter.',
                     'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
+                    'alamat_sekolah.min' => 'Alamat sekolah minimal 5 karakter.',
+                    'alamat_sekolah.max' => 'Alamat sekolah maksimal 1000 karakter.',
 
                     'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
-                    'kode_daerah.numeric' => 'Kode daerah harus berupa angka.',
+                    'kode_daerah.regex' => 'Kode daerah hanya boleh berisi angka.',
                     'kode_daerah.exists' => 'Kode daerah tidak valid.',
 
                     'latitude_sekolah.required' => 'Latitude harus diisi.',
@@ -325,7 +327,7 @@ class SekolahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data sekolah berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
@@ -357,7 +359,7 @@ class SekolahController extends Controller
 
                 return response()->json([
                     "status" => 200,
-                    "title" => "Success",
+                    "title" => "Berhasil!",
                     "message" => "Data sekolah berhasil dihapus.",
                     "icon" => "success"
                 ]);
@@ -390,7 +392,7 @@ class SekolahController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Semua data sekolah berhasil dihapus.",
                 "icon" => "success"
             ]);

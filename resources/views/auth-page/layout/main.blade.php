@@ -20,8 +20,6 @@
                             background-size: cover; 
                             background-position: center; 
                             background-repeat: no-repeat;">
-                    {{-- <p class="text-white fs-2">Be verified!</p>
-                    <small class="text-white text-wrap text-center">Join experienced platform</small> --}}
                 </div>
                 <div class="col-md-6 right-box py-2 px-4">
                     <div class="row align-items-center">

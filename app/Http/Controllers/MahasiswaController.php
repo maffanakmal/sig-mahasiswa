@@ -106,18 +106,35 @@ class MahasiswaController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|numeric|max:10|unique:mahasiswa,nim',
-                    'tahun_masuk' => 'required|digits:4',
-                    'kode_prodi' => 'required|numeric|exists:prodi,kode_prodi',
-                    'npsn' => 'required|numeric|exists:sekolah,nspn',
-                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
+                    'nim' => 'required|regex:/^[0-9]+$/|max:10|unique:mahasiswa,nim',
+                    'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
+                    'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,npsn',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                 ],
                 [
+                    'nim.required' => 'NIM tidak boleh kosong.',
                     'nim.unique' => 'NIM sudah terdaftar.',
-                    'kode_prodi.exists' => 'Program Studi tidak valid.',
-                    'npsn.exists' => 'Sekolah asal tidak valid.',
-                    'kode_daerah.exists' => 'Daerah asal tidak valid.',
+                    'nim.regex' => 'NIM hanya boleh berisi angka.',
+                    'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
+
+                    'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
+                    'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',
+                    'tahun_masuk.min' => 'Tahun masuk tidak boleh kurang dari 1900.',
+                    'tahun_masuk.max' => 'Tahun masuk tidak boleh lebih dari tahun saat ini.',
                     'tahun_masuk.digits' => 'Tahun masuk harus terdiri dari 4 digit.',
+
+                    'kode_prodi.required' => 'Program Studi tidak boleh kosong.',
+                    'kode_prodi.regex' => 'Kode Program Studi hanya boleh berisi angka.',
+                    'kode_prodi.exists' => 'Program Studi tidak valid.',
+
+                    'npsn.exists' => 'Sekolah asal tidak valid.',
+                    'npsn.required' => 'NPSN tidak boleh kosong.',
+                    'npsn.regex' => 'NPSN hanya boleh berisi angka.',
+
+                    'kode_daerah.exists' => 'Daerah asal tidak valid.',
+                    'kode_daerah.required' => 'Kode Daerah tidak boleh kosong.',
+                    'kode_daerah.regex' => 'Kode Daerah hanya boleh berisi angka.',
                 ]
             );
 
@@ -143,7 +160,7 @@ class MahasiswaController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data mahasiswa berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
@@ -180,7 +197,7 @@ class MahasiswaController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data mahasiswa berhasil diimpor.",
                 "icon" => "success"
             ]);
@@ -247,18 +264,35 @@ class MahasiswaController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|string|max:100|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
-                    'tahun_masuk' => 'required|digits:4',
-                    'kode_prodi'=> 'required|numeric|exists:prodi,kode_prodi',
-                    'npsn' => 'required|numeric|exists:sekolah,npsn',
-                    'kode_daerah' => 'required|numeric|exists:daerah,kode_daerah',
+                    'nim' => 'required|regex:/^[0-9]+$/|max:10|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
+                    'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
+                    'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,nspn',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                 ],
                 [
+                    'nim.required' => 'NIM tidak boleh kosong.',
                     'nim.unique' => 'NIM sudah terdaftar.',
-                    'kode_prodi.exists' => 'Program Studi tidak valid.',
-                    'npsn.exists' => 'Sekolah asal tidak valid.',
-                    'kode_daerah.exists' => 'Daerah asal tidak valid.',
+                    'nim.regex' => 'NIM hanya boleh berisi angka.',
+                    'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
+
+                    'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
+                    'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',
+                    'tahun_masuk.min' => 'Tahun masuk tidak boleh kurang dari 1900.',
+                    'tahun_masuk.max' => 'Tahun masuk tidak boleh lebih dari tahun saat ini.',
                     'tahun_masuk.digits' => 'Tahun masuk harus terdiri dari 4 digit.',
+
+                    'kode_prodi.required' => 'Program Studi tidak boleh kosong.',
+                    'kode_prodi.regex' => 'Kode Program Studi hanya boleh berisi angka.',
+                    'kode_prodi.exists' => 'Program Studi tidak valid.',
+
+                    'npsn.exists' => 'Sekolah asal tidak valid.',
+                    'npsn.required' => 'NPSN tidak boleh kosong.',
+                    'npsn.regex' => 'NPSN hanya boleh berisi angka.',
+
+                    'kode_daerah.exists' => 'Daerah asal tidak valid.',
+                    'kode_daerah.required' => 'Kode Daerah tidak boleh kosong.',
+                    'kode_daerah.regex' => 'Kode Daerah hanya boleh berisi angka.',
                 ]
             );
 
@@ -298,7 +332,7 @@ class MahasiswaController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data mahasiswa berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
@@ -330,7 +364,7 @@ class MahasiswaController extends Controller
 
                 return response()->json([
                     "status" => 200,
-                    "title" => "Success",
+                    "title" => "Berhasil!",
                     "message" => "Data mahasiswa berhasil dihapus.",
                     "icon" => "success"
                 ]);
@@ -363,7 +397,7 @@ class MahasiswaController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Semua data mahasiswa berhasil dihapus.",
                 "icon" => "success"
             ]);

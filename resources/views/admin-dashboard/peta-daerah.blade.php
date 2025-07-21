@@ -2,7 +2,7 @@
 
 @section('child-content')
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h3 class="fw-bold fs-4">Peta Persebaran Mahasiswa Berdasarkan Daerah</h3>
+        <h3 class="fw-bold fs-4">Peta persebaran mahasiswa berdasarkan daerah domisili</h3>
     </div>
     @if (empty($daerah) || $daerah->isEmpty())
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -11,9 +11,9 @@
         </div>
     @endif
 
-    @if (empty($jurusan) || $jurusan->isEmpty())
+    @if (empty($prodi) || $prodi->isEmpty())
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Perhatian!</strong> Data <strong>jurusan</strong> belum diunggah admin.
+            <strong>Perhatian!</strong> Data <strong>prodi</strong> belum diunggah admin.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -27,37 +27,35 @@
 
     <div class="card shadow-sm">
         <div class="card-header mb-2">
-            @if (session('loggedInUser')['role'] === 'Warek 3')
-                <p class="mb-2 fw-bolder">Search Data</p>
-                <form action="#" id="mapFilterForm" class="row g-2 align-items-center">
-                    {{-- CSRF Token --}}
-                    @csrf
+            <p class="mb-2 fw-bolder">Pencarian Data</p>
+            <form action="#" id="mapFilterForm" class="row g-2 align-items-center">
+                {{-- CSRF Token --}}
+                @csrf
 
-                    <div class="col-md-4">
-                        <select id="daerah" name="daerah" class="form-select">
-                            <option value="" selected disabled>Daerah</option>
-                        </select>
-                    </div>
+                <div class="col-md-4">
+                    <select id="daerah" name="daerah" class="form-select">
+                        <option value="" selected disabled>Daerah</option>
+                    </select>
+                </div>
 
-                    <div class="col-md-2">
-                        <select id="tahun_masuk" name="tahun_masuk" class="form-select">
-                            <option value="" selected disabled>Tahun Masuk</option>
-                        </select>
-                    </div>
+                <div class="col-md-2">
+                    <select id="tahun_masuk" name="tahun_masuk" class="form-select">
+                        <option value="" selected disabled>Tahun Masuk</option>
+                    </select>
+                </div>
 
-                    <div class="col-md-3">
-                        <select id="jurusan" name="jurusan" class="form-select">
-                            <option value="" selected disabled>Jurusan</option>
-                        </select>
-                    </div>
+                <div class="col-md-3">
+                    <select id="prodi" name="prodi" class="form-select">
+                        <option value="" selected disabled>Program Studi</option>
+                    </select>
+                </div>
 
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary"><i class='bx  bx-search'></i> Cari </button>
-                        <button type="button" id="resetFilterBtn" class="btn btn-danger"><i class='bx  bx-refresh'></i>
-                            Reset </button>
-                    </div>
-                </form>
-            @endif
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary"><i class='bx  bx-search'></i> Cari </button>
+                    <button type="button" id="resetFilterBtn" class="btn btn-danger"><i class='bx  bx-refresh'></i>
+                        Reset </button>
+                </div>
+            </form>
         </div>
         <div class="card-body">
             <div class="container-fluid">
@@ -80,7 +78,6 @@
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Tambahkan kontrol reset
         var resetControl = L.control({
             position: 'topleft'
         });
@@ -120,10 +117,10 @@
                 "#800026"
             ];
 
-            div.innerHTML += "<h4>Jumlah Mahasiswa</h4>";
+            div.innerHTML += "<h6>Jumlah Mahasiswa</h6>";
             for (let i = 0; i < grades.length; i++) {
                 div.innerHTML +=
-                    `<i style="background:${colors[i]}; width:18px; height:18px; display:inline-block; margin-right:6px;"></i> ` +
+                    `<i style="background:${colors[i]}; width:15px; height:15px; display:inline-block; margin-right:6px;"></i> ` +
                     `${grades[i]}${(grades[i + 1]) ? '&ndash;' + grades[i + 1] + '<br>' : '+'}`;
             }
 
@@ -178,8 +175,7 @@
 
         $(document).ready(function() {
             mapFilter();
-            // showDaerah();
-            selectJurusan();
+            selectProdi();
             selectTahunMasuk();
             selectDaerah();
         });
@@ -198,8 +194,8 @@
                 const count = data.count;
                 const latlng = L.latLng(data.latitude, data.longitude);
 
-                const jurusanList = Object.entries(data.jurusan)
-                    .map(([jurusan, jumlah]) => `<li>${jurusan}: ${jumlah}</li>`)
+                const prodiList = Object.entries(data.prodi)
+                    .map(([prodi, jumlah]) => `<li>${prodi}: ${jumlah}</li>`)
                     .join('');
 
                 L.circleMarker(latlng, {
@@ -215,18 +211,15 @@
     <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 1.4;">
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${label}</div>
         <div><strong>Jumlah Mahasiswa:</strong> ${count}</div>
-        <div style="margin-top: 5px;"><strong>Jurusan:</strong></div>
+        <div style="margin-top: 5px;"><strong>Program Studi:</strong></div>
         <ul style="margin: 4px 0 0 16px; padding: 0; list-style-type: disc;">
-            ${jurusanList}
+            ${prodiList}
         </ul>
     </div>
 `)
                     .on('mouseover', function() {
                         this.openPopup();
                     })
-                    // .on('mouseout', function() {
-                    //     this.closePopup();
-                    // })
                     .addTo(map);
             });
         }
@@ -248,14 +241,14 @@
                         const groupedData = {};
                         let countTampil = 0;
                         let countDaerahNull = 0;
-                        let countJurusanNull = 0;
+                        let countProdiNull = 0;
 
                         mahasiswa.forEach(data => {
                             if (!data.daerah) {
                                 countDaerahNull++;
                             }
-                            if (!data.jurusan) {
-                                countJurusanNull++;
+                            if (!data.prodi) {
+                                countProdiNull++;
                             }
 
                             if (!data.daerah) return;
@@ -267,7 +260,7 @@
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
-                                    jurusan: {},
+                                    prodi: {},
                                     latitude: lat,
                                     longitude: lng
                                 };
@@ -275,12 +268,12 @@
 
                             groupedData[city].count++;
 
-                            const jurusanName = data.jurusan ? data.jurusan.nama_jurusan :
+                            const prodiName = data.prodi ? data.prodi.nama_prodi :
                                 'Tidak diketahui';
-                            if (!groupedData[city].jurusan[jurusanName]) {
-                                groupedData[city].jurusan[jurusanName] = 0;
+                            if (!groupedData[city].prodi[prodiName]) {
+                                groupedData[city].prodi[prodiName] = 0;
                             }
-                            groupedData[city].jurusan[jurusanName]++;
+                            groupedData[city].prodi[prodiName]++;
 
                             countTampil++;
                         });
@@ -288,7 +281,7 @@
                         // Tampilkan jumlah ke elemen <span>
                         $('#jumlah-tampil').text(countTampil);
                         $('#jumlah-daerah-null').text(countDaerahNull);
-                        $('#jumlah-jurusan-null').text(countJurusanNull);
+                        $('#jumlah-prodi-null').text(countProdiNull);
 
                         renderMarkers(groupedData);
                     } else {
@@ -310,6 +303,55 @@
             });
         }
 
+        const user = @json(session('loggedInUser'));
+
+        if (user && user.role === "Warek 3") {
+
+            let isDaerahVisible = false;
+
+            var toggleDaerahControl = L.control({
+                position: 'topright'
+            });
+
+            toggleDaerahControl.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                var button = document.createElement('button');
+                button.innerHTML = '🗺️';
+                button.title = 'Tampilkan Data Daerah';
+                button.style.backgroundColor = 'white';
+                button.style.border = 'none';
+                button.style.width = '28px';
+                button.style.height = '28px';
+                button.style.fontSize = '18px';
+
+                L.DomEvent.disableClickPropagation(div);
+
+                div.appendChild(button);
+
+                button.onclick = function() {
+                    if (!isDaerahVisible) {
+                        showDaerah();
+                        button.style.backgroundColor = '#007bff';
+                        button.style.color = 'white';
+                        button.title = 'Sembunyikan Data Daerah';
+                    } else {
+                        clearCircleMarkers();
+                        button.style.backgroundColor = 'white';
+                        button.style.color = 'black';
+                        button.title = 'Tampilkan Data Daerah';
+                    }
+
+                    isDaerahVisible = !isDaerahVisible;
+                };
+
+                return div;
+            };
+
+            toggleDaerahControl.addTo(map);
+        }
+
+
         function mapFilter() {
             $.ajax({
                 headers: {
@@ -321,15 +363,15 @@
                     if (response.status == 200) {
                         $('#daerah').find('option:gt(0)').remove();
                         $('#tahun_masuk').find('option:gt(0)').remove();
-                        $('#jurusan').find('option:gt(0)').remove();
+                        $('#prodi').find('option:gt(0)').remove();
 
                         response.tahun_masuk.forEach(function(item) {
                             $('#tahun_masuk').append(`<option value="${item}">${item}</option>`);
                         });
 
-                        response.jurusan.forEach(function(item) {
-                            $('#jurusan').append(
-                                `<option value="${item.kode_jurusan}">${item.nama_jurusan}</option>`
+                        response.prodi.forEach(function(item) {
+                            $('#prodi').append(
+                                `<option value="${item.kode_prodi}">${item.nama_prodi}</option>`
                             );
                         });
 
@@ -356,12 +398,12 @@
             });
         }
 
-        function selectJurusan() {
-            $('#jurusan').select2({
+        function selectProdi() {
+            $('#prodi').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumInputLength: 0, // Allow search immediately
-                dropdownParent: $('#jurusan').parent(), // Ensures proper z-index handling
+                dropdownParent: $('#prodi').parent(), // Ensures proper z-index handling
                 language: {
                     noResults: function() {
                         return "Tidak ada hasil yang ditemukan";
@@ -426,14 +468,14 @@
             e.preventDefault();
 
             const tahunMasuk = $('#tahun_masuk option:selected').val();
-            const jurusan = $('#jurusan option:selected').val();
+            const prodi = $('#prodi option:selected').val();
             const daerah = $('#daerah option:selected').val();
 
-            if (!daerah && !jurusan && !tahunMasuk) {
+            if (!daerah && !prodi && !tahunMasuk) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
-                    text: 'Anda harus memilih minimal satu filter sebelum mencari.',
+                    text: 'Anda harus memilih minimal satu kolom pencarian.',
                 });
                 return;
             }
@@ -468,7 +510,7 @@
                             if (!groupedData[city]) {
                                 groupedData[city] = {
                                     count: 0,
-                                    jurusan: {},
+                                    prodi: {},
                                     latitude: lat,
                                     longitude: lng
                                 };
@@ -476,11 +518,11 @@
 
                             groupedData[city].count += data.total;
 
-                            const jurusanName = data.nama_jurusan ?? 'Tidak diketahui';
-                            if (!groupedData[city].jurusan[jurusanName]) {
-                                groupedData[city].jurusan[jurusanName] = 0;
+                            const prodiName = data.nama_prodi ?? 'Tidak diketahui';
+                            if (!groupedData[city].prodi[prodiName]) {
+                                groupedData[city].prodi[prodiName] = 0;
                             }
-                            groupedData[city].jurusan[jurusanName] += data.total;
+                            groupedData[city].prodi[prodiName] += data.total;
                         });
 
                         renderMarkers(groupedData);
@@ -515,14 +557,14 @@
 
         $('#resetFilterBtn').on('click', function() {
             const tahun_masuk = $('#tahun_masuk option:selected').val();
-            const jurusan = $('#jurusan option:selected').val();
+            const prodi = $('#prodi option:selected').val();
             const daerah = $('#daerah option:selected').val();
 
-            if (!tahun_masuk && !jurusan && !daerah) {
+            if (!tahun_masuk && !prodi && !daerah) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Peringatan',
-                    text: 'Anda belum melakukan filter data.',
+                    text: 'Anda belum melakukan pencarian data.',
                 });
                 return;
             }
@@ -530,7 +572,7 @@
             $('#mapFilterForm')[0].reset();
             $('#daerah').val('').trigger('change');
             $('#tahun_masuk').val('').trigger('change');
-            $('#jurusan').val('').trigger('change');
+            $('#prodi').val('').trigger('change');
 
             // Hapus semua marker lingkaran
             clearCircleMarkers();

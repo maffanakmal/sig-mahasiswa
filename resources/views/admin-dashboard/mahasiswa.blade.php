@@ -48,6 +48,9 @@
             </div>
         </div>
     </div>
+    <div class="row mt-3">
+        <p><strong>Note:</strong> Ketik <strong>"Tidak ada"</strong> di kolom search untuk melihat mahasiswa yang belum lengkap datanya.</p>
+    </div>
 
     <div class="modal fade" id="mahasiswaModal" tabindex="-1" aria-labelledby="mahasiswaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -61,7 +64,7 @@
                         @csrf
                         <input type="hidden" name="nim_edit" id="nim_edit">
                         <div class="form-group mb-3">
-                            <label for="nim" class="form-label">NIM</label>
+                            <label for="nim" class="form-label">Nomor Induk Mahasiswa</label>
                             <input type="text" class="form-control" id="nim" placeholder="Masukkan NIM"
                                 name="nim" value="{{ old('nim') }}" maxlength="10" required>
                             <div class="invalid-feedback" id="error-nim"></div>
@@ -73,16 +76,19 @@
                             <div class="invalid-feedback" id="error-tahun_masuk"></div>
                         </div>
                         <div class="form-group mb-3">
+                            <label for="kode_prodi" class="form-label">Program Studi</label>
                             <select id="kode_prodi" name="kode_prodi" class="form-control select-kode_prodi" required>
                                 <option value="" selected disabled>Pilih Program Studi</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
+                            <label for="npsn" class="form-label">Sekolah Asal</label>
                             <select id="npsn" name="npsn" class="form-control select-npsn" required>
                                 <option value="" selected disabled>Pilih Sekolah Asal</option>
                             </select>
                         </div>
                         <div class="form-group mb-3">
+                            <label for="kode_daerah" class="form-label">Daerah Asal</label>
                             <select id="kode_daerah" name="kode_daerah" class="form-control select-kode_daerah" required>
                                 <option value="" selected disabled>Pilih Daerah Asal</option>
                             </select>
@@ -151,6 +157,9 @@
 
         function mahasiswaModal() {
             $('#mahasiswaForm')[0].reset();
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             method = 'create';
             nim;
 
@@ -258,6 +267,11 @@
         $('#mahasiswaForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             let url = '{{ route('mahasiswa.store') }}';
             let httpMethod = 'POST';
@@ -287,6 +301,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (response.status == 200) {
                         $('#mahasiswaModal').modal('hide');
                         $('#mahasiswaForm').trigger('reset');
@@ -303,6 +319,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -314,7 +332,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
@@ -413,6 +431,11 @@
             nim = e.getAttribute('data-id');
             method = 'update';
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -420,6 +443,8 @@
                 url: "{{ route('mahasiswa.show', '') }}/" + nim,
                 type: "GET",
                 success: function(response) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     $('#nim_edit').val(response.mahasiswa.mahasiswa_uuid);
                     $('#nim').val(response.mahasiswa.nim);
                     $('#tahun_masuk').val(response.mahasiswa.tahun_masuk);
@@ -428,6 +453,8 @@
                     $('#kode_daerah').val(response.mahasiswa.kode_daerah);
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -439,7 +466,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });

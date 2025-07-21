@@ -70,16 +70,19 @@ class JurusanController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_prodi' => 'required|numeric|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:prodi,kode_prodi',
-                    'nama_prodi' => 'required|string|max:50',
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|max:10|unique:prodi,kode_prodi',
+                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50',
                 ],
                 [
-                    'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.required' => 'Kode daerah harus diisi.',
-                    'nama_prodi.required' => 'Nama daerah harus diisi.',
-                    'nama_prodi.string' => 'Nama daerah harus berupa string.',
-                    'nama_prodi.max' => 'Nama daerah tidak boleh lebih dari 50 karakter.',
+                    'kode_prodi.unique' => 'Kode program studi sudah terdaftar.',
+                    'kode_prodi.max' => 'Kode program studi tidak boleh lebih dari 10 karakter.',
+                    'kode_prodi.regex' => 'Kode program studi hanya boleh mengandung angka.',
+                    'kode_prodi.required' => 'Kode program studi harus diisi.',
+
+                    'nama_prodi.required' => 'Nama program studi harus diisi.',
+                    'nama_prodi.string' => 'Nama program studi harus berupa string.',
+                    'nama_prodi.regex' => 'Nama program studi hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                    'nama_prodi.max' => 'Nama program studi tidak boleh lebih dari 50 karakter.',
                 ]
             );
 
@@ -99,7 +102,7 @@ class JurusanController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data program studi berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
@@ -134,8 +137,8 @@ class JurusanController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
-                "message" => "Data program studi berhasil diimpor.",
+                "title" => "Berhasil!",
+                "message" => "Data program studi berhasil diimport.",
                 "icon" => "success"
             ]);
         } catch (ValidationException $e) {
@@ -189,16 +192,19 @@ class JurusanController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'kode_prodi'      => 'required|numeric|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:prodi,kode_prodi,' . $prodi->prodi_uuid . ',prodi_uuid',
-                    'nama_prodi'      => 'required|string|max:50',
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|max:10|unique:prodi,kode_prodi,' . $prodi->prodi_uuid . ',prodi_uuid',
+                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50',
                 ],
                 [
-                    'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
-                    'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
-                    'kode_daerah.required' => 'Kode daerah harus diisi.',
-                    'nama_prodi.required' => 'Nama daerah harus diisi.',
-                    'nama_prodi.string' => 'Nama daerah harus berupa string.',
-                    'nama_prodi.max' => 'Nama daerah tidak boleh lebih dari 50 karakter.',
+                    'kode_prodi.unique' => 'Kode program studi sudah terdaftar.',
+                    'kode_prodi.max' => 'Kode program studi tidak boleh lebih dari 10 karakter.',
+                    'kode_prodi.regex' => 'Kode program studi hanya boleh mengandung angka.',
+                    'kode_prodi.required' => 'Kode program studi harus diisi.',
+
+                    'nama_prodi.required' => 'Nama program studi harus diisi.',
+                    'nama_prodi.string' => 'Nama program studi harus berupa string.',
+                    'nama_prodi.regex' => 'Nama program studi hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                    'nama_prodi.max' => 'Nama program studi tidak boleh lebih dari 50 karakter.',
                 ]
             );
 
@@ -228,7 +234,7 @@ class JurusanController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data program studi berhasil diperbarui.",
                 "icon" => "success"
             ], 200);
@@ -260,7 +266,7 @@ class JurusanController extends Controller
 
                 return response()->json([
                     "status" => 200,
-                    "title" => "Success",
+                    "title" => "Berhasil!",
                     "message" => "Data program studi berhasil dihapus.",
                     "icon" => "success"
                 ]);
@@ -293,7 +299,7 @@ class JurusanController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Semua data program studi berhasil dihapus.",
                 "icon" => "success"
             ]);

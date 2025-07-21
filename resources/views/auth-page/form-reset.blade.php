@@ -18,7 +18,7 @@
         <div class="form-group mb-3">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password Baru" maxlength="60" required>
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <i class='bx bx-show'></i>
                 </span>
@@ -28,18 +28,18 @@
 
         <!-- Konfirmasi Password -->
         <div class="form-group mb-4">
-            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+            <label for="confirm_password" class="form-label">Konfirmasi Password</label>
             <div class="input-group">
-                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
-                    placeholder="Masukkan Ulang Passowrd">
-                <span class="input-group-text toggle-password" data-target="password_confirmation" style="cursor: pointer;">
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                    placeholder="Masukkan Ulang Password Baru" maxlength="60" required>
+                <span class="input-group-text toggle-password" data-target="confirm_password" style="cursor: pointer;">
                     <i class='bx bx-show'></i>
                 </span>
             </div>
-            <div class="invalid-feedback" id="error-password_confirmation"></div>
+            <div class="invalid-feedback" id="error-confirm_password"></div>
         </div>
         <div class="form-group mb-3">
-            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-login">Ubah Password</button>
+            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-reset">Ubah Password</button>
         </div>
     </form>
 @endsection
@@ -69,6 +69,12 @@
         $('#resetPasswordForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#btn-reset');
+            
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             const url = '{{ route('auth.update.password') }}';
 
@@ -83,6 +89,8 @@
                 processData: false,
                 success: function(response) {
                     if (response.status === 200) {
+                        btn.prop('disabled', false).html('Ubah Password');
+
                         Swal.fire({
                             icon: response.icon,
                             title: response.title,
@@ -95,6 +103,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah Password');
+                    
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -110,6 +120,7 @@
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
+
 
                     } else {
                         let errorResponse = xhr.responseJSON;

@@ -81,9 +81,7 @@
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="alamat_sekolah" class="form-label">Alamat Sekolah</label>
-                                    <input type="text" class="form-control" id="alamat_sekolah"
-                                        placeholder="Masukkan Alamat Sekolah" name="alamat_sekolah"
-                                        value="{{ old('alamat_sekolah') }}" maxlength="255" required>
+                                    <textarea  class="form-control" name="alamat_sekolah" id="alamat_sekolah" cols="10" rows="5" placeholder="Masukkan Alamat Sekolah"  value="{{ old('alamat_sekolah') }}" required></textarea>
                                     <div class="invalid-feedback" id="error-alamat_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -258,6 +256,9 @@
 
         function sekolahModal() {
             $('#sekolahForm')[0].reset();
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             method = 'create';
             npsn;
 
@@ -324,6 +325,11 @@
         $('#sekolahForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             let url = '{{ route('sekolah.store') }}';
             let httpMethod = 'POST'; // Default method for create
@@ -353,7 +359,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    console.log(response);
+                    btn.prop('disabled', false).html('Simpan');
 
                     if (response.status == 200) {
                         $('#sekolahModal').modal('hide');
@@ -371,6 +377,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -382,7 +390,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
@@ -481,6 +489,11 @@
             npsn = e.getAttribute('data-id');
             method = 'update';
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -488,6 +501,8 @@
                 url: "{{ route('sekolah.show', '') }}/" + npsn,
                 type: "GET",
                 success: function(response) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     $('#npsn').val(response.sekolah.npsn);
                     $('#nama_sekolah').val(response.sekolah.nama_sekolah);
                     $('#alamat_sekolah').val(response.sekolah.alamat_sekolah);
@@ -498,6 +513,8 @@
                     
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -509,7 +526,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });

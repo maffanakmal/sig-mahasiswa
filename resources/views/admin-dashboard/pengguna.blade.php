@@ -5,8 +5,8 @@
         <h3 class="fw-bold fs-4 mb-3">Daftar Pengguna</h3>
     </div>
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-primary" onclick="penggunaModal()"><i class='bx bx-plus'></i> Tambah</button>
+        <div class="card-header d-flex justify-content-end align-items-center">
+            <button id="tambahPenggunaBtn" class="btn btn-primary btn-sm" onclick="penggunaModal()"><i class='bx bx-plus'></i> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -56,7 +56,7 @@
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
-                                name="email" value="{{ old('email') }}" maxlength="100">
+                                name="email" value="{{ old('email') }}" maxlength="50">
                             <div class="invalid-feedback" id="error-email"></div>
                         </div>
                         <!-- Password -->
@@ -75,16 +75,17 @@
 
                         <!-- Konfirmasi Password -->
                         <div class="form-group mb-3">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+                            <label for="confirm_password" class="form-label">Konfirmasi Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" placeholder="Masukkan Ulang Passowrd" minlength="5" maxlength="60">
-                                <span class="input-group-text toggle-password" data-target="password_confirmation"
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" placeholder="Masukkan Ulang Password" minlength="5"
+                                    maxlength="60">
+                                <span class="input-group-text toggle-password" data-target="confirm_password"
                                     style="cursor: pointer;">
                                     <i class='bx bx-show'></i>
                                 </span>
                             </div>
-                            <div class="invalid-feedback" id="error-password_confirmation"></div>
+                            <div class="invalid-feedback" id="error-confirm_password"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="role" class="form-label">Role</label>
@@ -176,6 +177,9 @@
 
         function penggunaModal() {
             $('#penggunaForm')[0].reset();
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+            
             method = 'create';
             user_uuid;
 
@@ -186,6 +190,12 @@
 
         $('#penggunaForm').on('submit', function(e) {
             e.preventDefault();
+
+            let btn = $('#saveBtn');
+
+            btn.prop('disabled', false).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
 
             const formData = new FormData(this);
             let url = '{{ route('pengguna.store') }}';
@@ -216,6 +226,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (response.status == 200) {
                         $('#penggunaModal').modal('hide');
                         $('#penggunaForm').trigger('reset');
@@ -232,6 +244,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -282,6 +296,12 @@
             user_uuid = e.getAttribute('data-id');
             method = 'update';
 
+            let btn = $('#saveBtn');
+            
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -289,15 +309,19 @@
                 url: "{{ route('pengguna.show', '') }}/" + user_uuid,
                 type: "GET",
                 success: function(response) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     $('#user_uuid').val(response.user.user_uuid);
                     $('#nama_lengkap').val(response.user.nama_lengkap);
                     $('#username').val(response.user.username);
                     $('#email').val(response.user.email);
-                    $('#password').val(''); // kosongkan agar user isi sendiri jika ingin ganti
+                    $('#password').val('');
                     $('#password_confirmation').val('');
                     $('#role').val(response.user.role);
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -309,7 +333,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });

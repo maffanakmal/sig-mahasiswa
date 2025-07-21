@@ -40,29 +40,42 @@ class AuthController extends Controller
 
             $user = User::where($loginField, $validatedData['credentials'])->first();
 
-            if (!$user || !Hash::check($validatedData['password'], $user->password)) {
+            if (!$user) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Akun Tidak Ditemukan",
+                    "message" => "Akun dengan username/email tersebut tidak terdaftar.",
+                    "icon" => "error"
+                ], 404);
+            }
+
+            if (!Hash::check($validatedData['password'], $user->password)) {
                 return response()->json([
                     "status" => 401,
                     "title" => "Login Gagal",
-                    "message" => "Username/email atau password salah.",
+                    "message" => "Password yang dimasukkan salah.",
                     "icon" => "error"
                 ], 401);
             }
 
-            // if ($user->is_active) {
-            //     return response()->json([
-            //         "status" => 403,
-            //         "title" => "Akun Sedang Online",
-            //         "message" => "Akun ini sedang digunakan di perangkat lain.",
-            //         "icon" => "warning"
-            //     ], 403);
-            // }
+            $timeoutMinutes = 30;
 
+            if ($user->is_active && now()->diffInMinutes($user->last_active) < $timeoutMinutes) {
+                return response()->json([
+                    "status" => 403,
+                    "title" => "Akun Sedang Online",
+                    "message" => "Akun ini sedang digunakan di perangkat lain.",
+                    "icon" => "warning"
+                ], 403);
+            }
+
+            // Update status aktif dan last active
             $user->is_active = 1;
             $user->last_active = now();
             $user->timestamps = false;
             $user->save();
 
+            // Simpan session
             $request->session()->put('loggedInUser', [
                 'user_uuid' => $user->user_uuid,
                 'nama_lengkap' => $user->nama_lengkap,
@@ -90,6 +103,7 @@ class AuthController extends Controller
         }
     }
 
+
     public function logout(Request $request)
     {
         if ($request->isMethod('post')) {
@@ -99,6 +113,7 @@ class AuthController extends Controller
                 $user = User::where('user_uuid', $loggedInUser['user_uuid'])->first();
                 if ($user) {
                     $user->is_active = 0;
+                    $user->last_active = null;
                     $user->timestamps = false;
                     $user->save();
                 }
@@ -136,11 +151,11 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'email' => 'required|email|max:100',
+                'email' => 'required|email|max:50',
             ], [
                 'email.required' => 'Email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
-                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
             ]);
 
             $user = User::where('email', $request->email)->first();
@@ -172,7 +187,7 @@ class AuthController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Permintaan Reset Password",
+                "title" => "Validasi Berhasil",
                 "message" => "Permintaan reset password telah dikirim ke email Anda.",
                 "icon" => "success"
             ]);
@@ -215,19 +230,21 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'email' => 'required|email|max:100',
+                'email' => 'required|email|max:50',
                 'reset_token' => 'required|string|max:36',
-                'password' => 'required|string|min:5|max:60|confirmed',
+                'password' => 'required|string|min:5|max:60',
+                'confirm_password' => 'required_with:password|same:password',
             ], [
                 'email.required' => 'Email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
-                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
                 'reset_token.required' => 'Token reset wajib diisi.',
                 'reset_token.max' => 'Token reset tidak boleh lebih dari 36 karakter.',
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
-                'password.confirmed' => 'Konfirmasi password tidak cocok.'
+                'confirm_password.required_with' => 'Konfirmasi password harus diisi jika password diisi.',
+                'confirm_password.same' => 'Konfirmasi password harus sama dengan password.',
             ]);
 
             $user = User::where('email', $request->email)

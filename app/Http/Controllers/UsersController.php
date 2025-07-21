@@ -86,27 +86,31 @@ class UsersController extends Controller
         try {
             $validatedData = $request->validate([
                 'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                'username' => 'required|string|max:50|unique:users,username',
-                'email' => 'nullable|email|max:100|unique:users,email',
-                'password' => 'required|string|min:5|max:60|confirmed',
+                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50|unique:users,username',
+                'email' => 'nullable|email|max:50|unique:users,email',
+                'password' => 'required|string|min:5|max:60',
+                'confirm_password' => 'required_with:password|same:password',
                 'role' => 'required|in:BAAKPSI,Warek 3,PMB',
             ], [
-                'nama_lengkap.required' => 'Nama pengguna harus diisi.',
-                'nama_lengkap.regex' => 'Nama pengguna tidak boleh mengandung karakter khusus.',
-                'nama_lengkap.max' => 'Nama pengguna tidak boleh lebih dari 100 karakter.',
+                'nama_lengkap.required' => 'Nama lengkap harus diisi.',
+                'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
 
                 'email.email' => 'Format email tidak valid.',
-                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
                 'email.unique' => 'Email sudah digunakan.',
 
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
 
                 'password.required' => 'Password harus diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
-                'password.confirmed' => 'Konfirmasi password tidak cocok.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
+
+                'confirm_password.required_with' => 'Konfirmasi password harus diisi jika password diisi.',
+                'confirm_password.same' => 'Konfirmasi password harus sama dengan password.',
 
                 'role.required' => 'Role harus dipilih.',
                 'role.in' => 'Role yang dipilih tidak valid.',
@@ -138,7 +142,7 @@ class UsersController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Success",
+                "title" => "Berhasil!",
                 "message" => "Data pengguna baru berhasil ditambahkan.",
                 "icon" => "success"
             ], 200);
@@ -202,29 +206,32 @@ class UsersController extends Controller
             $user = User::where('user_uuid', $user_uuid)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate([
-                'nama_lengkap' => [
-                    'required',
-                    'string',
-                    'max:100',
-                    'regex:/^[a-zA-Z0-9\s.,-]+$/'
-                ],
-                'username' => 'required|string|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
-                'email' => 'nullable|email|max:100|unique:users,email,' . $user->user_uuid . ',user_uuid',
-                'password' => 'nullable|string|min:5|max:60|confirmed',
+                'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
+                'email' => 'nullable|email|max:50|unique:users,email,' . $user->user_uuid . ',user_uuid',
+                'password' => 'nullable|string|min:5|max:60',
+                'confirm_password' => 'required_with:password|same:password',
                 'role' => 'required|in:BAAKPSI,Warek 3,PMB',
-            ], [
-                'nama_lengkap.required' => 'Nama user tidak boleh kosong.',
-                'nama_lengkap.regex' => 'Nama user tidak boleh mengandung karakter khusus.',
-                'nama_lengkap.max' => 'Nama user tidak boleh lebih dari 100 karakter.',
+            ],[
+                'nama_lengkap.required' => 'Nama lengkap harus diisi.',
+                'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
+                'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
+
                 'email.email' => 'Format email tidak valid.',
-                'email.max' => 'Email tidak boleh lebih dari 100 karakter.',
+                'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
                 'email.unique' => 'Email sudah digunakan.',
-                'username.required' => 'Username wajib diisi.',
+
+                'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung',
+
                 'password.min' => 'Password minimal 5 karakter.',
-                'password.confirmed' => 'Konfirmasi password tidak cocok.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
+
+                'confirm_password.required_with' => 'Konfirmasi password harus diisi jika password diisi.',
+                'confirm_password.same' => 'Konfirmasi password harus sama dengan password.',
+
                 'role.required' => 'Role harus dipilih.',
                 'role.in' => 'Role yang dipilih tidak valid.',
             ]);
@@ -270,7 +277,7 @@ class UsersController extends Controller
 
             return response()->json([
                 "status" => 200,
-                "title" => "Berhasil",
+                "title" => "Berhasil!",
                 "message" => "Data pengguna berhasil diperbarui.",
                 "icon" => "success"
             ]);
@@ -302,7 +309,7 @@ class UsersController extends Controller
 
                 return response()->json([
                     "status" => 200,
-                    "title" => "Success",
+                    "title" => "Berhasil!",
                     "message" => "Data pengguna berhasil dihapus.",
                     "icon" => "success"
                 ]);

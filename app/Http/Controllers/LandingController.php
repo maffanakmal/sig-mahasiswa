@@ -12,7 +12,7 @@ class LandingController extends Controller
     public function index()
     {
         return view('landing-page.layout.main', [
-            'title' => 'gisapp',
+            'title' => 'USNIGIS',
         ]);
     }
 

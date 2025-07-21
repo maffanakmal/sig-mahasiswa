@@ -69,7 +69,7 @@
                                     <label for="kode_daerah" class="form-label">Kode Daerah</label>
                                     <input type="text" class="form-control" id="kode_daerah"
                                         placeholder="Masukkan Kode Daerah" name="kode_daerah"
-                                        value="{{ old('kode_daerah') }}" maxlength="4" required>
+                                        value="{{ old('kode_daerah') }}" maxlength="10" required>
                                     <div class="invalid-feedback" id="error-kode_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -171,18 +171,6 @@
                     marker.setLatLng(defaultCenter);
                     map.setView(defaultCenter, defaultZoom);
                 }
-
-                // if (method === 'update' && pendingLatLng) {
-                //     // Jika ada pendingLatLng, set marker dan view ke lokasi tersebut
-                //     document.getElementById('latitude_daerah').value = pendingLatLng[0];
-                //     document.getElementById('longitude_daerah').value = pendingLatLng[1];
-                //     // Set marker dan view ke pendingLatLng
-                //     pendingZoom = pendingZoom || defaultZoom; // Gunakan pendingZoom jika ada, atau defaultZoom
-
-                //     marker.setLatLng(pendingLatLng);
-                //     map.setView(pendingLatLng, pendingZoom);
-                //     pendingLatLng = null; // reset agar tidak tertimpa
-                // }
             });
 
             daerahModal.addEventListener('hidden.bs.modal', function() {
@@ -236,6 +224,9 @@
 
         function daerahModal() {
             $('#daerahForm')[0].reset();
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+            
             method = 'create';
             kode_daerah;
 
@@ -246,6 +237,12 @@
 
         $('#daerahForm').on('submit', function(e) {
             e.preventDefault();
+
+            let btn = $('#saveBtn');
+
+            btn.prop('disabled', false).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
 
             const formData = new FormData(this);
             let url = '{{ route('daerah.store') }}';
@@ -276,6 +273,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('Simpan');
+                
                     if (response.status == 200) {
                         $('#daerahModal').modal('hide');
                         $('#daerahForm').trigger('reset');
@@ -292,6 +291,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Simpan');
+
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -303,10 +304,11 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });
+
                         
                     } else if (xhr.status === 400) {
                         Swal.fire({
@@ -403,6 +405,11 @@
             kode_daerah = e.getAttribute('data-id');
             method = 'update';
 
+            let btn = $('#saveBtn');
+            btn.prop('disabled', false).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -410,18 +417,17 @@
                 url: "{{ route('daerah.show', '') }}/" + kode_daerah,
                 type: "GET",
                 success: function(response) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     $('#kode_daerah_edit').val(response.daerah.daerah_uuid);
                     $('#kode_daerah').val(response.daerah.kode_daerah);
                     $('#nama_daerah').val(response.daerah.nama_daerah);
                     $('#latitude_daerah').val(response.daerah.latitude_daerah);
                     $('#longitude_daerah').val(response.daerah.longitude_daerah);
-
-                    // var lat = parseFloat(response.daerah.latitude_daerah);
-                    // var lng = parseFloat(response.daerah.longitude_daerah);
-                    // pendingLatLng = [lat, lng];
-                    // pendingZoom = defaultZoom;
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('Ubah');
+
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
@@ -433,7 +439,7 @@
                             }
                         });
 
-                        $('.form-control').on('input', function() {
+                        $('input, select, textarea').on('input change', function() {
                             $(this).removeClass('is-invalid');
                             $('#error-' + $(this).attr('name')).text('');
                         });

@@ -71,6 +71,13 @@ img {
     object-fit: cover;
 }
 
+.main .modal {
+    z-index: 1060 !important;
+}
+.main .modal-backdrop {
+    z-index: 1050 !important;
+}
+
 .icon-card-wrapper {
     display: flex;
     justify-content: center;
@@ -389,7 +396,7 @@ table .th-aksi {
         transition: all 0.25s ease-in-out;
         background-color: var(--white-color);
         position: relative;
-        z-index: 1;
+        z-index: auto;
         margin-left: 0; /* Reset margin karena sidebar hidden */
     }
 
@@ -404,12 +411,13 @@ table .th-aksi {
         left: 0;
         top: 0;
         height: 100vh;
-        z-index: 10;
+        z-index: 1001;
     }
 
     .dashboard-navbar {
         left: 0;
         width: 100%;
+        z-index: 1000;
     }
 
     #dashboard-sidebar:not(.active) .sidebar-logo,

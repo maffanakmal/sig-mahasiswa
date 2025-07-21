@@ -15,13 +15,13 @@ class DataController extends Controller
     public function mapDaerah()
     {
         $daerah = Daerah::all();
-        $jurusan = Jurusan::all();
-        $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah'])->get();
+        $prodi = Jurusan::all();
+        $mahasiswa = Mahasiswa::with(['daerah', 'prodi', 'sekolah'])->get();
 
         return view('admin-dashboard.peta-daerah', [
             'title' => 'USNIGIS | Peta Daerah Mahasiswa',
             'daerah' => $daerah,
-            'jurusan' => $jurusan,
+            'prodi' => $prodi,
             'mahasiswa' => $mahasiswa,
         ]);
     }
@@ -29,13 +29,13 @@ class DataController extends Controller
     public function mapSekolah()
     {
         $sekolah = Sekolah::with('daerah')->get();
-        $jurusan = Jurusan::all();
-        $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah'])->get();
+        $prodi = Jurusan::all();
+        $mahasiswa = Mahasiswa::with(['daerah', 'prodi', 'sekolah'])->get();
 
         return view('admin-dashboard.peta-sekolah', [
             'title' => 'USNIGIS | Peta Sekolah Mahasiswa',
             'sekolah' => $sekolah,
-            'jurusan' => $jurusan,
+            'prodi' => $prodi,
             'mahasiswa' => $mahasiswa,
         ]);
     }
@@ -43,7 +43,7 @@ class DataController extends Controller
     public function mapShow()
     {
         try {
-            $mahasiswa = Mahasiswa::with(['daerah', 'jurusan', 'sekolah.daerah'])->get();
+            $mahasiswa = Mahasiswa::with(['daerah', 'prodi', 'sekolah.daerah'])->get();
 
             return response()->json([
                 'status' => 200,
@@ -63,14 +63,14 @@ class DataController extends Controller
     {
         try {
             $tahunMasuk = Mahasiswa::distinct()->orderBy('tahun_masuk')->pluck('tahun_masuk');
-            $jurusan = Jurusan::select('kode_jurusan', 'nama_jurusan')->orderBy('nama_jurusan')->distinct()->get();
+            $prodi = Jurusan::select('kode_prodi', 'nama_prodi')->orderBy('nama_prodi')->distinct()->get();
             $sekolah = Sekolah::select('npsn', 'nama_sekolah', 'latitude_sekolah', 'longitude_sekolah')->orderBy('nama_sekolah')->distinct()->get();
             $daerah = Daerah::select('kode_daerah', 'nama_daerah', 'latitude_daerah', 'longitude_daerah')->orderBy('nama_daerah')->distinct()->get();
 
             return response()->json([
                 'status' => 200,
                 'tahun_masuk' => $tahunMasuk,
-                'jurusan' => $jurusan,
+                'prodi' => $prodi,
                 'sekolah' => $sekolah,
                 'daerah' => $daerah,
             ], 200);
@@ -90,32 +90,32 @@ class DataController extends Controller
             $request->validate([
                 'daerah' => 'nullable|numeric',
                 'tahun_masuk' => 'nullable|numeric',
-                'jurusan' => 'nullable|numeric',
+                'prodi' => 'nullable|numeric',
             ]);
 
             $query = DB::table('mahasiswa')
                 ->leftJoin('daerah', 'mahasiswa.kode_daerah', '=', 'daerah.kode_daerah')
-                ->leftJoin('jurusan', 'mahasiswa.kode_jurusan', '=', 'jurusan.kode_jurusan')
+                ->leftJoin('prodi', 'mahasiswa.kode_prodi', '=', 'prodi.kode_prodi')
                 ->select(
                     'daerah.nama_daerah',
                     'daerah.latitude_daerah',
                     'daerah.longitude_daerah',
-                    'jurusan.nama_jurusan',
+                    'prodi.nama_prodi',
                     DB::raw('count(*) as total')
                 )
                 ->groupBy(
                     'daerah.nama_daerah',
                     'daerah.latitude_daerah',
                     'daerah.longitude_daerah',
-                    'jurusan.nama_jurusan'
+                    'prodi.nama_prodi'
                 );
 
             if ($request->tahun_masuk) {
                 $query->where('mahasiswa.tahun_masuk', $request->tahun_masuk);
             }
 
-            if ($request->jurusan) {
-                $query->where('mahasiswa.kode_jurusan', $request->jurusan);
+            if ($request->prodi) {
+                $query->where('mahasiswa.kode_prodi', $request->prodi);
             }
 
             if ($request->daerah) {
@@ -131,23 +131,23 @@ class DataController extends Controller
                     $namaDaerah = $daerah ? $daerah->nama_daerah : null;
                 }
 
-                $namaJurusan = null;
-                if ($request->jurusan) {
-                    $jurusan = DB::table('jurusan')->where('kode_jurusan', $request->jurusan)->first();
-                    $namaJurusan = $jurusan ? $jurusan->nama_jurusan : null;
+                $namaProdi = null;
+                if ($request->prodi) {
+                    $prodi = DB::table('prodi')->where('kode_prodi', $request->prodi)->first();
+                    $namaProdi = $prodi ? $prodi->nama_prodi : null;
                 }
 
                 $tahunMasuk = $request->tahun_masuk;
 
                 $message = 'Tidak ada mahasiswa';
                 if ($namaDaerah) $message .= ' dari daerah ' . $namaDaerah;
-                if ($namaJurusan) $message .= ' dengan jurusan ' . $namaJurusan;
+                if ($namaProdi) $message .= ' dengan prodi ' . $namaProdi;
                 if ($tahunMasuk) $message .= ' tahun masuk ' . $tahunMasuk;
                 $message .= '.';
 
                 return response()->json([
                     'status' => 204,
-                    'title' => 'Tidak Ada Mahasiswa',
+                    'title' => 'Perhatian',
                     'icon' => 'info',
                     'message' => $message,
                     'mahasiswa' => [],
@@ -168,77 +168,65 @@ class DataController extends Controller
         }
     }
 
-
     public function mapShowFilterSekolah(Request $request)
     {
         try {
             $request->validate([
-                'sekolah' => 'nullable|numeric',
+                'daerah' => 'nullable|numeric',
+                'prodi' => 'nullable|numeric',
                 'tahun_masuk' => 'nullable|numeric',
-                'jurusan' => 'nullable|numeric',
             ]);
 
             $query = DB::table('mahasiswa')
-                ->leftJoin('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
-                ->leftJoin('jurusan', 'mahasiswa.kode_jurusan', '=', 'jurusan.kode_jurusan')
-                ->leftJoin('daerah', 'sekolah.kode_daerah', '=', 'daerah.kode_daerah')
+                ->join('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
+                ->join('prodi', 'mahasiswa.kode_prodi', '=', 'prodi.kode_prodi')
+                ->join('daerah', 'sekolah.kode_daerah', '=', 'daerah.kode_daerah')
                 ->select(
                     'sekolah.nama_sekolah',
                     'sekolah.latitude_sekolah',
                     'sekolah.longitude_sekolah',
-                    'sekolah.kode_daerah',
                     'daerah.nama_daerah',
-                    'jurusan.nama_jurusan',
-                    DB::raw('count(*) as total')
+                    'prodi.nama_prodi',
+                    DB::raw('COUNT(*) as total')
                 )
                 ->groupBy(
                     'sekolah.nama_sekolah',
                     'sekolah.latitude_sekolah',
                     'sekolah.longitude_sekolah',
-                    'sekolah.kode_daerah',
                     'daerah.nama_daerah',
-                    'jurusan.nama_jurusan'
+                    'prodi.nama_prodi'
                 );
 
+            // Apply filters
+            if ($request->daerah) {
+                $query->where('sekolah.kode_daerah', $request->daerah);
+            }
 
-            if ($request->sekolah) {
-                $query->where('mahasiswa.npsn', $request->sekolah);
+            if ($request->prodi) {
+                $query->where('mahasiswa.kode_prodi', $request->prodi);
             }
 
             if ($request->tahun_masuk) {
                 $query->where('mahasiswa.tahun_masuk', $request->tahun_masuk);
             }
 
-            if ($request->jurusan) {
-                $query->where('mahasiswa.kode_jurusan', $request->jurusan);
-            }
+            $result = $query->get();
 
-            $mahasiswa = $query->get();
+            if ($result->isEmpty()) {
+                // Handle pesan kosong
+                $daerah = $request->daerah ? DB::table('daerah')->where('kode_daerah', $request->daerah)->value('nama_daerah') : null;
+                $prodi = $request->prodi ? DB::table('prodi')->where('kode_prodi', $request->prodi)->value('nama_prodi') : null;
+                $tahun = $request->tahun_masuk;
 
-            if ($mahasiswa->isEmpty()) {
-                $namaSekolah = null;
-                if ($request->sekolah) {
-                    $sekolah = DB::table('sekolah')->where('npsn', $request->sekolah)->first();
-                    $namaSekolah = $sekolah ? $sekolah->nama_sekolah : null;
-                }
-
-                $namaJurusan = null;
-                if ($request->jurusan) {
-                    $jurusan = DB::table('jurusan')->where('kode_jurusan', $request->jurusan)->first();
-                    $namaJurusan = $jurusan ? $jurusan->nama_jurusan : null;
-                }
-
-                $tahunMasuk = $request->tahun_masuk;
-
-                $message = 'Tidak ada mahasiswa';
-                if ($namaSekolah) $message .= ' dari sekolah ' . $namaSekolah;
-                if ($namaJurusan) $message .= ' dengan jurusan ' . $namaJurusan;
-                if ($tahunMasuk) $message .= ' tahun masuk ' . $tahunMasuk;
+                $message = 'Tidak ada asal sekolah mahasiswa';
+                if ($daerah) $message .= ' dari daerah ' . $daerah;
+                if ($prodi) $message .= ' dengan prodi ' . $prodi;
+                if ($tahun) $message .= ' tahun masuk ' . $tahun;
                 $message .= '.';
 
                 return response()->json([
                     'status' => 204,
-                    'title' => 'Tidak Ada Data',
+                    'title' => 'Data Tidak Ditemukan',
                     'icon' => 'info',
                     'message' => $message,
                     'mahasiswa' => [],
@@ -247,15 +235,15 @@ class DataController extends Controller
 
             return response()->json([
                 'status' => 200,
-                'mahasiswa' => $mahasiswa,
+                'mahasiswa' => $result,
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'title' => 'Internal Server Error',
+                'title' => 'Kesalahan Server',
                 'message' => $e->getMessage(),
-                'icon' => 'error'
-            ], 500);
+                'icon' => 'error',
+            ]);
         }
     }
 }
