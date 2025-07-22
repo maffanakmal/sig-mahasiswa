@@ -6,7 +6,7 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-end align-items-center">
-            <button id="tambahPenggunaBtn" class="btn btn-primary btn-sm" onclick="penggunaModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button id="tambahPenggunaBtn" class="btn btn-primary btn-sm" onclick="penggunaModal()"><box-icon name='plus' color='white' class="icon-crud"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">

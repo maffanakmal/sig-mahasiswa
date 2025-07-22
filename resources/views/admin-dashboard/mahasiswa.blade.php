@@ -9,6 +9,14 @@
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        @if ($jumlahTidakLengkap > 0)
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Terdapat <span class="fw-bold">{{ $jumlahTidakLengkap }}</span> data mahasiswa yang belum memiliki data
+                daerah, sekolah, atau program studi yang lengkap. ketik <span class="fw-bold">Tidak ada</span> di kolom
+                pencarian untuk melihatnya.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <p class="mb-2">Import Excel Mahasiswa</p>
         <form action="#" id="importMahasiswaForm" enctype="multipart/form-data"
             class="d-flex align-items-end gap-2 mb-3">
@@ -16,7 +24,8 @@
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_mahasiswa" id="import_mahasiswa"
                     aria-describedby="btnImport" aria-label="Upload">
-                <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
+                <button class="btn btn-success" type="submit" id="btnImport"><box-icon type="solid" name="spreadsheet"
+                        class="icon-crud" color="white"></box-icon>
                     Import</button>
                 <div class="invalid-feedback" id="error-import_mahasiswa"></div>
             </div>
@@ -24,8 +33,10 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="mahasiswaDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="mahasiswaModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="mahasiswaDeleteAll()"><box-icon type="solid" name="trash"
+                    class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="mahasiswaModal()"><box-icon name="plus" class="icon-crud"
+                    color="white"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -49,7 +60,8 @@
         </div>
     </div>
     <div class="row mt-3">
-        <p><strong>Note:</strong> Ketik <strong>"Tidak ada"</strong> di kolom search untuk melihat mahasiswa yang belum lengkap datanya.</p>
+        <p><strong>Note:</strong> Ketik <strong>"Tidak ada"</strong> di kolom search untuk melihat mahasiswa yang belum
+            lengkap datanya.</p>
     </div>
 
     <div class="modal fade" id="mahasiswaModal" tabindex="-1" aria-labelledby="mahasiswaModalLabel" aria-hidden="true">
@@ -344,7 +356,7 @@
                             text: xhr.responseJSON.message
                         });
                         return;
-                    
+
                     } else {
                         let errorResponse = xhr.responseJSON; // Ambil data JSON error
 
@@ -362,6 +374,11 @@
         $('#importMahasiswaForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#btnImport');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             let url = '{{ route('mahasiswa.import') }}';
             let httpMethod = 'POST'; // Default method for create
@@ -376,6 +393,10 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html(
+                        '<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import'
+                        );
+
                     if (response.status == 200) {
                         Swal.fire({
                             title: 'Memproses...',
@@ -402,6 +423,10 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html(
+                        '<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import'
+                        );
+
                     if (xhr.status === 422) { // 422 = Validation Error
                         let errorResponse = xhr.responseJSON;
 

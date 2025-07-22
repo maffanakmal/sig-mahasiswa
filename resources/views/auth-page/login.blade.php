@@ -24,7 +24,7 @@
                 <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password"
                     maxlength="60" required>
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
-                    <i class='bx bx-show'></i>
+                    <box-icon name='low-vision'></box-icon>
                 </span>
             </div>
             <div class="invalid-feedback" id="error-password"></div>
@@ -41,25 +41,23 @@
 
 @section('script')
     <script>
-        $(document).ready(function() {
+       $(document).ready(function () {
             document.querySelectorAll(".toggle-password").forEach(toggle => {
-                toggle.addEventListener("click", function() {
+                toggle.addEventListener("click", function () {
                     const targetId = this.getAttribute("data-target");
                     const passwordField = document.getElementById(targetId);
-                    const icon = this.querySelector("i");
+                    const boxIcon = this.querySelector("box-icon");
 
                     if (passwordField.type === "password") {
                         passwordField.type = "text";
-                        icon.classList.remove("bx-show");
-                        icon.classList.add("bx-low-vision");
+                        boxIcon.setAttribute("name", "show-alt");
                     } else {
                         passwordField.type = "password";
-                        icon.classList.remove("bx-low-vision");
-                        icon.classList.add("bx-show");
+                        boxIcon.setAttribute("name", "low-vision");
                     }
                 });
             });
-        })
+        });
 
 
         $('#loginForm').on('submit', function(e) {

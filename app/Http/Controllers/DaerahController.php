@@ -39,16 +39,16 @@ class DaerahController extends Controller
                 'latitude_daerah',
                 'longitude_daerah',
             )
-                ->orderBy('daerah_uuid', 'DESC');
+                ->orderBy('daerah_uuid', 'DESC')->get();
 
             return DataTables::of($daerahs)
                 ->addIndexColumn()
                 ->addColumn('action', function ($daerah) {
                     return '<button data-id="' . $daerah->daerah_uuid . '" class="btn btn-warning btn-sm" onclick="editDaerah(this)">
-                                <i class="bx bx-pencil"></i>
+                                <box-icon type="solid" name="pencil" class="icon-crud"  color="white"></box-icon>
                             </button>
                             <button data-id="' . $daerah->daerah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteDaerah(this)">
-                                <i class="bx bx-trash"></i>
+                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
                             </button>';
                 })
                 ->rawColumns(['action'])

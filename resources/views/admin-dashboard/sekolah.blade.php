@@ -9,13 +9,21 @@
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+                @if ($jumlahTidakLengkap > 0)
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Terdapat <span class="fw-bold">{{ $jumlahTidakLengkap }}</span> data sekolah yang belum memiliki data
+                daerah yang lengkap. ketik <span class="fw-bold">Tidak ada</span> di kolom
+                pencarian untuk melihatnya.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <p class="mb-2">Import Excel Sekolah</p>
         <form action="#" id="importSekolahForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 mb-3">
             @csrf
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_sekolah" id="import_sekolah"
                     aria-describedby="btnImport" aria-label="Upload">
-                <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
+                <button class="btn btn-success" type="submit" id="btnImport"><box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon>
                     Import</button>
                 <div class="invalid-feedback" id="error-import_sekolah"></div>
             </div>
@@ -23,8 +31,8 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="sekolahDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="sekolahModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="sekolahDeleteAll()"><box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="sekolahModal()"><box-icon name="plus" class="icon-crud" color="white"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -182,18 +190,6 @@
                     marker.setLatLng(defaultCenter);
                     map.setView(defaultCenter, defaultZoom);
                 }
-
-                // if (method === 'update' && pendingLatLng) {
-                //     // Jika ada pendingLatLng, set marker dan view ke lokasi tersebut
-                //     document.getElementById('latitude_sekolah').value = pendingLatLng[0];
-                //     document.getElementById('longitude_sekolah').value = pendingLatLng[1];
-                //     // Set marker dan view ke pendingLatLng
-                //     pendingZoom = pendingZoom || defaultZoom; // Gunakan pendingZoom jika ada, atau defaultZoom
-
-                //     marker.setLatLng(pendingLatLng);
-                //     map.setView(pendingLatLng, pendingZoom);
-                //     pendingLatLng = null; // reset agar tidak tertimpa
-                // }
             });
 
             sekolahModal.addEventListener('hidden.bs.modal', function() {
@@ -420,6 +416,11 @@
         $('#importSekolahForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#btnImport');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             let url = '{{ route('sekolah.import') }}';
             let httpMethod = 'POST'; // Default method for create
@@ -434,6 +435,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+
                     if (response.status == 200) {
                         Swal.fire({
                             title: 'Memproses...',
@@ -460,6 +463,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+
                     if (xhr.status === 422) { // 422 = Validation Error
                         let errorResponse = xhr.responseJSON;
 

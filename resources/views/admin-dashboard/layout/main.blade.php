@@ -8,10 +8,9 @@
     <meta name="csrf_token" content="{{ csrf_token() }}" />
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}" />
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/boxicons.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
     <script src="{{ asset('js/leaflet.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
@@ -26,44 +25,44 @@
                     <a href="#">USNIGIS</a>
                 </div>
                 <button class="toggle-btn border-0" type="button">
-                    <i class="bx bx-menu"></i>
+                    <box-icon name='menu' color='white' size='lg'></box-icon>
                 </button>
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item {{ Request::is('dashboard/home') ? 'status-active' : '' }}">
                     <a href="{{ route('home.index') }}" class="sidebar-link">
-                        <i class='bx bx-home'></i>
+                        <box-icon name='home' color='white'></box-icon>
                         <span>Beranda</span>
                     </a>
                 </li>
                 @if (session('loggedInUser')['role'] === 'BAAKPSI')
                     <li class="sidebar-item {{ Request::is('dashboard/pengguna') ? 'status-active' : '' }}">
                         <a href="{{ route('pengguna.index') }}" class="sidebar-link">
-                            <i class='bx bx-user'></i>
+                            <box-icon name='user' color='white'></box-icon>
                             <span>Pengguna</span>
                         </a>
                     </li>
                     <li class="sidebar-item {{ Request::is('dashboard/daerah') ? 'status-active' : '' }}">
                         <a href="{{ route('daerah.index') }}" class="sidebar-link">
-                            <i class='bx bx-map'></i>
+                            <box-icon name='map' color='white'></box-icon>
                             <span>Daerah</span>
                         </a>
                     </li>
                     <li class="sidebar-item {{ Request::is('dashboard/sekolah') ? 'status-active' : '' }}">
                         <a href="{{ route('sekolah.index') }}" class="sidebar-link">
-                            <i class='bx bxs-school'></i>
+                            <box-icon type='solid' name='school' color='white'></box-icon>
                             <span>Sekolah</span>
                         </a>
                     </li>
                     <li class="sidebar-item {{ Request::is('dashboard/prodi') ? 'status-active' : '' }}">
                         <a href="{{ route('prodi.index') }}" class="sidebar-link">
-                            <i class='bx bx-book'></i>
+                            <box-icon name='book' color='white'></box-icon>
                             <span>Program Studi</span>
                         </a>
                     </li>
                     <li class="sidebar-item {{ Request::is('dashboard/mahasiswa') ? 'status-active' : '' }}">
                         <a href="{{ route('mahasiswa.index') }}" class="sidebar-link">
-                            <i class='bx bxs-graduation'></i>
+                            <box-icon type='solid' name='graduation' color='white'></box-icon>
                             <span>Mahasiswa</span>
                         </a>
                     </li>
@@ -75,10 +74,10 @@
                             data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
                             aria-controls="collapseOne">
                             <div>
-                                <i class='bx bx-map-alt'></i>
+                                <box-icon name='map-alt' color='white'></box-icon>
                                 <span>Peta</span>
                             </div>
-                            <i class="caret-nav bx bx-caret-down rotate"></i>
+                            <box-icon name='caret-down' class="caret-nav rotate" color='white'></box-icon>
                         </a>
                         <ul id="collapseOne" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                             <li class="sidebar-item {{ Request::is('dashboard/peta/daerah') ? 'status-active' : '' }}">
@@ -106,18 +105,18 @@
                                     {{ session('loggedInUser')['role'] ?? 'User' }}
                                 </span>
                             </div>
-                            <div class="caret-icon mx-1" data-bs-toggle="dropdown" type="button" aria-expanded="false">
-                                <i class="bx bx-caret-down text-white" style="font-size: 20px"></i>
+                            <div class="caret-icon" data-bs-toggle="dropdown" type="button" aria-expanded="false">
+                                <box-icon name='caret-down' class="caret-nav rotate" color='white' style="width: 34px"></box-icon>
                             </div>
                             <div class="dropdown-menu dropdown-menu-end rounded-1 border-0 shadow mt-3">
                                 <a href="{{ route('home.pengaturan') }}" class="dropdown-item mb-2">
-                                    <i class="bx bx-cog"></i>
+                                    <box-icon name='cog' color='black'></box-icon>
                                     <span>Pengaturan</span>
                                 </a>
                                 <form action="#" id="logout-form">
                                     @csrf
                                     <a href="javascript:void(0)" class="dropdown-item" id="btn-logout">
-                                        <i class="bx bx-log-out"></i>
+                                        </i><box-icon name='log-out' color='black'></box-icon>
                                         <span>Logout</span>
                                     </a>
                                 </form>
@@ -139,10 +138,11 @@
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
+    <script src="{{ asset('js/esri-leaflet.js') }}"></script>
+    <script src="{{ asset('js/select2.min.js') }}"></script>
+    <script src="{{ asset('js/boxicons.js') }}"></script>
+    <script src="{{ asset('js/chart.js') }}"></script>
     <script src="{{ asset('js/script.js') }}"></script>
 
     <script>

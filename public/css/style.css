@@ -185,9 +185,12 @@ table.dataTable td {
     background-color: transparent;
 }
 
-.toggle-btn i {
-    color: #fff;
+.icon-crud {
+    width: 15px;
+    height: 15px;
+    color: var(--white-color);
 }
+
 
 #dashboard-sidebar.active .sidebar-logo,
 #dashboard-sidebar.active a.sidebar-link span {

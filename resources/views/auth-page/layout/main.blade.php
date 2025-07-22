@@ -7,7 +7,7 @@
     <title>{{ $title }}</title>
     <meta name="csrf_token" content="{{ csrf_token() }}" />
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/boxicons.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
 </head>
 
@@ -30,9 +30,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('js/boxicons.js') }}"></script>
     @yield('script');
 </body>
 

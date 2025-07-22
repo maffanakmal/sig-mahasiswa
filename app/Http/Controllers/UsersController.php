@@ -56,10 +56,10 @@ class UsersController extends Controller
                     $disabled = $user->is_active ? 'disabled' : '';
 
                     return '<button data-id="' . $user->user_uuid . '" class="btn btn-warning btn-sm" onclick="editUser(this)" ' . $disabled . '>
-                                <i class="bx bx-pencil"></i>
+                                <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
                             <button data-id="' . $user->user_uuid . '" class="btn btn-danger btn-sm" onclick="deleteUser(this)" ' . $disabled . '>
-                                <i class="bx bx-trash"></i>
+                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
                             </button>';
                 })
                 ->rawColumns(['action', 'email','status'])

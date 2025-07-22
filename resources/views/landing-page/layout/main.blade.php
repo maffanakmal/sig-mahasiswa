@@ -7,7 +7,7 @@
     <title>{{ $title }}</title>
     <meta name="csrf_token" content="{{ csrf_token() }}" />
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/boxicons.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
     <script src="{{ asset('js/leaflet.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
@@ -41,37 +41,6 @@
         </div>
     </div>
 
-    {{-- <div class="container min-vh-100">
-        <div class="card shadow-sm">
-            <div class="card-header mb-2 d-flex justify-content-between align-items-center flex-wrap">
-                <h5 class="mb-0 text-center flex-grow-1">Dari mana aja sih mahasiswa USNI berasal?</h5>
-
-                <form action="#" class="ms-auto">
-                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
-                        onclick="showDaerah()">Daerah</button>
-                    <button type="button" class="btn btn-sm rounded-5 btn-outline-primary px-4"
-                        onclick="showSekolah()">Sekolah</button>
-                </form>
-            </div>
-
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div id="map" class="mb-3"></div>
-
-                    <p class="mahasiswa-alert text-danger mb-0" style="display: none;">
-                        Data mahasiswa belum dimasukkan.
-                    </p>
-
-                    <p class="daerah-alert text-danger mb-0" style="display: none;">
-                        Data daerah belum dimasukkan.
-                    </p>
-                    <small>Data daerah berasal dari Badan Pusat Statistik <a
-                            href="https://sig.bps.go.id/">www.sig.bps.go.id</a></small>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
     <div class="container-fluid footer-landing">
         <footer class="d-flex justify-content-center align-items-center py-3">
             <span class="mb-3 mb-md-0 text-white">&copy; <span id="year"></span> USNIGIS. </span>
@@ -82,8 +51,8 @@
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
+    <script src="{{ asset('js/esri-leaflet.js') }}"></script>
     {{-- <script>
         // Buat koordinat awal dan zoom default
         var defaultCenter = [-2.3, 120]; // contoh koordinat

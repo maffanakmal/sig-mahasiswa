@@ -25,7 +25,11 @@ class MahasiswaController extends Controller
     {
         $data = [
             'title' => 'USNIGIS | Halaman Mahasiswa',
-            'mahasiswa' => Mahasiswa::where('mahasiswa_uuid', $request->nim)->first(['nim', 'tahun_masuk', 'kode_prodi', 'npsn', 'kode_daerah'])
+            'mahasiswa' => Mahasiswa::where('mahasiswa_uuid', $request->nim)->first(['nim', 'tahun_masuk', 'kode_prodi', 'npsn', 'kode_daerah']),
+            'jumlahTidakLengkap' => Mahasiswa::whereNull('kode_daerah')
+                ->orWhereNull('npsn')
+                ->orWhereNull('kode_prodi')
+                ->count(),
         ];
 
         if ($request->ajax()) {
@@ -57,16 +61,15 @@ class MahasiswaController extends Controller
                 })
                 ->addColumn('action', function ($mahasiswa) {
                     return '<button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-warning btn-sm" onclick="editMahasiswa(this)">
-                    <i class="bx bx-pencil"></i>
+                    <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                 </button>
                 <button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-danger btn-sm" onclick="deleteMahasiswa(this)">
-                    <i class="bx bx-trash"></i>
+                    <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
                 </button>';
                 })
                 ->rawColumns(['action', 'kode_prodi', 'npsn', 'kode_daerah']) // penting agar HTML-nya dirender
                 ->make(true);
         }
-
 
         return view('admin-dashboard.mahasiswa', $data);
     }

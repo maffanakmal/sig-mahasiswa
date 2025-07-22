@@ -90,40 +90,19 @@
             </div>
         </div>
     </div>
-    @if (session('loggedInUser')['role'] === 'BAAKPSI')
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card mb-3 shadow-sm ">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3">
-                            <div class="icon-card-wrapper p-3 rounded-circle">
-                                <i class="bi bi-exclamation-triangle-fill text-white fs-3"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h6 class="card-title mb-1">Data Tidak Lengkap</h6>
-                            <p class="card-text mb-0 fw-bold fs-5" id="mahasiswaIncompleteCount">0</p>
-                            <small class="text-muted">Mahasiswa</small>
-                            <p class="card-text mb-0"><a href="{{ route('mahasiswa.index') }}">Lihat data</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header p-3 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Distribusi Mahasiswa Berdasarkan Daerah Domisili</h6>
+                    <h6 class="mb-0">Distribusi Mahasiswa per Daerah dan Program Studi</h6>
                     @if (session('loggedInUser')['role'] === 'Warek 3' || session('loggedInUser')['role'] === 'PMB')
                         <a href="{{ route('dashboard.peta.daerah') }}" class="btn btn-sm btn-primary">
                             Lihat Selengkapnya
                         </a>
                     @endif
                 </div>
-                <div class="card-body" style="height: 350px;">
-                    <canvas id="daerahChart" style="width: 100%; height: 100%;"></canvas>
+                <div class="card-body" style="height: 400px;">
+                    <canvas id="daerahJurusanChart" style="width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
         </div>
@@ -157,56 +136,28 @@
             dataCount();
         });
 
+        let sekolahChartInstance;
+        let daerahJurusanChartInstance;
+
         function dataCount() {
             $.ajax({
-                url: "{{ route('home.count') }}", // Ensure this is the correct API route
+                url: "{{ route('home.count') }}",
                 type: "GET",
-                dataType: "json", // Ensure the response is parsed as JSON
+                dataType: "json",
                 success: function(response) {
                     if (response.status === 200) {
+                        $('#mahasiswaCount').text(response.jumlah_mahasiswa);
+                        $('#prodiCount').text(response.jumlah_prodi);
+                        $('#sekolahAsalCount').text(response.jumlah_sekolah);
+                        $('#daerahCount').text(response.jumlah_daerah);
+                        $('#penggunaCount').text(response.jumlah_pengguna);
 
-                        $('#mahasiswaCount').text(response.mahasiswa);
-                        $('#prodiCount').text(response.prodi);
-                        $('#sekolahAsalCount').text(response.asal_sekolah);
-                        $('#daerahCount').text(response.daerah);
-                        $('#penggunaCount').text(response.pengguna);
-                        $('#mahasiswaIncompleteCount').text(response.mahasiswaIncompleteCount);
+                        if (sekolahChartInstance) sekolahChartInstance.destroy();
+                        if (daerahJurusanChartInstance) daerahJurusanChartInstance.destroy();
 
-                        // Render Chart.js
-                        const daerahBarChart = document.getElementById('daerahChart').getContext('2d');
-                        new Chart(daerahBarChart, {
-                            type: 'bar',
-                            data: {
-                                labels: response.daerahChart.labels,
-                                datasets: [{
-                                    label: 'Jumlah Mahasiswa',
-                                    data: response.daerahChart.values,
-                                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: 'Daerah dengan Mahasiswa Terbanyak',
-                                        font: {
-                                            size: 14
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-
+                        // Chart 2: Doughnut sekolah
                         const daerahPieChart = document.getElementById('sekolahChart').getContext('2d');
-                        new Chart(daerahPieChart, {
+                        sekolahChartInstance = new Chart(daerahPieChart, {
                             type: 'doughnut',
                             data: {
                                 labels: response.sekolahChart.labels,
@@ -241,17 +192,89 @@
                             }
                         });
 
+                        // Chart 3: Bar chart daerah + jurusan
+                        const programStudiBarChart = document.getElementById('daerahJurusanChart').getContext(
+                            '2d');
+                        const warna = [
+                            '#007bff', // biru
+                            '#28a745', // hijau
+                            '#ffc107', // kuning
+                            '#dc3545', // merah
+                            '#6f42c1', // ungu
+                            '#20c997', // teal
+                            '#fd7e14', // oranye
+                            '#6610f2', // ungu gelap
+                            '#e83e8c', // pink
+                            '#343a40', // abu-abu gelap
+                            '#17a2b8', // biru muda
+                            '#8e44ad', // ungu keunguan
+                            '#2ecc71', // hijau terang
+                            '#f39c12', // kuning oranye
+                            '#c0392b' // merah tua
+                        ];
 
+                        daerahJurusanChartInstance = new Chart(programStudiBarChart, {
+                            type: 'bar',
+                            data: {
+                                labels: response.daerahJurusanChart.labels,
+                                datasets: response.daerahJurusanChart.datasets.map((ds, i) => ({
+                                    ...ds,
+                                    backgroundColor: warna[i % warna.length],
+                                    borderWidth: 1
+                                }))
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Jumlah Mahasiswa per Daerah dan Program Studi',
+                                        font: {
+                                            size: 14
+                                        }
+                                    },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const label = context.dataset.label || '';
+                                                const value = context.raw;
+
+                                                if (value === 0)
+                                                    return ''; // Jangan tampilkan tooltip untuk data 0
+                                                return `${label}: ${value}`;
+                                            }
+                                        }
+                                    },
+
+                                    legend: {
+                                        position: 'top'
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        stacked: true
+                                    },
+                                    y: {
+                                        stacked: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Jumlah Mahasiswa'
+                                        },
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
                     }
                 },
                 error: function(xhr) {
-                    let errorResponse = xhr.responseJSON; // Ambil data JSON error
-
+                    let errorResponse = xhr.responseJSON;
                     Swal.fire({
                         icon: errorResponse.icon || "error",
                         title: errorResponse.title || "Error",
-                        text: errorResponse.message ||
-                            "Terjadi kesalahan yang tidak diketahui.",
+                        text: errorResponse.message || "Terjadi kesalahan yang tidak diketahui.",
                     });
                 }
             });

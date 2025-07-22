@@ -1,9 +1,10 @@
 
 const hamburger = document.querySelector('.toggle-btn');
-const toggler = document.querySelector('.toggle-btn i'); // Ambil ikon di dalam tombol
+const toggler = document.querySelector('.toggle-btn box-icon'); // Ambil <box-icon> langsung
 
 hamburger.addEventListener('click', function () {
     document.querySelector('#dashboard-sidebar').classList.toggle('active');
-    toggler.classList.toggle('bx-menu');
-    toggler.classList.toggle('bx-x');
-})
+    
+    const currentIcon = toggler.getAttribute('name');
+    toggler.setAttribute('name', currentIcon === 'menu' ? 'x' : 'menu');
+});

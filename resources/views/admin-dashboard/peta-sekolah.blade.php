@@ -50,8 +50,8 @@
                 </div>
 
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary"><i class='bx  bx-search'></i> Cari </button>
-                    <button type="button" id="resetFilterBtn" class="btn btn-danger"><i class='bx  bx-refresh'></i>
+                    <button type="submit" class="btn btn-primary" id="btnSearch"><box-icon name="search" class="icon-crud" color="white"></box-icon></i> Cari </button>
+                    <button type="button" id="resetFilterBtn" class="btn btn-danger"><box-icon name="refresh" class="icon-crud" color="white"></box-icon>
                         Reset </button>
                 </div>
             </form>
@@ -284,11 +284,13 @@
                     }
                 },
                 error: function(xhr) {
-                    console.error("AJAX error:", xhr.responseText);
+                    let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+                        icon: errorResponse.icon || "error",
+                        title: errorResponse.title || "Error",
+                        text: errorResponse.message ||
+                            "Terjadi kesalahan yang tidak diketahui.",
                     });
                 }
             });
@@ -460,6 +462,11 @@
         $('#mapFilterForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#btnSearch');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const tahunMasuk = $('#tahun_masuk option:selected').val();
             const prodi = $('#prodi option:selected').val();
             const daerah = $('#daerah option:selected').val();
@@ -486,6 +493,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
@@ -540,11 +549,15 @@
                     }
                 },
                 error: function(xhr) {
-                    console.error("AJAX error:", xhr.responseText);
+                    btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+                    
+                    let errorResponse = xhr.responseJSON; // Ambil data JSON error
+
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Kesalahan Server',
-                        text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+                        icon: errorResponse.icon || "error",
+                        title: errorResponse.title || "Error",
+                        text: errorResponse.message ||
+                            "Terjadi kesalahan yang tidak diketahui.",
                     });
                 }
             });

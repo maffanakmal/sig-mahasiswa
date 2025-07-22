@@ -22,7 +22,8 @@ class SekolahController extends Controller
     {
         $data = [
             'title' => 'USNIGIS | Halaman Sekolah',
-            'sekolah' => Sekolah::where('sekolah_uuid', $request->npsn)->first(['npsn', 'nama_sekolah', 'alamat_sekolah', 'kode_daerah', 'latitude_sekolah', 'longitude_sekolah'])
+            'sekolah' => Sekolah::where('sekolah_uuid', $request->npsn)->first(['npsn', 'nama_sekolah', 'alamat_sekolah', 'kode_daerah', 'latitude_sekolah', 'longitude_sekolah']),
+            'jumlahTidakLengkap' => Sekolah::whereNull('kode_daerah')->count(),
         ];
 
         if ($request->ajax()) {
@@ -46,10 +47,10 @@ class SekolahController extends Controller
                 })
                 ->addColumn('action', function ($sekolah) {
                     return '<button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-warning btn-sm" onclick="editSekolah(this)">
-                                <i class="bx bx-pencil"></i>
+                                <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
                             <button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteSekolah(this)">
-                                <i class="bx bx-trash"></i>
+                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
                             </button>';
                 })
                 ->rawColumns(['action', 'kode_daerah'])

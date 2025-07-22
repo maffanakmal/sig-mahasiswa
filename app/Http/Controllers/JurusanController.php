@@ -40,10 +40,10 @@ class JurusanController extends Controller
                 ->addIndexColumn()
                 ->addColumn('action', function ($prodi) {
                     return '<button data-id="' . $prodi->prodi_uuid . '" class="btn btn-warning btn-sm" onclick="editProdi(this)">
-                                <i class="bx bx-pencil"></i>
+                                <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
                             <button data-id="' . $prodi->prodi_uuid . '" class="btn btn-danger btn-sm" onclick="deleteProdi(this)">
-                                <i class="bx bx-trash"></i>
+                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
                             </button>';
                 })
                 ->rawColumns(['action'])

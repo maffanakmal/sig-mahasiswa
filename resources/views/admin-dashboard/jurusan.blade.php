@@ -16,7 +16,7 @@
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_prodi" id="import_prodi"
                     aria-describedby="btnImport" aria-label="Upload">
-                <button class="btn btn-success" type="submit" id="btnImport"><i class='bx bx-spreadsheet'></i>
+                <button class="btn btn-success" type="submit" id="btnImport"><box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon>
                     Import</button>
                 <div class="invalid-feedback" id="error-import_prodi"></div>
             </div>
@@ -24,8 +24,8 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="prodiDeleteAll()"><i class='bx bx-trash'></i> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="prodiModal()"><i class='bx bx-plus'></i> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="prodiDeleteAll()"><box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="prodiModal()"><box-icon name="plus" class="icon-crud" color="white"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -227,6 +227,11 @@
         $('#importProdiForm').on('submit', function(e) {
             e.preventDefault();
 
+            let btn = $('#btnImport');
+            btn.prop('disabled', true).html(
+                '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
+            );
+
             const formData = new FormData(this);
             let url = '{{ route('prodi.import') }}';
             let httpMethod = 'POST';
@@ -241,6 +246,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
+                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+
                     if (response.status == 200) {
                         Swal.fire({
                             title: 'Memproses...',
@@ -266,6 +273,8 @@
                     }
                 },
                 error: function(xhr) {
+                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+
                     if (xhr.status === 422) {
                         let errorResponse = xhr.responseJSON;
 
