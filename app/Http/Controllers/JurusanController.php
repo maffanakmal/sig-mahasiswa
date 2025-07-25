@@ -33,11 +33,13 @@ class JurusanController extends Controller
                 'kode_prodi',
                 'nama_prodi',
             )
-                ->orderBy('prodi_uuid', 'DESC')
-                ->get();
+                ->orderBy('prodi_uuid', 'DESC');
 
             return DataTables::of($prodis)
                 ->addIndexColumn()
+                ->filterColumn('kode_prodi', function ($query, $keyword) {
+                    $query->whereRaw("CAST(kode_prodi AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
                 ->addColumn('action', function ($prodi) {
                     return '<button data-id="' . $prodi->prodi_uuid . '" class="btn btn-warning btn-sm" onclick="editProdi(this)">
                                 <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
@@ -70,19 +72,22 @@ class JurusanController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_prodi' => 'required|regex:/^[0-9]+$/|max:10|unique:prodi,kode_prodi',
-                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50',
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:prodi,kode_prodi',
+                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:50',
                 ],
                 [
                     'kode_prodi.unique' => 'Kode program studi sudah terdaftar.',
                     'kode_prodi.max' => 'Kode program studi tidak boleh lebih dari 10 karakter.',
+                    'kode_prodi.min' => 'Kode program studi minimal 5 karakter.',
                     'kode_prodi.regex' => 'Kode program studi hanya boleh mengandung angka.',
                     'kode_prodi.required' => 'Kode program studi harus diisi.',
+
 
                     'nama_prodi.required' => 'Nama program studi harus diisi.',
                     'nama_prodi.string' => 'Nama program studi harus berupa string.',
                     'nama_prodi.regex' => 'Nama program studi hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_prodi.max' => 'Nama program studi tidak boleh lebih dari 50 karakter.',
+                    'nama_prodi.min' => 'Nama program studi minimal 5 karakter.',
                 ]
             );
 
@@ -192,12 +197,13 @@ class JurusanController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'kode_prodi' => 'required|regex:/^[0-9]+$/|max:10|unique:prodi,kode_prodi,' . $prodi->prodi_uuid . ',prodi_uuid',
-                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50',
+                    'kode_prodi' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:prodi,kode_prodi,' . $prodi->prodi_uuid . ',prodi_uuid',
+                    'nama_prodi' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:50',
                 ],
                 [
                     'kode_prodi.unique' => 'Kode program studi sudah terdaftar.',
                     'kode_prodi.max' => 'Kode program studi tidak boleh lebih dari 10 karakter.',
+                    'kode_prodi.min' => 'Kode program studi minimal 5 karakter.',
                     'kode_prodi.regex' => 'Kode program studi hanya boleh mengandung angka.',
                     'kode_prodi.required' => 'Kode program studi harus diisi.',
 
@@ -205,6 +211,7 @@ class JurusanController extends Controller
                     'nama_prodi.string' => 'Nama program studi harus berupa string.',
                     'nama_prodi.regex' => 'Nama program studi hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_prodi.max' => 'Nama program studi tidak boleh lebih dari 50 karakter.',
+                    'nama_prodi.min' => 'Nama program studi minimal 5 karakter.',
                 ]
             );
 

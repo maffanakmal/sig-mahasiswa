@@ -27,4 +27,22 @@
     font-size: 17px;
 }
 
+.leaflet-control-geocoder-icon {
+    background-image: none !important;
+    background-color: transparent !important;
+    width: auto !important;
+    padding: 0 8px;
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    line-height: 28px;
+    white-space: nowrap;
+}
+
+.leaflet-control-geocoder-icon::before {
+    content: "Cari..";
+}
+
+
+
 

@@ -85,8 +85,8 @@ class UsersController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50|unique:users,username',
+                'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
+                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:50|unique:users,username',
                 'email' => 'nullable|email|max:50|unique:users,email',
                 'password' => 'required|string|min:5|max:60',
                 'confirm_password' => 'required_with:password|same:password',
@@ -95,6 +95,7 @@ class UsersController extends Controller
                 'nama_lengkap.required' => 'Nama lengkap harus diisi.',
                 'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                 'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
+                'nama_lengkap.min' => 'Nama lengkap minimal 5 karakter.',
 
                 'email.email' => 'Format email tidak valid.',
                 'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
@@ -103,6 +104,7 @@ class UsersController extends Controller
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                'username.min' => 'Username minimal 5 karakter.',
                 'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
 
                 'password.required' => 'Password harus diisi.',
@@ -206,8 +208,8 @@ class UsersController extends Controller
             $user = User::where('user_uuid', $user_uuid)->firstOrFail(); // Cari user berdasarkan UUID
 
             $validatedData = $request->validate([
-                'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
+                'nama_lengkap' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
+                'username' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:50|unique:users,username,' . $user->user_uuid . ',user_uuid',
                 'email' => 'nullable|email|max:50|unique:users,email,' . $user->user_uuid . ',user_uuid',
                 'password' => 'nullable|string|min:5|max:60',
                 'confirm_password' => 'required_with:password|same:password',
@@ -216,6 +218,7 @@ class UsersController extends Controller
                 'nama_lengkap.required' => 'Nama lengkap harus diisi.',
                 'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                 'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
+                'nama_lengkap.min' => 'Nama lengkap minimal 5 karakter.',
 
                 'email.email' => 'Format email tidak valid.',
                 'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
@@ -224,6 +227,7 @@ class UsersController extends Controller
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                'username.min' => 'Username minimal 5 karakter.',
                 'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung',
 
                 'password.min' => 'Password minimal 5 karakter.',

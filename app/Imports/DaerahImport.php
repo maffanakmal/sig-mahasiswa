@@ -6,52 +6,41 @@ use App\Models\Daerah;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class DaerahImport implements ToCollection
+class DaerahImport implements ToCollection, WithHeadingRow
 {
-    /**
-     * @param Collection $collection
-     */
-    public function collection(Collection $collection)
+    public function collection(Collection $rows)
     {
         $data = [];
-        $index = 1;
 
         // Ambil semua kode_daerah yang sudah ada di database
         $existingKodeDaerah = Daerah::pluck('kode_daerah')->toArray();
 
-        // Simpan kode_daerah yang sudah diproses dari file Excel
         $processedKodeDaerah = [];
 
-        foreach ($collection as $row) {
-            if ($index > 1) {
-                $kode = $row[0] ?? '';
+        foreach ($rows as $row) {
+            $kode = $row['kode_daerah'] ?? '';
 
-                // Skip jika kosong
-                if (empty($kode)) {
-                    $index++;
-                    continue;
-                }
-
-                // Skip jika duplikat di database atau sudah diproses sebelumnya
-                if (in_array($kode, $existingKodeDaerah) || in_array($kode, $processedKodeDaerah)) {
-                    $index++;
-                    continue;
-                }
-
-                $data[] = [
-                    'daerah_uuid' => Str::uuid(),
-                    'kode_daerah' => $kode,
-                    'nama_daerah' => $row[1] ?? '',
-                    'latitude_daerah' => $row[2] ?? '',
-                    'longitude_daerah' => $row[3] ?? '',
-                ];
-
-                // Tambahkan ke array kode yang sudah diproses
-                $processedKodeDaerah[] = $kode;
+            // Skip jika kosong
+            if (empty($kode)) {
+                continue;
             }
 
-            $index++;
+            // Skip jika duplikat di database atau sudah diproses
+            if (in_array($kode, $existingKodeDaerah) || in_array($kode, $processedKodeDaerah)) {
+                continue;
+            }
+
+            $data[] = [
+                'daerah_uuid'      => Str::uuid(),
+                'kode_daerah'      => $kode,
+                'nama_daerah'      => $row['nama_daerah'] ?? '',
+                'latitude_daerah'  => $row['latitude_daerah'] ?? '',
+                'longitude_daerah' => $row['longitude_daerah'] ?? '',
+            ];
+
+            $processedKodeDaerah[] = $kode;
         }
 
         if (!empty($data)) {

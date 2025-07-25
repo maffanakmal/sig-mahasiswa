@@ -181,22 +181,25 @@ class HomeController extends Controller
                     'nama_lengkap' => [
                         'required',
                         'string',
+                        'min:5',
                         'max:100',
                         'regex:/^[a-zA-Z0-9\s.,-]+$/'
                     ],
-                    'username' => 'required|string|max:50|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:users,username,' . $user->user_uuid . ',user_uuid',
+                    'username' => 'required|string|min:5|max:50|regex:/^[a-zA-Z0-9\s.,-]+$/|unique:users,username,' . $user->user_uuid . ',user_uuid',
                     'email' => 'nullable|email|max:50|unique:users,email,' . $user->user_uuid . ',user_uuid',
                 ],
                 [
                     'nama_lengkap.required' => 'Nama lengkap harus diisi.',
                     'nama_lengkap.string' => 'Nama lengkap harus berupa teks.',
                     'nama_lengkap.max' => 'Nama lengkap tidak boleh lebih dari 100 karakter.',
+                    'nama_lengkap.min' => 'Nama lengkap minimal 5 karakter.',
                     'nama_lengkap.regex' => 'Nama lengkap hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
 
                     'username.required' => 'Username harus diisi.',
                     'username.string' => 'Username harus berupa teks.',
                     'username.regex' => 'Username hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'username.max' => 'Username tidak boleh lebih dari 50 karakter.',
+                    'username.min' => 'Username minimal 5 karakter.',
                     'username.unique' => 'Username sudah digunakan.',
 
                     'email.email' => 'Format email tidak valid.',

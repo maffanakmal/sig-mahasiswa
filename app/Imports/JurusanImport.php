@@ -6,26 +6,20 @@ use App\Models\Jurusan;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class JurusanImport implements ToCollection
+class JurusanImport implements ToCollection, WithHeadingRow
 {
-    /**
-     * @param Collection $collection
-     */
-    public function collection(Collection $collection)
+    public function collection(Collection $rows)
     {
         $data = [];
         $processedKodeProdi = [];
 
         $existingKodeProdi = Jurusan::pluck('kode_prodi')->toArray();
 
-        foreach ($collection as $index => $row) {
-            if ($index === 0) {
-                continue;
-            }
-
-            $kode = trim($row[0] ?? '');
-            $nama = trim($row[1] ?? '');
+        foreach ($rows as $row) {
+            $kode = trim($row['kode_prodi'] ?? '');
+            $nama = trim($row['nama_prodi'] ?? '');
 
             if (empty($kode) || empty($nama)) {
                 continue;

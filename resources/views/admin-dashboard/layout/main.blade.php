@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/Control.Geocoder.css') }}" />
     <script src="{{ asset('js/leaflet.js') }}"></script>
+    <script src="{{ asset('js/Control.Geocoder.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/maps.css') }}" />
 </head>

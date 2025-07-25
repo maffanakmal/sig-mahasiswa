@@ -39,10 +39,13 @@ class DaerahController extends Controller
                 'latitude_daerah',
                 'longitude_daerah',
             )
-                ->orderBy('daerah_uuid', 'DESC')->get();
+                ->orderBy('daerah_uuid', 'DESC');
 
             return DataTables::of($daerahs)
                 ->addIndexColumn()
+                ->filterColumn('kode_daerah', function ($query, $keyword) {
+                    $query->whereRaw("CAST(kode_daerah AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
                 ->addColumn('action', function ($daerah) {
                     return '<button data-id="' . $daerah->daerah_uuid . '" class="btn btn-warning btn-sm" onclick="editDaerah(this)">
                                 <box-icon type="solid" name="pencil" class="icon-crud"  color="white"></box-icon>
@@ -75,8 +78,8 @@ class DaerahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'kode_daerah' => 'required|regex:/^[0-9]+$/|max:10|unique:daerah,kode_daerah',
-                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'kode_daerah' => 'required|regex:/^[0-9]+$/|min:4|max:10|unique:daerah,kode_daerah',
+                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
                     'latitude_daerah' => 'required|numeric|between:-90,90',
                     'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
@@ -84,11 +87,13 @@ class DaerahController extends Controller
                     'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
                     'kode_daerah.max' => 'Kode daerah tidak boleh lebih dari 10 karakter.',
+                    'kode_daerah.min' => 'Kode daerah harus minimal 4 karakter.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
                     'nama_daerah.regex' => 'Nama daerah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_daerah.max' => 'Nama daerah tidak boleh lebih dari 100 karakter.',
+                    'nama_daerah.min' => 'Nama daerah harus minimal 5 karakter.',
 
                     'latitude_daerah.required' => 'Latitude harus diisi.',
                     'latitude_daerah.numeric' => 'Latitude harus berupa angka.',
@@ -222,8 +227,8 @@ class DaerahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'kode_daerah'      => 'required|regex:/^[0-9]+$/|max:10|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
-                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
+                    'kode_daerah'      => 'required|regex:/^[0-9]+$/|min:4|max:10|unique:daerah,kode_daerah,' . $daerah->daerah_uuid . ',daerah_uuid',
+                    'nama_daerah' => 'required|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
                     'latitude_daerah' => 'required|numeric|between:-90,90',
                     'longitude_daerah' => 'required|numeric|between:-180,180',
                 ],
@@ -231,11 +236,13 @@ class DaerahController extends Controller
                     'kode_daerah.required' => 'Kode daerah harus diisi.',
                     'kode_daerah.regex' => 'Kode daerah hanya boleh berupa angka.',
                     'kode_daerah.max' => 'Kode daerah tidak boleh lebih dari 10 karakter.',
+                    'kode_daerah.min' => 'Kode daerah harus minimal 4 karakter.',
                     'kode_daerah.unique' => 'Kode daerah sudah terdaftar.',
 
                     'nama_daerah.required' => 'Nama daerah harus diisi.',
                     'nama_daerah.regex' => 'Nama daerah mengandung karakter tidak valid.',
                     'nama_daerah.max' => 'Nama daerah tidak boleh lebih dari 100 karakter.',
+                    'nama_daerah.min' => 'Nama daerah harus minimal 5 karakter.',
 
                     'latitude_daerah.required' => 'Latitude harus diisi.',
                     'latitude_daerah.numeric' => 'Latitude harus berupa angka.',

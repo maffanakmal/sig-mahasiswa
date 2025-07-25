@@ -59,10 +59,6 @@
             </div>
         </div>
     </div>
-    <div class="row mt-3">
-        <p><strong>Note:</strong> Ketik <strong>"Tidak ada"</strong> di kolom search untuk melihat mahasiswa yang belum
-            lengkap datanya.</p>
-    </div>
 
     <div class="modal fade" id="mahasiswaModal" tabindex="-1" aria-labelledby="mahasiswaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -137,7 +133,9 @@
                 ajax: '{{ route('mahasiswa.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
+                        searchable: false,
+                        orderable: false,
                     },
                     {
                         data: 'nim',
@@ -161,7 +159,9 @@
                     },
                     {
                         data: 'action',
-                        name: 'action'
+                        name: 'action',
+                        searchable: false,
+                        orderable: false,
                     }
                 ]
             });
@@ -313,7 +313,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (response.status == 200) {
                         $('#mahasiswaModal').modal('hide');
@@ -331,7 +331,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
@@ -456,6 +456,9 @@
             nim = e.getAttribute('data-id');
             method = 'update';
 
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             let btn = $('#saveBtn');
             btn.prop('disabled', true).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
@@ -468,7 +471,7 @@
                 url: "{{ route('mahasiswa.show', '') }}/" + nim,
                 type: "GET",
                 success: function(response) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     $('#nim_edit').val(response.mahasiswa.mahasiswa_uuid);
                     $('#nim').val(response.mahasiswa.nim);
@@ -478,7 +481,7 @@
                     $('#kode_daerah').val(response.mahasiswa.kode_daerah);
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;

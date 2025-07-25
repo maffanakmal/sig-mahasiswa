@@ -44,12 +44,13 @@ class MahasiswaController extends Controller
                     'sekolah.nama_sekolah as npsn',
                     'daerah.nama_daerah as kode_daerah',
                 )
-                ->orderBy('mahasiswa.mahasiswa_uuid', 'DESC')
-                ->get();
-
+                ->orderBy('mahasiswa.mahasiswa_uuid', 'DESC');
 
             return DataTables::of($mahasiswas)
                 ->addIndexColumn()
+                ->filterColumn('nim', function ($query, $keyword) {
+                    $query->whereRaw("CAST(nim AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
                 ->editColumn('kode_prodi', function ($row) {
                     return $row->kode_prodi ?? '<span class="text-muted">Tidak ada</span>';
                 })
@@ -109,7 +110,7 @@ class MahasiswaController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|regex:/^[0-9]+$/|max:10|unique:mahasiswa,nim',
+                    'nim' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:mahasiswa,nim',
                     'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
                     'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
                     'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,npsn',
@@ -120,6 +121,7 @@ class MahasiswaController extends Controller
                     'nim.unique' => 'NIM sudah terdaftar.',
                     'nim.regex' => 'NIM hanya boleh berisi angka.',
                     'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
+                    'nim.min' => 'NIM harus terdiri dari minimal 5 karakter.',
 
                     'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
                     'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',
@@ -267,10 +269,10 @@ class MahasiswaController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|regex:/^[0-9]+$/|max:10|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
+                    'nim' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
                     'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
                     'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
-                    'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,nspn',
+                    'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,npsn',
                     'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                 ],
                 [
@@ -278,6 +280,7 @@ class MahasiswaController extends Controller
                     'nim.unique' => 'NIM sudah terdaftar.',
                     'nim.regex' => 'NIM hanya boleh berisi angka.',
                     'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
+                    'nim.min' => 'NIM harus terdiri dari minimal 5 karakter.',
 
                     'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
                     'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',

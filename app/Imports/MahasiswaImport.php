@@ -4,19 +4,19 @@ namespace App\Imports;
 
 use App\Models\Daerah;
 use App\Models\Jurusan;
-use App\Models\Mahasiswa;
 use App\Models\Sekolah;
+use App\Models\Mahasiswa;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class MahasiswaImport implements ToCollection
+class MahasiswaImport implements ToCollection, WithHeadingRow
 {
-    public function collection(Collection $collection)
+    public function collection(Collection $rows)
     {
         $data = [];
 
-        // Ambil referensi dan ubah key menjadi lowercase
         $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')
             ->mapWithKeys(fn($kode, $nama) => [strtolower(trim($nama)) => $kode])
             ->toArray();
@@ -29,29 +29,23 @@ class MahasiswaImport implements ToCollection
             ->mapWithKeys(fn($npsn, $nama) => [strtolower(trim($nama)) => $npsn])
             ->toArray();
 
-        // Ambil NIM yang sudah ada untuk hindari duplikat
         $existingNIMs = Mahasiswa::pluck('nim')->toArray();
         $processedNIMs = [];
 
-        foreach ($collection as $index => $row) {
-            if ($index === 0 || !isset($row[0]) || !is_numeric($row[0])) {
-                continue;
-            }
+        foreach ($rows as $row) {
+            $nim = trim((string)($row['nim'] ?? ''));
+            $tahunMasuk = (int)($row['tahun_masuk'] ?? 0);
 
-            $nim = trim((string)$row[0]);
-            $tahunMasuk = (int)($row[1] ?? 0);
-
-            $namaProdi = strtolower(trim($row[2] ?? ''));
+            $namaProdi = strtolower(trim($row['prodi'] ?? ''));
             $kodeProdi = $prodiList[$namaProdi] ?? null;
 
-            $namaSekolah = strtolower(trim($row[3] ?? ''));
+            $namaSekolah = strtolower(trim($row['sekolah'] ?? ''));
             $npsn = $sekolahList[$namaSekolah] ?? null;
 
-            $namaDaerah = strtolower(trim($row[4] ?? ''));
+            $namaDaerah = strtolower(trim($row['daerah'] ?? ''));
             $kodeDaerah = $daerahList[$namaDaerah] ?? null;
 
-            // Hindari NIM duplikat
-            if (in_array($nim, $existingNIMs) || in_array($nim, $processedNIMs)) {
+            if (!$nim || in_array($nim, $existingNIMs) || in_array($nim, $processedNIMs)) {
                 continue;
             }
 

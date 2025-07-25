@@ -97,7 +97,9 @@
                 ajax: '{{ route('prodi.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
+                        searchable: false,
+                        orderable: false,
                     },
                     {
                         data: 'kode_prodi',
@@ -109,7 +111,9 @@
                     },
                     {
                         data: 'action',
-                        name: 'action'
+                        name: 'action',
+                        searchable: false,
+                        orderable: false,
                     }
                 ]
             });
@@ -165,7 +169,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (response.status == 200) {
                         $('#prodiModal').modal('hide');
@@ -183,7 +187,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
@@ -304,6 +308,9 @@
             kode_prodi = e.getAttribute('data-id');
             method = 'update';
 
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             let btn = $('#saveBtn');
             btn.prop('disabled', true).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
@@ -316,14 +323,14 @@
                 url: "{{ route('prodi.show', '') }}/" + kode_prodi,
                 type: "GET",
                 success: function(response) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     $('#prodi_edit').val(response.prodi.prodi_uuid);
                     $('#kode_prodi').val(response.prodi.kode_prodi);
                     $('#nama_prodi').val(response.prodi.nama_prodi);
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;

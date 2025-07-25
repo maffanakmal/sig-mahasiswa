@@ -26,11 +26,14 @@ class AuthController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'credentials' => 'required|string|max:50',
+                'credentials' => 'required|string|min:5|max:50',
                 'password' => 'required|string|min:5|max:60',
             ], [
                 'credentials.required' => 'Username atau email wajib diisi.',
                 'credentials.max' => 'Username/email tidak boleh lebih dari 50 karakter.',
+                'credentials.min' => 'Username/email minimal 5 karakter.',
+                'credentials.string' => 'Username/email harus berupa teks.',
+
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
@@ -238,11 +241,14 @@ class AuthController extends Controller
                 'email.required' => 'Email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
                 'email.max' => 'Email tidak boleh lebih dari 50 karakter.',
+
                 'reset_token.required' => 'Token reset wajib diisi.',
                 'reset_token.max' => 'Token reset tidak boleh lebih dari 36 karakter.',
+
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 5 karakter.',
                 'password.max' => 'Password tidak boleh lebih dari 60 karakter.',
+                
                 'confirm_password.required_with' => 'Konfirmasi password harus diisi jika password diisi.',
                 'confirm_password.same' => 'Konfirmasi password harus sama dengan password.',
             ]);

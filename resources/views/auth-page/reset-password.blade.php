@@ -2,7 +2,7 @@
 
 @section('child-auth')
     <div class="header-text mb-3">
-        <p class="fs-3 text-center">Lupa Password</p>
+        <p class="fs-3 text-center">Validasi Email</p>
     </div>
     <p>Kami akan kirimkan link reset password ke email Anda.</p>
     <form action="#" id="resetForm">
@@ -14,7 +14,7 @@
             <div class="invalid-feedback" id="error-email"></div>
         </div>
         <div class="form-group mb-3">
-            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-reset">Reset Password</button>
+            <button type="submit" class="btn btn-primary w-100 fs-6" id="btn-reset">Validasi</button>
         </div>
         <a href="{{ route('auth.login') }}" class="btn btn-outline-secondary w-100 fs-6">Kembali ke halaman login</a>
     </form>

@@ -310,13 +310,13 @@
                 var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 var button = document.createElement('button');
-                button.innerHTML = '🗺️';
-                button.title = 'Tampilkan Data Sekolah';
+                button.innerHTML = '👨‍🎓';
+                button.title = 'Tampilkan Data Mahasiswa berdasarkan Sekolah Asal';
                 button.style.backgroundColor = 'white';
                 button.style.border = 'none';
-                button.style.width = '28px';
-                button.style.height = '28px';
-                button.style.fontSize = '18px';
+                button.style.width = '42px';
+                button.style.height = '42px';
+                button.style.fontSize = '22px';
 
                 L.DomEvent.disableClickPropagation(div);
 
@@ -324,11 +324,19 @@
 
                 button.onclick = function() {
                     if (!isSekolahVisible) {
+                        $('#mapFilterForm')[0].reset();
+                        $('#daerah').val('').trigger('change');
+                        $('#tahun_masuk').val('').trigger('change');
+                        $('#prodi').val('').trigger('change');
                         showSekolah();
                         button.style.backgroundColor = '#007bff';
                         button.style.color = 'white';
                         button.title = 'Sembunyikan Data Sekolah';
                     } else {
+                        $('#mapFilterForm')[0].reset();
+                        $('#daerah').val('').trigger('change');
+                        $('#tahun_masuk').val('').trigger('change');
+                        $('#prodi').val('').trigger('change');
                         clearCircleMarkers();
                         button.style.backgroundColor = 'white';
                         button.style.color = 'black';
@@ -477,6 +485,9 @@
                     title: 'Peringatan',
                     text: 'Anda harus memilih minimal satu kolom pencarian.',
                 });
+                
+                btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+
                 return;
             }
 

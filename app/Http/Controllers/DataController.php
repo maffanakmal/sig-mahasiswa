@@ -218,7 +218,7 @@ class DataController extends Controller
                 $prodi = $request->prodi ? DB::table('prodi')->where('kode_prodi', $request->prodi)->value('nama_prodi') : null;
                 $tahun = $request->tahun_masuk;
 
-                $message = 'Tidak ada asal sekolah mahasiswa';
+                $message = 'Tidak ada sekolah asal mahasiswa';
                 if ($daerah) $message .= ' dari daerah ' . $daerah;
                 if ($prodi) $message .= ' dengan prodi ' . $prodi;
                 if ($tahun) $message .= ' tahun masuk ' . $tahun;

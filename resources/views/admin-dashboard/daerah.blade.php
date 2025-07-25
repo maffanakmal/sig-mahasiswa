@@ -15,7 +15,8 @@
             <div class="input-group w-50">
                 <input type="file" class="form-control" name="import_daerah" id="import_daerah"
                     aria-describedby="btnImport" aria-label="Upload">
-                <button class="btn btn-success" type="submit" id="btnImport"><box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon>
+                <button class="btn btn-success" type="submit" id="btnImport"><box-icon type="solid" name="spreadsheet"
+                        class="icon-crud" color="white"></box-icon>
                     Import</button>
                 <div class="invalid-feedback" id="error-import_daerah"></div>
             </div>
@@ -23,8 +24,10 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="daerahDeleteAll()"><box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
-            <button class="btn btn-sm btn-primary" onclick="daerahModal()"><box-icon name="plus"  class="icon-crud" color="white"></box-icon> Tambah</button>
+            <button class="btn btn-sm btn-danger" onclick="daerahDeleteAll()"><box-icon type="solid" name="trash"
+                    class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-primary" onclick="daerahModal()"><box-icon name="plus" class="icon-crud"
+                    color="white"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -118,27 +121,43 @@
             var daerahModal = document.getElementById('daerahModal');
             daerahModal.addEventListener('shown.bs.modal', function() {
                 if (!map) {
-                    // Inisialisasi peta dan marker...
                     map = L.map('mapInput').setView(defaultCenter, defaultZoom);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
 
+                    L.Control.geocoder({
+                            defaultMarkGeocode: false,
+                            placeholder: 'Kabupaten/Kota',
+                        })
+                        .on('markgeocode', function(e) {
+                            var latlng = e.geocode.center;
+                            var namaLokasi = e.geocode.name.split(',')[0].trim();
+
+                            map.setView(latlng, 14);
+                            marker.setLatLng(latlng);
+
+                            document.getElementById('latitude_daerah').value = latlng.lat;
+                            document.getElementById('longitude_daerah').value = latlng.lng;
+                            document.getElementById('nama_daerah').value = namaLokasi;
+                        })
+                        .addTo(map);
+
                     marker = L.marker(defaultCenter, {
                         draggable: true
                     });
+
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
                         document.getElementById('latitude_daerah').value = latlng.lat;
                         document.getElementById('longitude_daerah').value = latlng.lng;
                     });
 
-                    // Tambahkan marker hanya jika belum ada di map
                     if (!map.hasLayer(marker)) {
                         map.addLayer(marker);
                     }
 
-                    // Reset Control ...
+                    // Tombol reset posisi marker
                     var resetControl = L.control({
                         position: 'topleft'
                     });
@@ -149,9 +168,6 @@
                             '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
                         div.onclick = function() {
                             map.setView(defaultCenter, defaultZoom);
-                            marker.setLatLng(defaultCenter);
-                            document.getElementById('latitude_daerah').value = defaultCenter[0];
-                            document.getElementById('longitude_daerah').value = defaultCenter[1];
                         };
                         return div;
                     };
@@ -216,7 +232,9 @@
                     },
                     {
                         data: 'action',
-                        name: 'action'
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
                     }
                 ]
             });
@@ -226,7 +244,7 @@
             $('#daerahForm')[0].reset();
             $('.form-control').removeClass('is-invalid');
             $('.invalid-feedback').text('');
-            
+
             method = 'create';
             kode_daerah;
 
@@ -273,8 +291,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('Simpan');
-                
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
+
                     if (response.status == 200) {
                         $('#daerahModal').modal('hide');
                         $('#daerahForm').trigger('reset');
@@ -291,7 +309,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
@@ -309,7 +327,7 @@
                             $('#error-' + $(this).attr('name')).text('');
                         });
 
-                        
+
                     } else if (xhr.status === 400) {
                         Swal.fire({
                             icon: xhr.responseJSON.icon,
@@ -354,7 +372,9 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+                    btn.prop('disabled', false).html(
+                        '<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import'
+                    );
 
                     Swal.fire({
                         title: 'Memproses...',
@@ -383,7 +403,9 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
+                    btn.prop('disabled', false).html(
+                        '<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import'
+                    );
 
                     if (xhr.status === 422) { // 422 = Validation Error
                         let errorResponse = xhr.responseJSON;
@@ -414,6 +436,9 @@
             kode_daerah = e.getAttribute('data-id');
             method = 'update';
 
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             let btn = $('#saveBtn');
             btn.prop('disabled', false).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
@@ -426,8 +451,8 @@
                 url: "{{ route('daerah.show', '') }}/" + kode_daerah,
                 type: "GET",
                 success: function(response) {
-                    btn.prop('disabled', false).html('Ubah');
-
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
+                    
                     $('#kode_daerah_edit').val(response.daerah.daerah_uuid);
                     $('#kode_daerah').val(response.daerah.kode_daerah);
                     $('#nama_daerah').val(response.daerah.nama_daerah);
@@ -435,8 +460,8 @@
                     $('#longitude_daerah').val(response.daerah.longitude_daerah);
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Ubah');
-
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
+                    
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {

@@ -67,7 +67,7 @@
                                     placeholder="Masukkan Password" minlength="5" maxlength="60">
                                 <span class="input-group-text toggle-password" data-target="password"
                                     style="cursor: pointer;">
-                                    <i class='bx bx-show'></i>
+                                    <box-icon name='low-vision'></box-icon>
                                 </span>
                             </div>
                             <div class="invalid-feedback" id="error-password"></div>
@@ -82,7 +82,7 @@
                                     maxlength="60">
                                 <span class="input-group-text toggle-password" data-target="confirm_password"
                                     style="cursor: pointer;">
-                                    <i class='bx bx-show'></i>
+                                    <box-icon name='low-vision'></box-icon>
                                 </span>
                             </div>
                             <div class="invalid-feedback" id="error-confirm_password"></div>
@@ -115,25 +115,22 @@
         let method;
         let user_uuid = null;
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             document.querySelectorAll(".toggle-password").forEach(toggle => {
-                toggle.addEventListener("click", function() {
+                toggle.addEventListener("click", function () {
                     const targetId = this.getAttribute("data-target");
                     const passwordField = document.getElementById(targetId);
-                    const icon = this.querySelector("i");
+                    const boxIcon = this.querySelector("box-icon");
 
                     if (passwordField.type === "password") {
                         passwordField.type = "text";
-                        icon.classList.remove("bx-show");
-                        icon.classList.add("bx-low-vision");
+                        boxIcon.setAttribute("name", "show-alt");
                     } else {
                         passwordField.type = "password";
-                        icon.classList.remove("bx-low-vision");
-                        icon.classList.add("bx-show");
+                        boxIcon.setAttribute("name", "low-vision");
                     }
                 });
             });
-
             penggunaTable();
         });
 
@@ -145,7 +142,7 @@
                 ajax: '{{ route('pengguna.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
                     },
                     {
                         data: 'nama_lengkap',
@@ -226,7 +223,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (response.status == 200) {
                         $('#penggunaModal').modal('hide');
@@ -244,7 +241,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Simpan');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
@@ -296,6 +293,9 @@
             user_uuid = e.getAttribute('data-id');
             method = 'update';
 
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             let btn = $('#saveBtn');
             
             btn.prop('disabled', true).html(
@@ -309,7 +309,7 @@
                 url: "{{ route('pengguna.show', '') }}/" + user_uuid,
                 type: "GET",
                 success: function(response) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     $('#user_uuid').val(response.user.user_uuid);
                     $('#nama_lengkap').val(response.user.nama_lengkap);
@@ -320,7 +320,7 @@
                     $('#role').val(response.user.role);
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;

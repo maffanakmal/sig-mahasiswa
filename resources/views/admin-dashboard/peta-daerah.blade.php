@@ -303,13 +303,13 @@
                 var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 var button = document.createElement('button');
-                button.innerHTML = '🗺️';
-                button.title = 'Tampilkan Data Daerah';
+                button.innerHTML = '👨‍🎓';
+                button.title = 'Tampilkan Data Mahasiswa berdasarkan Domisili';
                 button.style.backgroundColor = 'white';
                 button.style.border = 'none';
-                button.style.width = '28px';
-                button.style.height = '28px';
-                button.style.fontSize = '18px';
+                button.style.width = '42px';
+                button.style.height = '42px';
+                button.style.fontSize = '22px';
 
                 L.DomEvent.disableClickPropagation(div);
 
@@ -318,14 +318,22 @@
                 button.onclick = function() {
                     if (!isDaerahVisible) {
                         showDaerah();
+                        $('#mapFilterForm')[0].reset();
+                        $('#daerah').val('').trigger('change');
+                        $('#tahun_masuk').val('').trigger('change');
+                        $('#prodi').val('').trigger('change');
                         button.style.backgroundColor = '#007bff';
                         button.style.color = 'white';
-                        button.title = 'Sembunyikan Data Daerah';
+                        button.title = 'Sembunyikan Data Mahasiswa berdasarkan Domisili';
                     } else {
+                        $('#mapFilterForm')[0].reset();
+                        $('#daerah').val('').trigger('change');
+                        $('#tahun_masuk').val('').trigger('change');
+                        $('#prodi').val('').trigger('change');
                         clearCircleMarkers();
                         button.style.backgroundColor = 'white';
                         button.style.color = 'black';
-                        button.title = 'Tampilkan Data Daerah';
+                        button.title = 'Tampilkan Data Mahasiswa berdasarkan Domisili';
                     }
 
                     isDaerahVisible = !isDaerahVisible;
@@ -469,6 +477,9 @@
                     title: 'Peringatan',
                     text: 'Anda harus memilih minimal satu kolom pencarian.',
                 });
+
+                btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+
                 return;
             }
 
@@ -539,15 +550,16 @@
                 },
                 error: function(xhr) {
                     btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
-
+                    
                     let errorResponse = xhr.responseJSON; // Ambil data JSON error
-
+                    
                     Swal.fire({
                         icon: errorResponse.icon || "error",
                         title: errorResponse.title || "Error",
                         text: errorResponse.message ||
-                            "Terjadi kesalahan yang tidak diketahui.",
+                        "Terjadi kesalahan yang tidak diketahui.",
                     });
+
                 }
             });
         });

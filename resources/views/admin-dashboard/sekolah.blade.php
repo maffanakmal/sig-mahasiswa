@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="alamat_sekolah" class="form-label">Alamat Sekolah</label>
-                                    <textarea  class="form-control" name="alamat_sekolah" id="alamat_sekolah" cols="10" rows="5" placeholder="Masukkan Alamat Sekolah"  value="{{ old('alamat_sekolah') }}" required></textarea>
+                                    <textarea  class="form-control" name="alamat_sekolah" id="alamat_sekolah" cols="10" rows="5" placeholder="Masukkan Alamat Sekolah"  value="{{ old('alamat_sekolah') }}" required maxlength="1000"></textarea>
                                     <div class="invalid-feedback" id="error-alamat_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -137,27 +137,43 @@
             var sekolahModal = document.getElementById('sekolahModal');
             sekolahModal.addEventListener('shown.bs.modal', function() {
                 if (!map) {
-                    // Inisialisasi peta dan marker...
                     map = L.map('mapInput').setView(defaultCenter, defaultZoom);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
 
+                    L.Control.geocoder({
+                            defaultMarkGeocode: false,
+                            placeholder: 'Jalan/Kelurahan/Kecamatan',
+                        })
+                        .on('markgeocode', function(e) {
+                            var latlng = e.geocode.center;
+                            // var namaLokasi = e.geocode.name;
+
+                            map.setView(latlng, 14);
+                            marker.setLatLng(latlng);
+
+                            document.getElementById('latitude_sekolah').value = latlng.lat;
+                            document.getElementById('longitude_sekolah').value = latlng.lng;
+                            // document.getElementById('alamat_sekolah').value = namaLokasi;
+                        })
+                        .addTo(map);
+
                     marker = L.marker(defaultCenter, {
                         draggable: true
                     });
+
                     marker.on('dragend', function(e) {
                         var latlng = marker.getLatLng();
                         document.getElementById('latitude_sekolah').value = latlng.lat;
                         document.getElementById('longitude_sekolah').value = latlng.lng;
                     });
 
-                    // Tambahkan marker hanya jika belum ada di map
                     if (!map.hasLayer(marker)) {
                         map.addLayer(marker);
                     }
 
-                    // Reset Control ...
+                    // Tombol reset posisi marker
                     var resetControl = L.control({
                         position: 'topleft'
                     });
@@ -168,9 +184,6 @@
                             '<button title="Reset View" style="background-color:white; border:none; width:28px; height:28px; font-size:18px;">📍</button>';
                         div.onclick = function() {
                             map.setView(defaultCenter, defaultZoom);
-                            marker.setLatLng(defaultCenter);
-                            document.getElementById('latitude_sekolah').value = defaultCenter[0];
-                            document.getElementById('longitude_sekolah').value = defaultCenter[1];
                         };
                         return div;
                     };
@@ -244,7 +257,9 @@
                     },
                     {
                         data: 'action',
-                        name: 'action'
+                        name: 'action',
+                        searchable: false,
+                        orderable: false,
                     }
                 ]
             });
@@ -355,7 +370,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('Simpan');
+                   btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (response.status == 200) {
                         $('#sekolahModal').modal('hide');
@@ -373,7 +388,7 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Simpan');
+                   btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;
@@ -494,6 +509,9 @@
             npsn = e.getAttribute('data-id');
             method = 'update';
 
+            $('.form-control').removeClass('is-invalid');
+            $('.invalid-feedback').text('');
+
             let btn = $('#saveBtn');
             btn.prop('disabled', true).html(
                 '<div class="spinner-border spinner-border-sm text-light mb-0" role="status"><span class="visually-hidden">Loading...</span></div>'
@@ -506,7 +524,7 @@
                 url: "{{ route('sekolah.show', '') }}/" + npsn,
                 type: "GET",
                 success: function(response) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     $('#npsn').val(response.sekolah.npsn);
                     $('#nama_sekolah').val(response.sekolah.nama_sekolah);
@@ -518,7 +536,7 @@
                     
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('Ubah');
+                    btn.prop('disabled', false).html(method === 'update' ? 'Ubah' : 'Simpan');
 
                     if (xhr.status === 422) { // 422 = Error Validasi Laravel
                         let errors = xhr.responseJSON.errors;

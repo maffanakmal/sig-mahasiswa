@@ -37,11 +37,13 @@ class SekolahController extends Controller
                     'sekolah.latitude_sekolah',
                     'sekolah.longitude_sekolah',
                 )
-                ->orderBy('sekolah.sekolah_uuid', 'DESC')
-                ->get();
+                ->orderBy('sekolah.sekolah_uuid', 'DESC');
 
             return DataTables::of($sekolahs)
                 ->addIndexColumn()
+                ->filterColumn('npsn', function ($query, $keyword) {
+                    $query->whereRaw("CAST(npsn AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
                 ->editColumn('kode_daerah', function ($row) {
                     return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
                 })
@@ -90,9 +92,9 @@ class SekolahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|max:10|unique:sekolah,npsn',
-                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                    'alamat_sekolah' => 'required|string|min:5|max:1000',
+                    'npsn' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:sekolah,npsn',
+                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
+                    'alamat_sekolah' => 'required|string|min:10|max:1000',
                     'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
@@ -101,15 +103,17 @@ class SekolahController extends Controller
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
                     'npsn.max' => 'NPSN maksimal 10 karakter.',
+                    'npsn.min' => 'NPSN minimal 5 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
                     'nama_sekolah.regex' => 'Nama sekolah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
+                    'nama_sekolah.min' => 'Nama sekolah minimal 5 karakter.',
 
                     'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
                     'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
-                    'alamat_sekolah.min' => 'Alamat sekolah minimal 5 karakter.',
+                    'alamat_sekolah.min' => 'Alamat sekolah minimal 10 karakter.',
                     'alamat_sekolah.max' => 'Alamat sekolah maksimal 1000 karakter.',
 
                     'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
@@ -254,9 +258,9 @@ class SekolahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|max:10|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
-                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|max:100',
-                    'alamat_sekolah' => 'required|string|min:5|max:1000',
+                    'npsn' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
+                    'alamat_sekolah' => 'required|string|min:10|max:1000',
                     'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
                     'latitude_sekolah' => 'required|numeric|between:-90,90',
                     'longitude_sekolah' => 'required|numeric|between:-180,180',
@@ -265,15 +269,17 @@ class SekolahController extends Controller
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
                     'npsn.max' => 'NPSN maksimal 10 karakter.',
+                    'npsn.min' => 'NPSN minimal 5 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
                     'nama_sekolah.regex' => 'Nama sekolah hanya boleh mengandung huruf, angka, spasi, titik, koma, dan tanda hubung.',
                     'nama_sekolah.max' => 'Nama sekolah maksimal 100 karakter.',
+                    'nama_sekolah.min' => 'Nama sekolah minimal 5 karakter.',
 
                     'alamat_sekolah.required' => 'Alamat sekolah harus diisi.',
                     'alamat_sekolah.string' => 'Alamat sekolah harus berupa string.',
-                    'alamat_sekolah.min' => 'Alamat sekolah minimal 5 karakter.',
+                    'alamat_sekolah.min' => 'Alamat sekolah minimal 10 karakter.',
                     'alamat_sekolah.max' => 'Alamat sekolah maksimal 1000 karakter.',
 
                     'kode_daerah.required' => 'Daerah sekolah tidak boleh kosong.',
