@@ -509,6 +509,9 @@
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
 
+                        // ⬅️ Cetak ke console
+                        console.log(mahasiswa);
+
                         clearCircleMarkers();
 
                         const groupedData = {};
@@ -542,6 +545,16 @@
 
 
                         renderMarkers(groupedData);
+
+                        // Ambil satu kota untuk zoom
+                        const firstCity = Object.keys(groupedData)[0];
+                        if (firstCity) {
+                            const lat = groupedData[firstCity].latitude;
+                            const lng = groupedData[firstCity].longitude;
+
+                            // Zoom ke lokasi
+                            map.setView([lat, lng], 12);
+                        }
                     } else if (response.status == 204) {
                         clearCircleMarkers();
 

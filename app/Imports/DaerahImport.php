@@ -8,26 +8,25 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class DaerahImport implements ToCollection, WithHeadingRow
+class DaerahImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
         $data = [];
 
-        // Ambil semua kode_daerah yang sudah ada di database
-        $existingKodeDaerah = Daerah::pluck('kode_daerah')->toArray();
+        // Lewati baris pertama (heading)
+        $rows = $rows->slice(1);
 
+        $existingKodeDaerah = Daerah::pluck('kode_daerah')->toArray();
         $processedKodeDaerah = [];
 
         foreach ($rows as $row) {
-            $kode = $row['kode_daerah'] ?? '';
+            $kode = strtolower(trim($row[0] ?? ''));
 
-            // Skip jika kosong
             if (empty($kode)) {
                 continue;
             }
 
-            // Skip jika duplikat di database atau sudah diproses
             if (in_array($kode, $existingKodeDaerah) || in_array($kode, $processedKodeDaerah)) {
                 continue;
             }
@@ -35,9 +34,9 @@ class DaerahImport implements ToCollection, WithHeadingRow
             $data[] = [
                 'daerah_uuid'      => Str::uuid(),
                 'kode_daerah'      => $kode,
-                'nama_daerah'      => $row['nama_daerah'] ?? '',
-                'latitude_daerah'  => $row['latitude_daerah'] ?? '',
-                'longitude_daerah' => $row['longitude_daerah'] ?? '',
+                'nama_daerah'      => $row[1] ?? '',
+                'latitude_daerah'  => $row[2] ?? '',
+                'longitude_daerah' => $row[3] ?? '',
             ];
 
             $processedKodeDaerah[] = $kode;
@@ -48,3 +47,4 @@ class DaerahImport implements ToCollection, WithHeadingRow
         }
     }
 }
+

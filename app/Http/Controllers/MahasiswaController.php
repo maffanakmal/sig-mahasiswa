@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\Models\Mahasiswa;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Imports\MahasiswaImport;
 use App\Models\Daerah;
 use App\Models\Jurusan;
 use App\Models\Sekolah;
+use App\Models\Mahasiswa;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Exports\MahasiswaExport;
+use App\Imports\MahasiswaImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -50,6 +51,15 @@ class MahasiswaController extends Controller
                 ->addIndexColumn()
                 ->filterColumn('nim', function ($query, $keyword) {
                     $query->whereRaw("CAST(nim AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
+                ->filterColumn('kode_daerah', function ($query, $keyword) {
+                    $query->whereRaw("LOWER(daerah.nama_daerah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
+                })
+                ->filterColumn('npsn', function ($query, $keyword) {
+                    $query->whereRaw("LOWER(sekolah.nama_sekolah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
+                })
+                ->filterColumn('kode_prodi', function ($query, $keyword) {
+                    $query->whereRaw("LOWER(prodi.nama_prodi) LIKE ?", ["%" . strtolower($keyword) . "%"]);
                 })
                 ->editColumn('kode_prodi', function ($row) {
                     return $row->kode_prodi ?? '<span class="text-muted">Tidak ada</span>';
@@ -110,7 +120,7 @@ class MahasiswaController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:mahasiswa,nim',
+                    'nim' => 'required|regex:/^[0-9]+$/|min:9|max:10|unique:mahasiswa,nim',
                     'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
                     'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
                     'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,npsn',
@@ -121,7 +131,7 @@ class MahasiswaController extends Controller
                     'nim.unique' => 'NIM sudah terdaftar.',
                     'nim.regex' => 'NIM hanya boleh berisi angka.',
                     'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
-                    'nim.min' => 'NIM harus terdiri dari minimal 5 karakter.',
+                    'nim.min' => 'NIM harus terdiri dari minimal 9 karakter.',
 
                     'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
                     'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',
@@ -223,6 +233,33 @@ class MahasiswaController extends Controller
     }
 
     /**
+     * Export data to Excel.
+     */
+    public function export()
+    {
+        try {
+            if (Mahasiswa::count() === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Data Kosong",
+                    "message" => "Tidak ada data mahasiswa yang bisa dibackup.",
+                    "icon" => "warning"
+                ], 404);
+            }
+            
+            return Excel::download(new MahasiswaExport, 'mahasiswa_' . date('Ymd_His') . '.xlsx');
+            
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show($mahasiswa_uuid)
@@ -269,7 +306,7 @@ class MahasiswaController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'nim' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
+                    'nim' => 'required|regex:/^[0-9]+$/|min:9|max:10|unique:mahasiswa,nim,' . $mahasiswa->mahasiswa_uuid . ',mahasiswa_uuid',
                     'tahun_masuk' => 'required|integer|digits:4|min:1900|max:' . date('Y'),
                     'kode_prodi' => 'required|regex:/^[0-9]+$/|exists:prodi,kode_prodi',
                     'npsn' => 'required|regex:/^[0-9]+$/|exists:sekolah,npsn',
@@ -280,7 +317,7 @@ class MahasiswaController extends Controller
                     'nim.unique' => 'NIM sudah terdaftar.',
                     'nim.regex' => 'NIM hanya boleh berisi angka.',
                     'nim.max' => 'NIM tidak boleh lebih dari 10 karakter.',
-                    'nim.min' => 'NIM harus terdiri dari minimal 5 karakter.',
+                    'nim.min' => 'NIM harus terdiri dari minimal 9 karakter.',
 
                     'tahun_masuk.required' => 'Tahun masuk tidak boleh kosong.',
                     'tahun_masuk.integer' => 'Tahun masuk harus berupa angka.',

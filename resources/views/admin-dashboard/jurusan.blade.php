@@ -60,13 +60,13 @@
                         <div class="form-group mb-3">
                             <label for="kode_prodi" class="form-label">Kode Program Studi</label>
                             <input type="text" class="form-control" id="kode_prodi" placeholder="Masukkan Kode Program Studi"
-                                name="kode_prodi" value="{{ old('kode_prodi') }}" maxlength="10" required>
+                                name="kode_prodi" value="{{ old('kode_prodi') }}" required>
                             <div class="invalid-feedback" id="error-kode_prodi"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="nama_prodi" class="form-label">Nama Program Studi</label>
                             <input type="text" class="form-control" id="nama_prodi" placeholder="Masukkan Nama Program Studi"
-                                name="nama_prodi" value="{{ old('nama_prodi') }}" maxlength="50" required>
+                                name="nama_prodi" value="{{ old('nama_prodi') }}" required>
                             <div class="invalid-feedback" id="error-nama_prodi"></div>
                         </div>
                 </div>
@@ -272,6 +272,8 @@
                                 text: response.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                location.reload();
                             });
                         }, 1000);
                     }
@@ -415,7 +417,7 @@
         function prodiDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
-                text: "Menghapus semua data secara permanen",
+                html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",

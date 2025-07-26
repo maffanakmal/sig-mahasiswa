@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\SekolahImport;
 use Exception;
 use App\Models\Daerah;
 use App\Models\Sekolah;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Exports\SekolahExport;
+use App\Imports\SekolahImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -43,6 +44,9 @@ class SekolahController extends Controller
                 ->addIndexColumn()
                 ->filterColumn('npsn', function ($query, $keyword) {
                     $query->whereRaw("CAST(npsn AS CHAR) LIKE ?", ["%{$keyword}%"]);
+                })
+                ->filterColumn('kode_daerah', function ($query, $keyword) {
+                    $query->whereRaw("LOWER(daerah.nama_daerah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
                 })
                 ->editColumn('kode_daerah', function ($row) {
                     return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
@@ -92,7 +96,7 @@ class SekolahController extends Controller
         try {
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:sekolah,npsn',
+                    'npsn' => 'required|regex:/^[0-9]+$/|min:8|max:10|unique:sekolah,npsn',
                     'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
                     'alamat_sekolah' => 'required|string|min:10|max:1000',
                     'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
@@ -103,7 +107,7 @@ class SekolahController extends Controller
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
                     'npsn.max' => 'NPSN maksimal 10 karakter.',
-                    'npsn.min' => 'NPSN minimal 5 karakter.',
+                    'npsn.min' => 'NPSN minimal 8 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',
@@ -212,6 +216,33 @@ class SekolahController extends Controller
     }
 
     /**
+     * Export data to Excel.
+     */
+    public function export()
+    {
+        try {
+            if (Daerah::count() === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Data Kosong",
+                    "message" => "Tidak ada data sekolah yang bisa dibackup.",
+                    "icon" => "warning"
+                ], 404);
+            }
+            
+            return Excel::download(new SekolahExport, 'sekolah_' . date('Ymd_His') . '.xlsx');
+            
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show($sekolah_uuid)
@@ -258,7 +289,7 @@ class SekolahController extends Controller
 
             $validatedData = $request->validate(
                 [
-                    'npsn' => 'required|regex:/^[0-9]+$/|min:5|max:10|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
+                    'npsn' => 'required|regex:/^[0-9]+$/|min:8|max:10|unique:sekolah,npsn,' . $sekolah->sekolah_uuid . ',sekolah_uuid',
                     'nama_sekolah' => 'required|string|regex:/^[a-zA-Z0-9\s.,-]+$/|min:5|max:100',
                     'alamat_sekolah' => 'required|string|min:10|max:1000',
                     'kode_daerah' => 'required|regex:/^[0-9]+$/|exists:daerah,kode_daerah',
@@ -269,7 +300,7 @@ class SekolahController extends Controller
                     'npsn.required' => 'NPSN harus diisi.',
                     'npsn.regex' => 'NPSN hanya boleh berisi angka.',
                     'npsn.max' => 'NPSN maksimal 10 karakter.',
-                    'npsn.min' => 'NPSN minimal 5 karakter.',
+                    'npsn.min' => 'NPSN minimal 8 karakter.',
                     'npsn.unique' => 'NPSN sudah terdaftar.',
 
                     'nama_sekolah.required' => 'Nama sekolah harus diisi.',

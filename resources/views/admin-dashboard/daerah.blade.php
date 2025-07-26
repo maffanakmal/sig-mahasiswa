@@ -72,14 +72,14 @@
                                     <label for="kode_daerah" class="form-label">Kode Daerah</label>
                                     <input type="text" class="form-control" id="kode_daerah"
                                         placeholder="Masukkan Kode Daerah" name="kode_daerah"
-                                        value="{{ old('kode_daerah') }}" maxlength="10" required>
+                                        value="{{ old('kode_daerah') }}" required>
                                     <div class="invalid-feedback" id="error-kode_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_daerah" class="form-label">Nama Daerah</label>
                                     <input type="text" class="form-control" id="nama_daerah"
                                         placeholder="Masukkan Nama Daerah" name="nama_daerah"
-                                        value="{{ old('nama_daerah') }}" maxlength="100" required>
+                                        value="{{ old('nama_daerah') }}" required>
                                     <div class="invalid-feedback" id="error-nama_daerah"></div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -132,14 +132,12 @@
                         })
                         .on('markgeocode', function(e) {
                             var latlng = e.geocode.center;
-                            var namaLokasi = e.geocode.name.split(',')[0].trim();
 
                             map.setView(latlng, 14);
                             marker.setLatLng(latlng);
 
                             document.getElementById('latitude_daerah').value = latlng.lat;
                             document.getElementById('longitude_daerah').value = latlng.lng;
-                            document.getElementById('nama_daerah').value = namaLokasi;
                         })
                         .addTo(map);
 
@@ -398,6 +396,8 @@
                                 text: response.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                location.reload();
                             });
                         }, 1000); // delay 0.8 detik sebelum tampil hasil
                     }
@@ -544,16 +544,17 @@
         }
 
         function daerahDeleteAll() {
-            Swal.fire({
-                title: "Apakah anda yakin?",
-                text: "Menghapus semua data secara permanen",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
+           Swal.fire({
+            title: "Apakah anda yakin?",
+            html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+        })
+        .then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
                         url: "{{ route('daerah.destroyAll') }}",

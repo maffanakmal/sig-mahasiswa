@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Daerah;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Exports\DaerahExport;
 use App\Imports\DaerahImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -181,6 +182,34 @@ class DaerahController extends Controller
             ]);
         }
     }
+
+    /**
+     * Export data to Excel.
+     */
+    public function export()
+    {
+        try {
+            if (Daerah::count() === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Data Kosong",
+                    "message" => "Tidak ada data daerah yang bisa dibackup.",
+                    "icon" => "warning"
+                ], 404);
+            }
+            
+            return Excel::download(new DaerahExport, 'daerah_' . date('Ymd_His') . '.xlsx');
+            
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
+        }
+    }
+
 
     /**
      * Display the specified resource.

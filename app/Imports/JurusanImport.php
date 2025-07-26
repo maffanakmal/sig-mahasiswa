@@ -8,34 +8,36 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class JurusanImport implements ToCollection, WithHeadingRow
+class JurusanImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
         $data = [];
-        $processedKodeProdi = [];
 
-        $existingKodeProdi = Jurusan::pluck('kode_prodi')->toArray();
+        $existingKodeJurusan = Jurusan::pluck('kode_prodi')->toArray();
+        $processedKodeJurusan = [];
+
+        // Lewati baris pertama jika itu header
+        $rows = $rows->slice(1);
 
         foreach ($rows as $row) {
-            $kode = trim($row['kode_prodi'] ?? '');
-            $nama = trim($row['nama_prodi'] ?? '');
+            $kode = trim((string)($row[0] ?? ''));
 
-            if (empty($kode) || empty($nama)) {
+            if (empty($kode)) {
                 continue;
             }
 
-            if (in_array($kode, $existingKodeProdi) || in_array($kode, $processedKodeProdi)) {
+            if (in_array($kode, $existingKodeJurusan) || in_array($kode, $processedKodeJurusan)) {
                 continue;
             }
 
             $data[] = [
                 'prodi_uuid' => Str::uuid(),
                 'kode_prodi' => $kode,
-                'nama_prodi' => $nama,
+                'nama_prodi' => $row[1] ?? '',
             ];
 
-            $processedKodeProdi[] = $kode;
+            $processedKodeJurusan[] = $kode;
         }
 
         if (!empty($data)) {

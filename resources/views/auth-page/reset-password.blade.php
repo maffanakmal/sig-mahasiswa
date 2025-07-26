@@ -10,7 +10,7 @@
         <div class="form-group mb-5">
             <label for="email" class="form-label">Email</label>
             <input type="text" class="form-control" id="email" placeholder="Masukkan Email" name="email"
-                value="{{ old('email') }}" maxlength="50" required>
+                value="{{ old('email') }}" required>
             <div class="invalid-feedback" id="error-email"></div>
         </div>
         <div class="form-group mb-3">

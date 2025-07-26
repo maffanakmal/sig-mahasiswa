@@ -18,7 +18,7 @@
         <div class="form-group mb-3">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password Baru" maxlength="60" required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password Baru" required>
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <box-icon name='low-vision'></box-icon>
                 </span>
@@ -31,7 +31,7 @@
             <label for="confirm_password" class="form-label">Konfirmasi Password</label>
             <div class="input-group">
                 <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                    placeholder="Masukkan Ulang Password Baru" maxlength="60" required>
+                    placeholder="Masukkan Ulang Password Baru" required>
                 <span class="input-group-text toggle-password" data-target="confirm_password" style="cursor: pointer;">
                     <box-icon name='low-vision'></box-icon>
                 </span>

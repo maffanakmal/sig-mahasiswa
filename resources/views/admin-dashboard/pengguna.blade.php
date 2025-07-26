@@ -44,19 +44,19 @@
                         <div class="form-group mb-3">
                             <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
                             <input type="text" class="form-control" id="nama_lengkap" placeholder="Masukkan Nama Lengkap"
-                                name="nama_lengkap" value="{{ old('nama_lengkap') }}" maxlength="100" required>
+                                name="nama_lengkap" value="{{ old('nama_lengkap') }}" required>
                             <div class="invalid-feedback" id="error-nama_lengkap"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" placeholder="Masukkan Username"
-                                name="username" value="{{ old('username') }}" maxlength="50" required>
+                                name="username" value="{{ old('username') }}" required>
                             <div class="invalid-feedback" id="error-username"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
-                                name="email" value="{{ old('email') }}" maxlength="50">
+                                name="email" value="{{ old('email') }}">
                             <div class="invalid-feedback" id="error-email"></div>
                         </div>
                         <!-- Password -->
@@ -64,7 +64,7 @@
                             <label for="password" class="form-label">Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Masukkan Password" minlength="5" maxlength="60">
+                                    placeholder="Masukkan Password" required>
                                 <span class="input-group-text toggle-password" data-target="password"
                                     style="cursor: pointer;">
                                     <box-icon name='low-vision'></box-icon>
@@ -78,8 +78,7 @@
                             <label for="confirm_password" class="form-label">Konfirmasi Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="confirm_password"
-                                    name="confirm_password" placeholder="Masukkan Ulang Password" minlength="5"
-                                    maxlength="60">
+                                    name="confirm_password" placeholder="Masukkan Ulang Password" required>
                                 <span class="input-group-text toggle-password" data-target="confirm_password"
                                     style="cursor: pointer;">
                                     <box-icon name='low-vision'></box-icon>

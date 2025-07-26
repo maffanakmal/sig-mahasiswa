@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class SekolahImport implements ToCollection, WithHeadingRow
+class SekolahImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
@@ -18,7 +18,7 @@ class SekolahImport implements ToCollection, WithHeadingRow
 
         $existingNpsn = Sekolah::pluck('npsn')->toArray();
 
-        // Ambil semua nama daerah dari DB, jadikan lowercase untuk pencocokan
+        // Ambil semua nama daerah dari DB, lowercase + trim untuk pencocokan
         $daerahList = Daerah::pluck('kode_daerah', 'nama_daerah')
             ->mapWithKeys(function ($kode, $nama) {
                 return [strtolower(trim($nama)) => $kode];
@@ -27,8 +27,11 @@ class SekolahImport implements ToCollection, WithHeadingRow
 
         $processedNpsn = [];
 
+        // Lewati baris pertama jika itu adalah header
+        $rows = $rows->slice(1); // <-- ini penting kalau baris pertama adalah header manual
+
         foreach ($rows as $row) {
-            $npsn = $row['npsn'] ?? null;
+            $npsn = $row[0] ?? null;
 
             if (!is_numeric($npsn)) {
                 continue;
@@ -40,17 +43,17 @@ class SekolahImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $namaDaerah = strtolower(trim($row['nama_daerah'] ?? ''));
+            $namaDaerah = strtolower(trim($row[3] ?? ''));
             $kodeDaerah = $daerahList[$namaDaerah] ?? null;
 
             $data[] = [
-                'sekolah_uuid' => Str::uuid(),
-                'npsn' => $npsn,
-                'nama_sekolah' => $row['nama_sekolah'] ?? '',
-                'alamat_sekolah' => $row['alamat_sekolah'] ?? '',
-                'kode_daerah' => $kodeDaerah,
-                'latitude_sekolah' => $row['latitude_sekolah'] ?? null,
-                'longitude_sekolah' => $row['longitude_sekolah'] ?? null,
+                'sekolah_uuid'     => Str::uuid(),
+                'npsn'             => $npsn,
+                'nama_sekolah'     => $row[1] ?? '',
+                'alamat_sekolah'   => $row[2] ?? '',
+                'kode_daerah'      => $kodeDaerah,
+                'latitude_sekolah' => $row[4] ?? '',
+                'longitude_sekolah'=> $row[5] ?? '',
             ];
 
             $processedNpsn[] = $npsn;

@@ -77,19 +77,19 @@
                                     <label for="npsn" class="form-label">Nomor Pokok Sekolah Nasional</label>
                                     <input type="text" class="form-control" id="npsn"
                                         placeholder="Masukkan NPSN" name="npsn"
-                                        value="{{ old('npsn') }}" maxlength="10" required>
+                                        value="{{ old('npsn') }}" required>
                                     <div class="invalid-feedback" id="error-npsn"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="nama_sekolah" class="form-label">Nama Sekolah</label>
                                     <input type="text" class="form-control" id="nama_sekolah"
                                         placeholder="Masukkan Nama Sekolah" name="nama_sekolah"
-                                        value="{{ old('nama_sekolah') }}" maxlength="100" required>
+                                        value="{{ old('nama_sekolah') }}" required>
                                     <div class="invalid-feedback" id="error-nama_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="alamat_sekolah" class="form-label">Alamat Sekolah</label>
-                                    <textarea  class="form-control" name="alamat_sekolah" id="alamat_sekolah" cols="10" rows="5" placeholder="Masukkan Alamat Sekolah"  value="{{ old('alamat_sekolah') }}" required maxlength="1000"></textarea>
+                                    <textarea  class="form-control" name="alamat_sekolah" id="alamat_sekolah" cols="10" rows="5" placeholder="Masukkan Alamat Sekolah"  value="{{ old('alamat_sekolah') }}" required></textarea>
                                     <div class="invalid-feedback" id="error-alamat_sekolah"></div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -473,6 +473,8 @@
                                 text: response.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                location.reload();
                             });
                         }, 1000); // delay 0.8 detik sebelum tampil hasil
                     }
@@ -621,7 +623,7 @@
         function sekolahDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
-                text: "Menghapus semua data secara permanen",
+                html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",

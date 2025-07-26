@@ -15,14 +15,13 @@
         <div class="form-group mb-2">
             <label for="credentials" class="form-label">Username/Email</label>
             <input type="text" class="form-control" id="credentials" placeholder="Masukkan Username atau Email"
-                name="credentials" value="{{ old('credentials') }}" maxlength="50" required>
+                name="credentials" value="{{ old('credentials') }}" required>
             <div class="invalid-feedback" id="error-credentials"></div>
         </div>
         <div class="form-group mb-4">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password"
-                    maxlength="60" required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan Password" required>
                 <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
                     <box-icon name='low-vision'></box-icon>
                 </span>

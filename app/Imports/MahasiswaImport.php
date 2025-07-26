@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class MahasiswaImport implements ToCollection, WithHeadingRow
+class MahasiswaImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
@@ -32,17 +32,20 @@ class MahasiswaImport implements ToCollection, WithHeadingRow
         $existingNIMs = Mahasiswa::pluck('nim')->toArray();
         $processedNIMs = [];
 
-        foreach ($rows as $row) {
-            $nim = trim((string)($row['nim'] ?? ''));
-            $tahunMasuk = (int)($row['tahun_masuk'] ?? 0);
+        // Lewati baris pertama jika itu heading
+        $rows = $rows->slice(1);
 
-            $namaProdi = strtolower(trim($row['prodi'] ?? ''));
+        foreach ($rows as $row) {
+            $nim = trim((string)($row[0] ?? ''));              // NIM
+            $tahunMasuk = (int)($row[1] ?? 0);                 // Tahun Masuk
+
+            $namaProdi = strtolower(trim($row[2] ?? ''));      // Program Studi
             $kodeProdi = $prodiList[$namaProdi] ?? null;
 
-            $namaSekolah = strtolower(trim($row['sekolah'] ?? ''));
+            $namaSekolah = strtolower(trim($row[3] ?? ''));    // Sekolah Asal
             $npsn = $sekolahList[$namaSekolah] ?? null;
 
-            $namaDaerah = strtolower(trim($row['daerah'] ?? ''));
+            $namaDaerah = strtolower(trim($row[4] ?? ''));     // Daerah Asal
             $kodeDaerah = $daerahList[$namaDaerah] ?? null;
 
             if (!$nim || in_array($nim, $existingNIMs) || in_array($nim, $processedNIMs)) {
@@ -51,11 +54,11 @@ class MahasiswaImport implements ToCollection, WithHeadingRow
 
             $data[] = [
                 'mahasiswa_uuid' => Str::uuid(),
-                'nim' => $nim,
-                'tahun_masuk' => $tahunMasuk,
-                'kode_prodi' => $kodeProdi,
-                'npsn' => $npsn,
-                'kode_daerah' => $kodeDaerah,
+                'nim'            => $nim,
+                'tahun_masuk'    => $tahunMasuk,
+                'kode_prodi'     => $kodeProdi,
+                'npsn'           => $npsn,
+                'kode_daerah'    => $kodeDaerah,
             ];
 
             $processedNIMs[] = $nim;

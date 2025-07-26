@@ -57,6 +57,7 @@ Route::group(['middleware' => ['loginCheck', 'checkSession', 'roleCheck:BAAKPSI'
     Route::get('/dashboard/daerah', [DaerahController::class, 'index'])->name('daerah.index');
     Route::post('/dashboard/daerah/store', [DaerahController::class, 'store'])->name('daerah.store');
     Route::post('/dashboard/daerah/import', [DaerahController::class, 'import'])->name('daerah.import');
+    Route::get('/dashboard/daerah/export', [DaerahController::class, 'export'])->name('daerah.export');
     Route::get('/dashboard/daerah/show/{daerah_uuid}', [DaerahController::class, 'show'])->name('daerah.show');
     Route::put('/dashboard/daerah/update/{daerah_uuid}', [DaerahController::class, 'update'])->name('daerah.update');
     Route::delete('/dashboard/daerah/destroy/{daerah_uuid}', [DaerahController::class, 'destroy'])->name('daerah.destroy');
@@ -66,6 +67,7 @@ Route::group(['middleware' => ['loginCheck', 'checkSession', 'roleCheck:BAAKPSI'
     Route::get('/dashboard/sekolah/create', [SekolahController::class, 'create'])->name('sekolah.create');
     Route::post('/dashboard/sekolah/store', [SekolahController::class, 'store'])->name('sekolah.store');
     Route::post('/dashboard/sekolah/import', [SekolahController::class, 'import'])->name('sekolah.import');
+    Route::get('/dashboard/sekolah/export', [SekolahController::class, 'export'])->name('sekolah.export');
     Route::get('/dashboard/sekolah/show/{sekolah_uuid}', [SekolahController::class, 'show'])->name('sekolah.show');
     Route::put('/dashboard/sekolah/update/{sekolah_uuid}', [SekolahController::class, 'update'])->name('sekolah.update');
     Route::delete('/dashboard/sekolah/destroy/{sekolah_uuid}', [SekolahController::class, 'destroy'])->name('sekolah.destroy');
@@ -74,6 +76,7 @@ Route::group(['middleware' => ['loginCheck', 'checkSession', 'roleCheck:BAAKPSI'
     Route::get('/dashboard/prodi', [JurusanController::class, 'index'])->name('prodi.index');
     Route::post('/dashboard/prodi/store', [JurusanController::class, 'store'])->name('prodi.store');
     Route::post('/dashboard/prodi/import', [JurusanController::class, 'import'])->name('prodi.import');
+    Route::get('/dashboard/prodi/export', [JurusanController::class, 'export'])->name('prodi.export');
     Route::get('/dashboard/prodi/show/{prodi_uuid}', [JurusanController::class, 'show'])->name('prodi.show');
     Route::put('/dashboard/prodi/update/{prodi_uuid}', [JurusanController::class, 'update'])->name('prodi.update');
     Route::delete('/dashboard/prodi/destroy/{prodi_uuid}', [JurusanController::class, 'destroy'])->name('prodi.destroy');
@@ -83,6 +86,7 @@ Route::group(['middleware' => ['loginCheck', 'checkSession', 'roleCheck:BAAKPSI'
     Route::get('/dashboard/mahasiswa/create', [MahasiswaController::class, 'create'])->name('mahasiswa.create');
     Route::post('/dashboard/mahasiswa/store', [MahasiswaController::class, 'store'])->name('mahasiswa.store');
     Route::post('/dashboard/mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+    Route::get('/dashboard/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
     Route::get('/dashboard/mahasiswa/show/{mahasiswa_uuid}', [MahasiswaController::class, 'show'])->name('mahasiswa.show');
     Route::put('/dashboard/mahasiswa/update/{mahasiswa_uuid}', [MahasiswaController::class, 'update'])->name('mahasiswa.update');
     Route::delete('/dashboard/mahasiswa/destroy/{mahasiswa_uuid}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');

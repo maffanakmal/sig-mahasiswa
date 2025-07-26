@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\JurusanImport;
 use Exception;
 use App\Models\Jurusan;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Exports\JurusanExport;
+use App\Imports\JurusanImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -159,6 +160,33 @@ class JurusanController extends Controller
                 "message" => $e->getMessage(),
                 "icon" => "error"
             ]);
+        }
+    }
+
+    /**
+     * Export data to Excel.
+     */
+    public function export()
+    {
+        try {
+            if (Jurusan::count() === 0) {
+                return response()->json([
+                    "status" => 404,
+                    "title" => "Data Kosong",
+                    "message" => "Tidak ada data program studi yang bisa dibackup.",
+                    "icon" => "warning"
+                ], 404);
+            }
+            
+            return Excel::download(new JurusanExport, 'prodi_' . date('Ymd_His') . '.xlsx');
+            
+        } catch (Exception $e) {
+            return response()->json([
+                "status" => 500,
+                "title" => "Internal Server Error",
+                "message" => $e->getMessage(),
+                "icon" => "error"
+            ], 500);
         }
     }
 

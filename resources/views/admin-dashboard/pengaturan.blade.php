@@ -15,21 +15,21 @@
                         <div class="form-group mb-3">
                             <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
                             <input type="text" class="form-control" id="nama_lengkap" placeholder="Masukkan Nama Lengkap"
-                                name="nama_lengkap" value="{{ $user->nama_lengkap }}" maxlength="100">
+                                name="nama_lengkap" value="{{ $user->nama_lengkap }}" required>
                             <div class="invalid-feedback" id="error-nama_lengkap"></div>
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" placeholder="Masukkan Username"
-                                name="username" value="{{ $user->username }}" maxlength="50">
+                                name="username" value="{{ $user->username }}" required>
                             <div class="invalid-feedback" id="error-username"></div>
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
-                                name="email" value="{{ $user->email }}" maxlength="50">
+                                name="email" value="{{ $user->email }}" required>
                             <div class="invalid-feedback" id="error-email"></div>
                         </div>
 
@@ -84,6 +84,8 @@
                             text: response.message,
                             showConfirmButton: false,
                             timer: 1500
+                        }).then(() => {
+                            location.reload();
                         });
                     }
                 },

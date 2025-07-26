@@ -74,13 +74,13 @@
                         <div class="form-group mb-3">
                             <label for="nim" class="form-label">Nomor Induk Mahasiswa</label>
                             <input type="text" class="form-control" id="nim" placeholder="Masukkan NIM"
-                                name="nim" value="{{ old('nim') }}" maxlength="10" required>
+                                name="nim" value="{{ old('nim') }}" required>
                             <div class="invalid-feedback" id="error-nim"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
                             <input type="text" class="form-control" id="tahun_masuk" placeholder="Masukkan Tahun Masuk"
-                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" maxlength="4" required>
+                                name="tahun_masuk" value="{{ old('tahun_masuk') }}" required>
                             <div class="invalid-feedback" id="error-tahun_masuk"></div>
                         </div>
                         <div class="form-group mb-3">
@@ -418,6 +418,8 @@
                                 text: response.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                location.reload();
                             });
                         }, 1000); // delay 0.8 detik sebelum tampil hasil
                     }
@@ -566,7 +568,7 @@
         function mahasiswaDeleteAll() {
             Swal.fire({
                 title: "Apakah anda yakin?",
-                text: "Menghapus semua data secara permanen",
+                html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
