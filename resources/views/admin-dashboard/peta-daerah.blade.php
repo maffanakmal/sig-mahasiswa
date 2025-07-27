@@ -51,8 +51,10 @@
                 </div>
 
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary" id="btnSearch"><box-icon name="search" class="icon-crud" color="white"></box-icon> Cari </button>
-                    <button type="button" id="resetFilterBtn" class="btn btn-danger"><box-icon name="refresh" class="icon-crud" color="white"></box-icon>
+                    <button type="submit" class="btn btn-primary" id="btnSearch"><box-icon name="search" class="icon-crud"
+                            color="white"></box-icon> Cari </button>
+                    <button type="button" id="resetFilterBtn" class="btn btn-danger"><box-icon name="refresh"
+                            class="icon-crud" color="white"></box-icon>
                         Reset </button>
                 </div>
             </form>
@@ -61,6 +63,23 @@
             <div class="container-fluid">
                 <div id="map" class="mb-3"></div>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered" id="resultTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Daerah</th>
+                        <th>Nama Program Studi</th>
+                        <th>Total Mahasiswa</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
         </div>
     </div>
 @endsection
@@ -172,13 +191,14 @@
             this.closePopup();
         });
 
-
         $(document).ready(function() {
             mapFilter();
             selectProdi();
             selectTahunMasuk();
             selectDaerah();
         });
+
+        let resultTable = $('#resultTable').DataTable();
 
         function clearCircleMarkers() {
             map.eachLayer(function(layer) {
@@ -268,6 +288,61 @@
                         });
 
                         renderMarkers(groupedData);
+
+                        /// Siapkan data untuk tabel
+                        let tableData = [];
+                        let rowIndex = 1;
+
+                        Object.entries(groupedData).forEach(([city, info]) => {
+                            const prodiList = Object.entries(info.prodi)
+                                .map(([prodi, jumlah]) => `${prodi} (${jumlah})`)
+                                .join('<br>');
+
+                            tableData.push([
+                                rowIndex++,
+                                city,
+                                prodiList,
+                                info.count
+                            ]);
+                        });
+
+                        // Inisialisasi ulang DataTable
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+                            $('#resultTable').empty();
+                        }
+
+                        $('#resultTable').DataTable({
+                            data: tableData,
+                            columns: [{
+                                    title: "No"
+                                },
+                                {
+                                    title: "Nama Daerah"
+                                },
+                                {
+                                    title: "Nama Program Studi"
+                                },
+                                {
+                                    title: "Total Mahasiswa"
+                                }
+                            ],
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50, 100],
+                            ordering: true,
+                            responsive: true,
+                            language: {
+                                search: "Cari:",
+                                lengthMenu: "Tampilkan _MENU_ data",
+                                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                                paginate: {
+                                    first: "‹‹",
+                                    last: "››",
+                                    next: "›",
+                                    previous: "‹"
+                                }
+                            }
+                        });
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -331,6 +406,7 @@
                         $('#tahun_masuk').val('').trigger('change');
                         $('#prodi').val('').trigger('change');
                         clearCircleMarkers();
+                        resultTable.clear().draw(true);
                         button.style.backgroundColor = 'white';
                         button.style.color = 'black';
                         button.title = 'Tampilkan Data Mahasiswa berdasarkan Domisili';
@@ -478,7 +554,8 @@
                     text: 'Anda harus memilih minimal satu kolom pencarian.',
                 });
 
-                btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+                btn.prop('disabled', false).html(
+                    '<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
 
                 return;
             }
@@ -496,7 +573,8 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+                    btn.prop('disabled', false).html(
+                        '<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
 
                     if (response.status == 200) {
                         const mahasiswa = response.mahasiswa;
@@ -533,14 +611,70 @@
                         // Render marker
                         renderMarkers(groupedData);
 
-                        // Ambil satu kota untuk zoom
-                        const firstCity = Object.keys(groupedData)[0];
-                        if (firstCity) {
-                            const lat = groupedData[firstCity].latitude;
-                            const lng = groupedData[firstCity].longitude;
+                        /// Siapkan data untuk tabel
+                        let tableData = [];
+                        let rowIndex = 1;
 
-                            // Zoom ke lokasi
-                            map.setView([lat, lng], 12);
+                        Object.entries(groupedData).forEach(([city, info]) => {
+                            const prodiList = Object.entries(info.prodi)
+                                .map(([prodi, jumlah]) => `${prodi} (${jumlah})`)
+                                .join('<br>');
+
+                            tableData.push([
+                                rowIndex++,
+                                city,
+                                prodiList,
+                                info.count
+                            ]);
+                        });
+
+                        // Inisialisasi ulang DataTable
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+                            $('#resultTable').empty();
+                        }
+
+                        $('#resultTable').DataTable({
+                            data: tableData,
+                            columns: [{
+                                    title: "No"
+                                },
+                                {
+                                    title: "Nama Daerah"
+                                },
+                                {
+                                    title: "Nama Program Studi"
+                                },
+                                {
+                                    title: "Total Mahasiswa"
+                                }
+                            ],
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50, 100],
+                            ordering: true,
+                            responsive: true,
+                            language: {
+                                search: "Cari:",
+                                lengthMenu: "Tampilkan _MENU_ data",
+                                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                                paginate: {
+                                    first: "‹‹",
+                                    last: "››",
+                                    next: "›",
+                                    previous: "‹"
+                                }
+                            }
+                        });
+
+                        // Zoom hanya jika filter daerah dipilih
+                        const daerahFilter = $('#daerah').val();
+                        if (daerahFilter) {
+                            const firstCity = Object.keys(groupedData)[0];
+                            if (firstCity) {
+                                const lat = groupedData[firstCity].latitude;
+                                const lng = groupedData[firstCity].longitude;
+                                map.setView([lat, lng], 12);
+                            }
                         }
                     } else if (response.status == 204) {
                         clearCircleMarkers();
@@ -560,15 +694,16 @@
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).html('<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
-                    
+                    btn.prop('disabled', false).html(
+                        '<box-icon name="search" class="icon-crud" color="white"></box-icon> Cari');
+
                     let errorResponse = xhr.responseJSON; // Ambil data JSON error
-                    
+
                     Swal.fire({
                         icon: errorResponse.icon || "error",
                         title: errorResponse.title || "Error",
                         text: errorResponse.message ||
-                        "Terjadi kesalahan yang tidak diketahui.",
+                            "Terjadi kesalahan yang tidak diketahui.",
                     });
 
                 }
@@ -599,6 +734,8 @@
 
             // Hapus semua marker lingkaran
             clearCircleMarkers();
+
+            resultTable.clear().draw(true);
         });
     </script>
 @endsection

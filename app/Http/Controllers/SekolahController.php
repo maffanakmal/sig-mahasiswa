@@ -38,16 +38,10 @@ class SekolahController extends Controller
                     'sekolah.latitude_sekolah',
                     'sekolah.longitude_sekolah',
                 )
-                ->orderBy('sekolah.sekolah_uuid', 'DESC');
+                ->orderBy('sekolah.sekolah_uuid', 'DESC')->get();
 
             return DataTables::of($sekolahs)
                 ->addIndexColumn()
-                ->filterColumn('npsn', function ($query, $keyword) {
-                    $query->whereRaw("CAST(npsn AS CHAR) LIKE ?", ["%{$keyword}%"]);
-                })
-                ->filterColumn('kode_daerah', function ($query, $keyword) {
-                    $query->whereRaw("LOWER(daerah.nama_daerah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
-                })
                 ->editColumn('kode_daerah', function ($row) {
                     return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
                 })

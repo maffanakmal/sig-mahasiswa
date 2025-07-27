@@ -35,32 +35,21 @@ class MahasiswaController extends Controller
 
         if ($request->ajax()) {
             $mahasiswas = Mahasiswa::leftJoin('daerah', 'mahasiswa.kode_daerah', '=', 'daerah.kode_daerah')
-                ->leftJoin('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
-                ->leftJoin('prodi', 'mahasiswa.kode_prodi', '=', 'prodi.kode_prodi')
-                ->select(
-                    'mahasiswa.mahasiswa_uuid',
-                    'mahasiswa.nim',
-                    'mahasiswa.tahun_masuk',
-                    'prodi.nama_prodi as kode_prodi',
-                    'sekolah.nama_sekolah as npsn',
-                    'daerah.nama_daerah as kode_daerah',
-                )
-                ->orderBy('mahasiswa.mahasiswa_uuid', 'DESC');
+            ->leftJoin('sekolah', 'mahasiswa.npsn', '=', 'sekolah.npsn')
+            ->leftJoin('prodi', 'mahasiswa.kode_prodi', '=', 'prodi.kode_prodi')
+            ->select(
+                'mahasiswa.mahasiswa_uuid',
+                'mahasiswa.nim',
+                'mahasiswa.tahun_masuk',
+                'prodi.nama_prodi as kode_prodi',
+                'sekolah.nama_sekolah as npsn',
+                'daerah.nama_daerah as kode_daerah',
+            )
+            ->orderBy('mahasiswa.mahasiswa_uuid', 'DESC')
+            ->get();
 
             return DataTables::of($mahasiswas)
                 ->addIndexColumn()
-                ->filterColumn('nim', function ($query, $keyword) {
-                    $query->whereRaw("CAST(nim AS CHAR) LIKE ?", ["%{$keyword}%"]);
-                })
-                ->filterColumn('kode_daerah', function ($query, $keyword) {
-                    $query->whereRaw("LOWER(daerah.nama_daerah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
-                })
-                ->filterColumn('npsn', function ($query, $keyword) {
-                    $query->whereRaw("LOWER(sekolah.nama_sekolah) LIKE ?", ["%" . strtolower($keyword) . "%"]);
-                })
-                ->filterColumn('kode_prodi', function ($query, $keyword) {
-                    $query->whereRaw("LOWER(prodi.nama_prodi) LIKE ?", ["%" . strtolower($keyword) . "%"]);
-                })
                 ->editColumn('kode_prodi', function ($row) {
                     return $row->kode_prodi ?? '<span class="text-muted">Tidak ada</span>';
                 })
