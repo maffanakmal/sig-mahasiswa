@@ -336,7 +336,7 @@
                         // Hancurkan instance lama jika ada
                         if ($.fn.DataTable.isDataTable('#resultTable')) {
                             $('#resultTable').DataTable().clear().destroy();
-                            $('#resultTable').empty();
+        
                         }
 
                         // Inisialisasi ulang DataTable
@@ -437,7 +437,10 @@
                         $('#tahun_masuk').val('').trigger('change');
                         $('#prodi').val('').trigger('change');
                         clearCircleMarkers();
-                        resultTable.clear().draw(true);
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+        
+                        }
                         button.style.backgroundColor = 'white';
                         button.style.color = 'black';
                         button.title = 'Tampilkan Data Sekolah';
@@ -685,10 +688,9 @@
                             ]);
                         });
 
-                        // Hancurkan instance lama jika ada
                         if ($.fn.DataTable.isDataTable('#resultTable')) {
                             $('#resultTable').DataTable().clear().destroy();
-                            $('#resultTable').empty();
+        
                         }
 
                         // Inisialisasi ulang DataTable
@@ -741,6 +743,11 @@
 
                     } else if (response.status == 204) {
                         clearCircleMarkers();
+
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+        
+                        }
 
                         Swal.fire({
                             icon: response.icon,
@@ -795,7 +802,9 @@
 
             clearCircleMarkers();
 
-            resultTable.clear().draw(true);
+            if ($.fn.DataTable.isDataTable('#resultTable')) {
+                $('#resultTable').DataTable().clear().destroy();
+            }
         });
     </script>
 @endsection

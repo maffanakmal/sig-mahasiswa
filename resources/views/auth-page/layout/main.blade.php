@@ -15,11 +15,10 @@
     <div class="main-wrapper p-3">
         <div class="container d-flex justify-content-center align-items-center min-vh-100">
             <div class="row border rounded-1 p-3 m-2 bg-white shadow box-area">
-                <div class="col-md-6 rounded-1 d-flex justify-content-center align-items-center flex-column left-box p-3"
-                    style="background-image: url({{ asset('img/logo-usni2.png') }}); 
-                            background-size: cover; 
-                            background-position: center; 
-                            background-repeat: no-repeat;">
+                <div class="col-md-6 rounded-1 d-flex justify-content-center align-items-center flex-column left-box p-3">
+                    <span class="fw-bold d-block text-center fs-1 fs-md-1 fs-lg-1 fs-xl-display-1" style="color: #27548A;">
+                        USNIGIS
+                    </span>
                 </div>
                 <div class="col-md-6 right-box py-2 px-4">
                     <div class="row align-items-center">

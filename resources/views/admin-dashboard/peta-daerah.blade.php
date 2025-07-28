@@ -309,7 +309,6 @@
                         // Inisialisasi ulang DataTable
                         if ($.fn.DataTable.isDataTable('#resultTable')) {
                             $('#resultTable').DataTable().clear().destroy();
-                            $('#resultTable').empty();
                         }
 
                         $('#resultTable').DataTable({
@@ -406,7 +405,9 @@
                         $('#tahun_masuk').val('').trigger('change');
                         $('#prodi').val('').trigger('change');
                         clearCircleMarkers();
-                        resultTable.clear().draw(true);
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+                        }
                         button.style.backgroundColor = 'white';
                         button.style.color = 'black';
                         button.title = 'Tampilkan Data Mahasiswa berdasarkan Domisili';
@@ -631,7 +632,6 @@
                         // Inisialisasi ulang DataTable
                         if ($.fn.DataTable.isDataTable('#resultTable')) {
                             $('#resultTable').DataTable().clear().destroy();
-                            $('#resultTable').empty();
                         }
 
                         $('#resultTable').DataTable({
@@ -678,6 +678,10 @@
                         }
                     } else if (response.status == 204) {
                         clearCircleMarkers();
+
+                        if ($.fn.DataTable.isDataTable('#resultTable')) {
+                            $('#resultTable').DataTable().clear().destroy();
+                        }
 
                         Swal.fire({
                             icon: response.icon,
@@ -735,7 +739,9 @@
             // Hapus semua marker lingkaran
             clearCircleMarkers();
 
-            resultTable.clear().draw(true);
+            if ($.fn.DataTable.isDataTable('#resultTable')) {
+                $('#resultTable').DataTable().clear().destroy();
+            }
         });
     </script>
 @endsection

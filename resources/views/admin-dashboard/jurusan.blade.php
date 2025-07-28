@@ -5,7 +5,7 @@
         <h3 class="fw-bold fs-4 mb-3">Daftar Program Studi</h3>
         <div class="alert alert-info alert-dismissible fade show" role="alert">
             <strong>Info!</strong> Untuk mengimpor data program studi, silakan unduh template <a
-                href="{{ asset('template/jurusan_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
+                href="{{ asset('template/prodi_template.xlsx') }}" class="text-decoration-none">di sini</a>. Pastikan
             untuk mengisi data sesuai dengan format yang telah ditentukan.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
