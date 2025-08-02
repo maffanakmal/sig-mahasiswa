@@ -48,7 +48,12 @@ class MahasiswaImport implements ToCollection
             $namaDaerah = strtolower(trim($row[4] ?? ''));     // Daerah Asal
             $kodeDaerah = $daerahList[$namaDaerah] ?? null;
 
-            if (!$nim || in_array($nim, $existingNIMs) || in_array($nim, $processedNIMs)) {
+            if (
+                !$nim ||
+                strlen($nim) < 9 || strlen($nim) > 10 || // cek panjang NIM
+                in_array($nim, $existingNIMs) ||
+                in_array($nim, $processedNIMs)
+            ) {
                 continue;
             }
 

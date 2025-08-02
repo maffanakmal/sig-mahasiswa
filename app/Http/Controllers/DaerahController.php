@@ -48,12 +48,15 @@ class DaerahController extends Controller
                     $query->whereRaw("CAST(kode_daerah AS CHAR) LIKE ?", ["%{$keyword}%"]);
                 })
                 ->addColumn('action', function ($daerah) {
-                    return '<button data-id="' . $daerah->daerah_uuid . '" class="btn btn-warning btn-sm" onclick="editDaerah(this)">
-                                <box-icon type="solid" name="pencil" class="icon-crud"  color="white"></box-icon>
+                    return '
+                        <div class="d-flex align-items-center gap-1">
+                            <button data-id="' . $daerah->daerah_uuid . '" class="btn btn-warning btn-sm" onclick="editDaerah(this)">
+                                <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
-                            <button data-id="' . $daerah->daerah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteDaerah(this)">
-                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
-                            </button>';
+                            <div class="btn btn-danger btn-sm m-0 d-flex align-items-center justify-content-center p-1" style="height:32px; width:32px;">
+                                <input type="checkbox" name="delete_selected[]" class="form-check-input delete-checkbox m-0" value="' . $daerah->daerah_uuid . '" style="cursor:pointer; transform: scale(1);">
+                            </div>
+                        </div>';
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -184,34 +187,6 @@ class DaerahController extends Controller
     }
 
     /**
-     * Export data to Excel.
-     */
-    public function export()
-    {
-        try {
-            if (Daerah::count() === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Kosong",
-                    "message" => "Tidak ada data daerah yang bisa dibackup.",
-                    "icon" => "warning"
-                ], 404);
-            }
-            
-            return Excel::download(new DaerahExport, 'daerah_' . date('Ymd_His') . '.xlsx');
-            
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-
-    /**
      * Display the specified resource.
      */
     public function show($daerah_uuid)
@@ -337,60 +312,26 @@ class DaerahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($daerah_uuid)
+    public function destroySelected(Request $request)
     {
-        try {
-            $daerah = Daerah::where('daerah_uuid', $daerah_uuid)->firstOrFail();
+        $ids = $request->input('ids');
 
-            if ($daerah) {
-                $daerah->delete();
-
-                return response()->json([
-                    "status" => 200,
-                    "title" => "Berhasil!",
-                    "message" => "Data daerah berhasil dihapus.",
-                    "icon" => "success"
-                ]);
-            }
-        } catch (Exception $e) {
+        if (!$ids || !is_array($ids)) {
             return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    public function destroyAll()
-    {
-        try {
-            $count = DB::table('daerah')->count();
-
-            if ($count === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Tidak Ada Data",
-                    "message" => "Tidak ada data daerah yang dapat dihapus.",
-                    "icon" => "warning"
-                ]);
-            }
-
-            DB::table('daerah')->delete();
-
-            return response()->json([
-                "status" => 200,
-                "title" => "Berhasil!",
-                "message" => "Semua data daerah berhasil dihapus.",
-                "icon" => "success"
+                'status' => 400,
+                'icon' => 'warning',
+                'title' => 'Gagal',
+                'message' => 'Tidak ada data yang dipilih.',
             ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
         }
+
+        Daerah::whereIn('daerah_uuid', $ids)->delete();
+
+        return response()->json([
+            'status' => 200,
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data terpilih berhasil dihapus.',
+        ]);
     }
 }

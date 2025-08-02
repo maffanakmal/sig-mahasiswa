@@ -39,7 +39,12 @@ class SekolahImport implements ToCollection
 
             $npsn = (int) $npsn;
 
-            if (in_array($npsn, $existingNpsn) || in_array($npsn, $processedNpsn)) {
+            if (
+                empty($npsn) ||
+                strlen($npsn) < 8 || strlen($npsn) > 10 ||
+                in_array($npsn, $existingNpsn) ||
+                in_array($npsn, $processedNpsn)
+            ) {
                 continue;
             }
 

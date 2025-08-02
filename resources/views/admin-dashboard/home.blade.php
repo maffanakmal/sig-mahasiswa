@@ -1,24 +1,8 @@
 @extends('admin-dashboard.layout.main')
 
 @section('child-content')
-    <div class="mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center">
         <h3 class="fw-bold fs-4 mb-3">Dashboard</h3>
-        @if (session('loggedInUser')['role'] === 'BAAKPSI')    
-            <div class="dropdown">
-            <button class="btn btn-sm btn-warning dropdown-toggle d-inline-flex align-items-center gap-1"
-                    type="button" id="dropdownBackupBtn"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                <box-icon name="cloud-download"></box-icon>
-                Backup Data
-            </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownBackupBtn">     
-                    <li><a class="dropdown-item" id="exportDaerahBtn" onclick="backupDaerah()">Data Daerah</a></li>
-                    <li><a class="dropdown-item" id="exportSekolahBtn" onclick="backupSekolah()">Data Sekolah</a></li> 
-                    <li><a class="dropdown-item" id="exportProdiBtn" onclick="backupProdi()">Data Program Studi</a></li>
-                    <li><a class="dropdown-item" id="exportMahasiswaBtn" onclick="backupMahasiswa()">Data Mahasiswa</a></li>
-                </ul>
-            </div>
-        @endif
     </div>
     @if ($user && empty($user->email))
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -168,27 +152,6 @@
                         $('#daerahCount').text(response.jumlah_daerah);
                         $('#penggunaCount').text(response.jumlah_pengguna);
 
-                        if (response.jumlah_daerah === 0) {
-                            $('#exportDaerahBtn')
-                                .addClass('disabled')
-                                .css({ color: '#ccc', pointerEvents: 'none' });
-                        }
-                        if (response.jumlah_prodi === 0) {
-                            $('#exportProdiBtn')
-                                .addClass('disabled')
-                                .css({ color: '#ccc', pointerEvents: 'none' });
-                        }
-                        if (response.jumlah_sekolah === 0) {
-                            $('#exportSekolahBtn')
-                                .addClass('disabled')
-                                .css({ color: '#ccc', pointerEvents: 'none' });
-                        }
-                        if (response.jumlah_mahasiswa === 0) {
-                            $('#exportMahasiswaBtn')
-                                .addClass('disabled')
-                                .css({ color: '#ccc', pointerEvents: 'none' });
-                        }
-
                         if (sekolahChartInstance) sekolahChartInstance.destroy();
                         if (daerahJurusanChartInstance) daerahJurusanChartInstance.destroy();
 
@@ -313,71 +276,6 @@
                         title: errorResponse.title || "Error",
                         text: errorResponse.message || "Terjadi kesalahan yang tidak diketahui.",
                     });
-                }
-            });
-        }
-
-        function backupDaerah() {
-            Swal.fire({
-                title: "Ingin Backup Data Daerah?",
-                html: 'File akan diunduh dalam format Excel.',
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Backup!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ route('daerah.export') }}";
-                }
-            });
-        }
-        function backupSekolah() {
-            Swal.fire({
-                title: "Ingin Backup Data Sekolah?",
-                html: 'File akan diunduh dalam format Excel.',
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Backup!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ route('sekolah.export') }}";
-                }
-            });
-        }
-        function backupProdi() {
-            Swal.fire({
-                title: "Ingin Backup Data Prodi?",
-                html: 'File akan diunduh dalam format Excel.',
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Backup!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ route('prodi.export') }}";
-                }
-            });
-        }
-        function backupMahasiswa() {
-            Swal.fire({
-                title: "Ingin Backup Data Mahasiswa?",
-                html: 'File akan diunduh dalam format Excel.',
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Backup!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ route('mahasiswa.export') }}";
                 }
             });
         }

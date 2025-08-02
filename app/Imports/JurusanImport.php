@@ -27,7 +27,12 @@ class JurusanImport implements ToCollection
                 continue;
             }
 
-            if (in_array($kode, $existingKodeJurusan) || in_array($kode, $processedKodeJurusan)) {
+            if (
+                empty($kode) ||
+                strlen($kode) < 5 || strlen($kode) > 10 ||
+                in_array($kode, $existingKodeJurusan) ||
+                in_array($kode, $processedKodeJurusan)
+            ) {
                 continue;
             }
 

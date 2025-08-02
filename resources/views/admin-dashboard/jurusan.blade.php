@@ -24,7 +24,8 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="prodiDeleteAll()"><box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-danger" id="btnDeleteSelected" onclick="prodiSelectedDelete()"><box-icon
+                    type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
             <button class="btn btn-sm btn-primary" onclick="prodiModal()"><box-icon name="plus" class="icon-crud" color="white"></box-icon> Tambah</button>
         </div>
         <div class="card-body">
@@ -35,7 +36,12 @@
                             <th class="th-number">No</th>
                             <th>Kode Program Studi</th>
                             <th>Nama Program Studi</th>
-                            <th class="th-aksi">Action</th>
+                            <th class="th-aksi text-center">
+                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                    Action
+                                    <input type="checkbox" id="checkAll" class="form-check-input" title="Pilih semua">
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -263,6 +269,7 @@
                         });
 
                         $('#importProdiForm')[0].reset();
+                        $('#importProdiForm').find('input[type="file"]').val(null);
                         $('#prodiTable').DataTable().ajax.reload();
 
                         setTimeout(() => {
@@ -281,6 +288,9 @@
                 error: function(xhr) {
                     btn.prop('disabled', false).html('<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import');
 
+                    $('#importProdiForm')[0].reset();
+                    $('#importProdiForm').find('input[type="file"]').val(null);
+                    
                     if (xhr.status === 422) {
                         let errorResponse = xhr.responseJSON;
 
@@ -367,57 +377,28 @@
             $('#saveBtn').text('Ubah');
         }
 
-        function deleteProdi(e) {
-            let kode_prodi = e.getAttribute('data-id');
+        $('#checkAll').on('change', function() {
+            $('.delete-checkbox').prop('checked', this.checked);
+        });
 
-            Swal.fire({
-                title: "Apakah anda yakin?",
-                text: "Menghapus data secara permanen",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ route('prodi.destroy', '') }}/" + kode_prodi,
-                        type: "DELETE",
-                        data: {
-                            _token: "{{ csrf_token() }}", // Kirim token dalam body
-                        },
-                        success: function(response) {
-                            if (response.status == 200) {
-                                $('#prodiTable').DataTable().ajax.reload();
-                                Swal.fire({
-                                    icon: response.icon,
-                                    title: response.title,
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            }
-                        },
-                        error: function(xhr) {
-                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
-
-                            Swal.fire({
-                                icon: errorResponse.icon || "error",
-                                title: errorResponse.title || "Error",
-                                text: errorResponse.message ||
-                                    "Terjadi kesalahan yang tidak diketahui.",
-                            });
-                        }
-                    });
-                }
+        function prodiSelectedDelete() {
+            const selectedIds = [];
+            $('.delete-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
             });
-        }
 
-        function prodiDeleteAll() {
+            if (selectedIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Tidak ada data yang dipilih.',
+                });
+                return;
+            }
+
             Swal.fire({
                 title: "Apakah anda yakin?",
-                html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
+                text: "Data yang dipilih akan dihapus secara permanen.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -427,37 +408,31 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('prodi.destroyAll') }}",
-                        type: "DELETE",
+                        url: "{{ route('prodi.destroySelected') }}",
+                        type: "POST",
                         data: {
                             _token: "{{ csrf_token() }}",
+                            ids: selectedIds
                         },
                         success: function(response) {
-                            if (response.status === 200) {
-                                $('#prodiTable').DataTable().ajax.reload();
-                                Swal.fire({
-                                    icon: response.icon,
-                                    title: response.title,
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: response.icon || "info",
-                                    title: response.title || "Info",
-                                    text: response.message || "Tidak ada data untuk dihapus.",
-                                });
-                            }
+                            $('#prodiTable').DataTable().ajax.reload();
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#checkAll').prop('checked', false);
+                                $('.delete-checkbox').prop('checked', false);
+                                $('#prodiTable').DataTable().ajax.reload(null, false);
+                            });
                         },
                         error: function(xhr) {
-                            let errorResponse = xhr.responseJSON || {};
-
                             Swal.fire({
-                                icon: errorResponse.icon || "error",
-                                title: errorResponse.title || "Error",
-                                text: errorResponse.message ||
-                                    "Terjadi kesalahan yang tidak diketahui.",
+                                icon: "error",
+                                title: "Gagal",
+                                text: "Terjadi kesalahan saat menghapus data.",
                             });
                         }
                     });

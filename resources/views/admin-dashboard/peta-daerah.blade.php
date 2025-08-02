@@ -93,9 +93,22 @@
         // Inisialisasi peta
         var map = L.map('map').setView(defaultCenter, defaultZoom);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        // Inisialisasi beberapa layer basemap
+        var baseLayer_OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        var baseLayer_ESRI = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }); // ini default
+
+        // Tambahkan control switch basemap
+        var baseMaps = {
+            "ESRI World Imagery": baseLayer_ESRI,
+            "OpenStreetMap": baseLayer_OSM,
+        };
+
+        L.control.layers(baseMaps).addTo(map);
 
         var resetControl = L.control({
             position: 'topleft'

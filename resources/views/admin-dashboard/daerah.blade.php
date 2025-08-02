@@ -24,8 +24,8 @@
     </div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-sm btn-danger" onclick="daerahDeleteAll()"><box-icon type="solid" name="trash"
-                    class="icon-crud" color="white"></box-icon> Hapus</button>
+            <button class="btn btn-sm btn-danger" id="btnDeleteSelected" onclick="daerahSelectedDelete()"><box-icon
+                    type="solid" name="trash" class="icon-crud" color="white"></box-icon> Hapus</button>
             <button class="btn btn-sm btn-primary" onclick="daerahModal()"><box-icon name="plus" class="icon-crud"
                     color="white"></box-icon> Tambah</button>
         </div>
@@ -39,7 +39,12 @@
                             <th>Nama Daerah</th>
                             <th>Latitude Daerah</th>
                             <th>Longitude Daerah</th>
-                            <th class="th-aksi">Action</th>
+                            <th class="th-aksi text-center">
+                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                    Action
+                                    <input type="checkbox" id="checkAll" class="form-check-input" title="Pilih semua">
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,9 +127,23 @@
             daerahModal.addEventListener('shown.bs.modal', function() {
                 if (!map) {
                     map = L.map('mapInput').setView(defaultCenter, defaultZoom);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap'
+
+                    // Inisialisasi beberapa layer basemap
+                    var baseLayer_OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
                     }).addTo(map);
+
+                    var baseLayer_ESRI = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri'
+                    }); // ini default
+
+                    // Tambahkan control switch basemap
+                    var baseMaps = {
+                        "ESRI World Imagery": baseLayer_ESRI,
+                        "OpenStreetMap": baseLayer_OSM,
+                    };
+
+                    L.control.layers(baseMaps).addTo(map);
 
                     L.Control.geocoder({
                             defaultMarkGeocode: false,
@@ -132,13 +151,20 @@
                         })
                         .on('markgeocode', function(e) {
                             var latlng = e.geocode.center;
+                            var fullAddress = e.geocode.name;
+                            var addressParts = fullAddress.split(',');
+
+                            // Ambil bagian pertama sebagai nama kota/kabupaten
+                            var namaKotaKabupaten = addressParts[0].trim();
 
                             map.setView(latlng, 14);
                             marker.setLatLng(latlng);
 
                             document.getElementById('latitude_daerah').value = latlng.lat;
                             document.getElementById('longitude_daerah').value = latlng.lng;
+                            document.getElementById('nama_daerah').value = namaKotaKabupaten;
                         })
+
                         .addTo(map);
 
                     marker = L.marker(defaultCenter, {
@@ -386,6 +412,7 @@
                     if (response.status == 200) {
 
                         $('#importDaerahForm')[0].reset();
+                        $('#importDaerahForm').find('input[type="file"]').val(null);
                         $('#daerahTable').DataTable().ajax.reload();
 
                         // Setelah sedikit delay agar spinner sempat terlihat
@@ -406,6 +433,9 @@
                     btn.prop('disabled', false).html(
                         '<box-icon type="solid" name="spreadsheet" class="icon-crud" color="white"></box-icon> Import'
                     );
+
+                    $('#importDaerahForm')[0].reset();
+                    $('#importDaerahForm').find('input[type="file"]').val(null);
 
                     if (xhr.status === 422) { // 422 = Validation Error
                         let errorResponse = xhr.responseJSON;
@@ -495,12 +525,28 @@
         }
 
 
-        function deleteDaerah(e) {
-            let kode_daerah = e.getAttribute('data-id');
+        $('#checkAll').on('change', function() {
+            $('.delete-checkbox').prop('checked', this.checked);
+        });
+
+        function daerahSelectedDelete() {
+            const selectedIds = [];
+            $('.delete-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Tidak ada data yang dipilih.',
+                });
+                return;
+            }
 
             Swal.fire({
                 title: "Apakah anda yakin?",
-                text: "Menghapus data secara permanen",
+                text: "Data yang dipilih akan dihapus secara permanen.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -510,85 +556,31 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('daerah.destroy', '') }}/" + kode_daerah,
-                        type: "DELETE",
+                        url: "{{ route('daerah.destroySelected') }}",
+                        type: "POST",
                         data: {
-                            _token: "{{ csrf_token() }}", // Kirim token dalam body
+                            _token: "{{ csrf_token() }}",
+                            ids: selectedIds
                         },
                         success: function(response) {
-                            if (response.status == 200) {
-                                $('#daerahTable').DataTable().ajax.reload();
-                                Swal.fire({
-                                    icon: response.icon,
-                                    title: response.title,
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            }
-                        },
-                        error: function(xhr) {
-                            let errorResponse = xhr.responseJSON; // Ambil data JSON error
-
+                            $('#daerahTable').DataTable().ajax.reload();
                             Swal.fire({
-                                icon: errorResponse.icon || "error",
-                                title: errorResponse.title || "Error",
-                                text: errorResponse.message ||
-                                    "Terjadi kesalahan yang tidak diketahui.",
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#checkAll').prop('checked', false);
+                                $('.delete-checkbox').prop('checked', false);
+                                $('#daerahTable').DataTable().ajax.reload(null, false);
                             });
-                        }
-                    });
-                }
-            });
-
-        }
-
-        function daerahDeleteAll() {
-           Swal.fire({
-            title: "Apakah anda yakin?",
-            html: 'Menghapus semua data secara permanen, pastikan anda sudah melakukan <a href="{{ route('home.index') }}">backup data</a>.',
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ya, Hapus!",
-            cancelButtonText: "Batal",
-        })
-        .then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ route('daerah.destroyAll') }}",
-                        type: "DELETE",
-                        data: {
-                            _token: "{{ csrf_token() }}", // Kirim token dalam body
-                        },
-                        success: function(response) {
-                            if (response.status === 200) {
-                                $('#daerahTable').DataTable().ajax.reload();
-                                Swal.fire({
-                                    icon: response.icon,
-                                    title: response.title,
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            } else {
-                                // Untuk response custom selain 200 (misal 404 dari backend)
-                                Swal.fire({
-                                    icon: response.icon || "info",
-                                    title: response.title || "Info",
-                                    text: response.message || "Tidak ada data untuk dihapus.",
-                                });
-                            }
                         },
                         error: function(xhr) {
-                            let errorResponse = xhr.responseJSON || {};
-
                             Swal.fire({
-                                icon: errorResponse.icon || "error",
-                                title: errorResponse.title || "Error",
-                                text: errorResponse.message ||
-                                    "Terjadi kesalahan yang tidak diketahui.",
+                                icon: "error",
+                                title: "Gagal",
+                                text: "Terjadi kesalahan saat menghapus data.",
                             });
                         }
                     });

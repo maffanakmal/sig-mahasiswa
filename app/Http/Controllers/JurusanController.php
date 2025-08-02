@@ -42,12 +42,15 @@ class JurusanController extends Controller
                     $query->whereRaw("CAST(kode_prodi AS CHAR) LIKE ?", ["%{$keyword}%"]);
                 })
                 ->addColumn('action', function ($prodi) {
-                    return '<button data-id="' . $prodi->prodi_uuid . '" class="btn btn-warning btn-sm" onclick="editProdi(this)">
+                    return '
+                        <div class="d-flex align-items-center gap-1">
+                            <button data-id="' . $prodi->prodi_uuid . '" class="btn btn-warning btn-sm" onclick="editProdi(this)">
                                 <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
-                            <button data-id="' . $prodi->prodi_uuid . '" class="btn btn-danger btn-sm" onclick="deleteProdi(this)">
-                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
-                            </button>';
+                            <div class="btn btn-danger btn-sm m-0 d-flex align-items-center justify-content-center p-1" style="height:32px; width:32px;">
+                                <input type="checkbox" name="delete_selected[]" class="form-check-input delete-checkbox m-0" value="' . $prodi->prodi_uuid . '" style="cursor:pointer; transform: scale(1);">
+                            </div>
+                        </div>';
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -164,33 +167,6 @@ class JurusanController extends Controller
     }
 
     /**
-     * Export data to Excel.
-     */
-    public function export()
-    {
-        try {
-            if (Jurusan::count() === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Kosong",
-                    "message" => "Tidak ada data program studi yang bisa dibackup.",
-                    "icon" => "warning"
-                ], 404);
-            }
-            
-            return Excel::download(new JurusanExport, 'prodi_' . date('Ymd_His') . '.xlsx');
-            
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show($prodi_uuid)
@@ -291,60 +267,26 @@ class JurusanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($prodi_uuid)
+    public function destroySelected(Request $request)
     {
-        try {
-            $prodi = Jurusan::where('prodi_uuid', $prodi_uuid)->firstOrFail();
+        $ids = $request->input('ids');
 
-            if ($prodi) {
-                $prodi->delete();
-
-                return response()->json([
-                    "status" => 200,
-                    "title" => "Berhasil!",
-                    "message" => "Data program studi berhasil dihapus.",
-                    "icon" => "success"
-                ]);
-            }
-        } catch (Exception $e) {
+        if (!$ids || !is_array($ids)) {
             return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    public function destroyAll()
-    {
-        try {
-            $count = DB::table('prodi')->count();
-
-            if ($count === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Tidak Ada Data",
-                    "message" => "Tidak ada data program studi yang dapat dihapus.",
-                    "icon" => "warning"
-                ]);
-            }
-
-            DB::table('prodi')->delete();
-
-            return response()->json([
-                "status" => 200,
-                "title" => "Berhasil!",
-                "message" => "Semua data program studi berhasil dihapus.",
-                "icon" => "success"
+                'status' => 400,
+                'icon' => 'warning',
+                'title' => 'Gagal',
+                'message' => 'Tidak ada data yang dipilih.',
             ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
         }
+
+        Jurusan::whereIn('prodi_uuid', $ids)->delete();
+
+        return response()->json([
+            'status' => 200,
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data terpilih berhasil dihapus.',
+        ]);
     }
 }

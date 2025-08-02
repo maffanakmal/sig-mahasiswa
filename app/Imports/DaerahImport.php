@@ -27,7 +27,12 @@ class DaerahImport implements ToCollection
                 continue;
             }
 
-            if (in_array($kode, $existingKodeDaerah) || in_array($kode, $processedKodeDaerah)) {
+            if (
+                empty($kode) ||
+                strlen($kode) < 4 || strlen($kode) > 10 || // validasi panjang kode_daerah
+                in_array($kode, $existingKodeDaerah) || 
+                in_array($kode, $processedKodeDaerah)
+            ) {
                 continue;
             }
 

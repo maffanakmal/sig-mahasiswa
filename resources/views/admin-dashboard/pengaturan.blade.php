@@ -29,7 +29,7 @@
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="Masukkan Email"
-                                name="email" value="{{ $user->email }}" required>
+                                name="email" value="{{ $user->email }}">
                             <div class="invalid-feedback" id="error-email"></div>
                         </div>
 

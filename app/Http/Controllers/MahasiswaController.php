@@ -60,12 +60,15 @@ class MahasiswaController extends Controller
                     return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
                 })
                 ->addColumn('action', function ($mahasiswa) {
-                    return '<button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-warning btn-sm" onclick="editMahasiswa(this)">
-                    <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
-                </button>
-                <button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-danger btn-sm" onclick="deleteMahasiswa(this)">
-                    <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
-                </button>';
+                    return '
+                        <div class="d-flex align-items-center gap-1">
+                            <button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-warning btn-sm" onclick="editMahasiswa(this)">
+                                <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
+                            </button>
+                            <div class="btn btn-danger btn-sm m-0 d-flex align-items-center justify-content-center p-1" style="height:32px; width:32px;">
+                                <input type="checkbox" name="delete_selected[]" class="form-check-input delete-checkbox m-0" value="' . $mahasiswa->mahasiswa_uuid . '" style="cursor:pointer; transform: scale(1);">
+                            </div>
+                        </div>';
                 })
                 ->rawColumns(['action', 'kode_prodi', 'npsn', 'kode_daerah']) // penting agar HTML-nya dirender
                 ->make(true);
@@ -73,6 +76,10 @@ class MahasiswaController extends Controller
 
         return view('admin-dashboard.mahasiswa', $data);
     }
+
+    // <button data-id="' . $mahasiswa->mahasiswa_uuid . '" class="btn btn-danger btn-sm" onclick="deleteMahasiswa(this)">
+    //     <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
+    // </button>
 
     /**
      * Show the form for creating a new resource.
@@ -220,34 +227,7 @@ class MahasiswaController extends Controller
             ]);
         }
     }
-
-    /**
-     * Export data to Excel.
-     */
-    public function export()
-    {
-        try {
-            if (Mahasiswa::count() === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Kosong",
-                    "message" => "Tidak ada data mahasiswa yang bisa dibackup.",
-                    "icon" => "warning"
-                ], 404);
-            }
-            
-            return Excel::download(new MahasiswaExport, 'mahasiswa_' . date('Ymd_His') . '.xlsx');
-            
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
+    
     /**
      * Display the specified resource.
      */
@@ -383,63 +363,27 @@ class MahasiswaController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($mahasiswa_uuid)
+    public function destroySelected(Request $request)
     {
-        try {
-            $mahasiswa = Mahasiswa::where('mahasiswa_uuid', $mahasiswa_uuid)->firstOrFail();
+        $ids = $request->input('ids');
 
-            if ($mahasiswa) {
-                $mahasiswa->delete();
-
-                return response()->json([
-                    "status" => 200,
-                    "title" => "Berhasil!",
-                    "message" => "Data mahasiswa berhasil dihapus.",
-                    "icon" => "success"
-                ]);
-            }
-        } catch (Exception $e) {
+        if (!$ids || !is_array($ids)) {
             return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    public function destroyAll()
-    {
-        try {
-            $count = DB::table('mahasiswa')->count();
-
-            if ($count === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Tidak Ada Data",
-                    "message" => "Tidak ada data mahasiswa yang dapat dihapus.",
-                    "icon" => "warning"
-                ]);
-            }
-
-            DB::table('mahasiswa')->delete();
-
-            return response()->json([
-                "status" => 200,
-                "title" => "Berhasil!",
-                "message" => "Semua data mahasiswa berhasil dihapus.",
-                "icon" => "success"
+                'status' => 400,
+                'icon' => 'warning',
+                'title' => 'Gagal',
+                'message' => 'Tidak ada data yang dipilih.',
             ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
         }
+
+        Mahasiswa::whereIn('mahasiswa_uuid', $ids)->delete();
+
+        return response()->json([
+            'status' => 200,
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data terpilih berhasil dihapus.',
+        ]);
     }
+
 }

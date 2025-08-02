@@ -46,12 +46,15 @@ class SekolahController extends Controller
                     return $row->kode_daerah ?? '<span class="text-muted">Tidak ada</span>';
                 })
                 ->addColumn('action', function ($sekolah) {
-                    return '<button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-warning btn-sm" onclick="editSekolah(this)">
+                    return '
+                        <div class="d-flex align-items-center gap-1">
+                            <button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-warning btn-sm" onclick="editSekolah(this)">
                                 <box-icon type="solid" name="pencil" class="icon-crud" color="white"></box-icon>
                             </button>
-                            <button data-id="' . $sekolah->sekolah_uuid . '" class="btn btn-danger btn-sm" onclick="deleteSekolah(this)">
-                                <box-icon type="solid" name="trash" class="icon-crud" color="white"></box-icon>
-                            </button>';
+                            <div class="btn btn-danger btn-sm m-0 d-flex align-items-center justify-content-center p-1" style="height:32px; width:32px;">
+                                <input type="checkbox" name="delete_selected[]" class="form-check-input delete-checkbox m-0" value="' . $sekolah->sekolah_uuid . '" style="cursor:pointer; transform: scale(1);">
+                            </div>
+                        </div>';
                 })
                 ->rawColumns(['action', 'kode_daerah'])
                 ->make(true);
@@ -210,33 +213,6 @@ class SekolahController extends Controller
     }
 
     /**
-     * Export data to Excel.
-     */
-    public function export()
-    {
-        try {
-            if (Daerah::count() === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Data Kosong",
-                    "message" => "Tidak ada data sekolah yang bisa dibackup.",
-                    "icon" => "warning"
-                ], 404);
-            }
-            
-            return Excel::download(new SekolahExport, 'sekolah_' . date('Ymd_His') . '.xlsx');
-            
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show($sekolah_uuid)
@@ -381,60 +357,26 @@ class SekolahController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($sekolah_uuid)
+    public function destroySelected(Request $request)
     {
-        try {
-            $sekolah = Sekolah::where('sekolah_uuid', $sekolah_uuid)->firstOrFail();
+        $ids = $request->input('ids');
 
-            if ($sekolah) {
-                $sekolah->delete();
-
-                return response()->json([
-                    "status" => 200,
-                    "title" => "Berhasil!",
-                    "message" => "Data sekolah berhasil dihapus.",
-                    "icon" => "success"
-                ]);
-            }
-        } catch (Exception $e) {
+        if (!$ids || !is_array($ids)) {
             return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
-        }
-    }
-
-    public function destroyAll()
-    {
-        try {
-            $count = DB::table('sekolah')->count();
-
-            if ($count === 0) {
-                return response()->json([
-                    "status" => 404,
-                    "title" => "Tidak Ada Data",
-                    "message" => "Tidak ada data sekolah yang dapat dihapus.",
-                    "icon" => "warning"
-                ]);
-            }
-
-            DB::table('sekolah')->delete();
-
-            return response()->json([
-                "status" => 200,
-                "title" => "Berhasil!",
-                "message" => "Semua data sekolah berhasil dihapus.",
-                "icon" => "success"
+                'status' => 400,
+                'icon' => 'warning',
+                'title' => 'Gagal',
+                'message' => 'Tidak ada data yang dipilih.',
             ]);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "title" => "Internal Server Error",
-                "message" => $e->getMessage(),
-                "icon" => "error"
-            ], 500);
         }
+
+        Sekolah::whereIn('sekolah_uuid', $ids)->delete();
+
+        return response()->json([
+            'status' => 200,
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data terpilih berhasil dihapus.',
+        ]);
     }
 }
